@@ -1,0 +1,220 @@
+@import 'tailwindcss';
+
+/* Font imports */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource/space-mono';
+@import '@fontsource-variable/playfair-display';
+@import '@fontsource/jetbrains-mono';
+@import '@fontsource/bebas-neue';
+@import '@fontsource-variable/quicksand';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/fira-code';
+@import '@fontsource-variable/source-serif-4';
+@import '@fontsource/ibm-plex-mono';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/exo-2';
+@import '@fontsource-variable/nunito';
+@import '@fontsource/barlow';
+@import '@fontsource-variable/work-sans';
+@import '@fontsource-variable/bitter';
+@import '@fontsource-variable/roboto';
+@import '@fontsource-variable/outfit';
+@import '@fontsource-variable/archivo';
+@import '@fontsource-variable/oswald';
+@import '@fontsource-variable/karla';
+@import '@fontsource/anton';
+@import '@fontsource-variable/comfortaa';
+@import '@fontsource-variable/overpass';
+@import '@fontsource/poppins';
+@import '@fontsource/audiowide';
+@import '@fontsource/chakra-petch';
+@import '@fontsource/righteous';
+@import '@fontsource/bungee';
+@import '@fontsource/lobster';
+@import '@fontsource-variable/cormorant';
+@import '@fontsource-variable/lora';
+@import '@fontsource-variable/orbitron';
+@import '@fontsource/rajdhani';
+
+/* Theme defaults (overridden by JS) */
+:root {
+  --color-background: #f2efe9;
+  --color-surface: #faf8f4;
+  --color-surface-alt: #e8e4db;
+  --color-primary: #1a1a18;
+  --color-secondary: #6b6860;
+  --color-accent: #1a1a18;
+  --color-text: #1a1a18;
+  --color-text-muted: #8a867d;
+  --color-text-on-dark: #f2efe9;
+  --color-border: #d4d0c7;
+  --color-card-dark: #1a1a18;
+  --color-card-dark-text: #f2efe9;
+  --color-badge: #e8e4db;
+  --color-badge-text: #1a1a18;
+  --font-header: 'Cormorant Variable', serif;
+  --font-body: 'Inter Variable', sans-serif;
+  --border-radius: 4px;
+  --slide-border-radius: 6px;
+}
+
+@theme inline {
+  --color-theme-bg: var(--color-background);
+  --color-theme-surface: var(--color-surface);
+  --color-theme-surface-alt: var(--color-surface-alt);
+  --color-theme-primary: var(--color-primary);
+  --color-theme-secondary: var(--color-secondary);
+  --color-theme-accent: var(--color-accent);
+  --color-theme-text: var(--color-text);
+  --color-theme-text-muted: var(--color-text-muted);
+  --color-theme-text-on-dark: var(--color-text-on-dark);
+  --color-theme-border: var(--color-border);
+  --color-theme-card-dark: var(--color-card-dark);
+  --color-theme-card-dark-text: var(--color-card-dark-text);
+  --color-theme-badge: var(--color-badge);
+  --color-theme-badge-text: var(--color-badge-text);
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter Variable', system-ui, sans-serif;
+  background: #18181b;
+  color: #e4e4e7;
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #52525b;
+  border-radius: 2px;
+}
+
+/* Zoom slider */
+.zoom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.zoom-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Header uppercase setting — applied globally to h1/h2 in slides */
+h1, h2 {
+  text-transform: var(--header-text-transform, none);
+  letter-spacing: var(--header-letter-spacing, 0em);
+}
+
+/* CV slide body content — styled bullet lists */
+.cv-body-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cv-body-content li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+.cv-body-content li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* Settings sliders */
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #3f3f46;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Print / Export styles */
+@media print {
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-slide {
+    page-break-after: always;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+  }
+
+  .print-slide:last-child {
+    page-break-after: avoid;
+  }
+}
