@@ -1,6 +1,45 @@
-import { useRef, useState, useCallback, useMemo } from 'react'
+import { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import { usePortfolioStore } from '../../store/portfolio-store'
 import type { DrawingPath, DrawingLayer } from '../../store/types'
+
+// ── Throttled state updater: coalesces rapid setState calls per animation frame ──
+// Prevents OOM from pointer-move events firing faster than the renderer can flush.
+function useRafThrottle<T>(applyFn: (pending: T) => void) {
+  const rafRef = useRef<number | null>(null)
+  const pendingRef = useRef<T | null>(null)
+
+  const schedule = useCallback((value: T) => {
+    pendingRef.current = value
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        if (pendingRef.current !== null) {
+          applyFn(pendingRef.current)
+          pendingRef.current = null
+        }
+      })
+    }
+  }, [applyFn])
+
+  const cancel = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+    pendingRef.current = null
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => cancel, [cancel])
+
+  return { schedule, cancel, flush: () => {
+    cancel()
+    if (pendingRef.current !== null) {
+      applyFn(pendingRef.current)
+      pendingRef.current = null
+    }
+  }}
+}
 
 const COLOR_MAP: Record<string, string> = {
   text: 'var(--color-text)',
@@ -314,8 +353,27 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
   const [handleDrag, setHandleDrag] = useState<'rotate' | 'scale' | null>(null)
   const handleStartRef = useRef<{ x: number; y: number; startRotation: number; startScale: number; startScaleX: number; startScaleY: number; cx: number; cy: number; bw: number; bh: number }>({ x: 0, y: 0, startRotation: 0, startScale: 1, startScaleX: 1, startScaleY: 1, cx: 0, cy: 0, bw: 0, bh: 0 })
 
+  // RAF gate for rotate/scale handle drags — skip events arriving faster than 1/frame
+  const handleDragRafRef = useRef<number | null>(null)
+
   const layers = slide?.drawingLayers ?? []
   const selectedLayer = layers.find((l) => l.id === selectedLayerId)
+
+  // ── RAF-throttled move: coalesces hand-tool drag setState to 1/frame ──
+  const applyHandMove = useCallback((delta: { dx: number; dy: number; ids: Set<string> }) => {
+    usePortfolioStore.setState((state) => ({
+      slides: state.slides.map((s) => {
+        if (s.id !== slideId) return s
+        return {
+          ...s,
+          drawingLayers: (s.drawingLayers ?? []).map((l) =>
+            delta.ids.has(l.id) ? { ...l, offsetX: (l.offsetX ?? 0) + delta.dx, offsetY: (l.offsetY ?? 0) + delta.dy } : l
+          ),
+        }
+      }),
+    }))
+  }, [slideId])
+  const handMove = useRafThrottle(applyHandMove)
 
   // Compute bounds for all selected layers combined
   const selectedLayers = useMemo(() =>
@@ -532,25 +590,18 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
       const pt = getSvgPoint(e)
       const dx = pt.x - dragStartRef.current.x
       const dy = pt.y - dragStartRef.current.y
-      // Batch all layer moves into a single state update
-      const idSet = new Set(selectedLayerIds)
-      usePortfolioStore.setState((state) => ({
-        slides: state.slides.map((s) => {
-          if (s.id !== slideId) return s
-          return {
-            ...s,
-            drawingLayers: (s.drawingLayers ?? []).map((l) =>
-              idSet.has(l.id) ? { ...l, offsetX: (l.offsetX ?? 0) + dx, offsetY: (l.offsetY ?? 0) + dy } : l
-            ),
-          }
-        }),
-      }))
+      // Throttled to 1 update per animation frame to prevent OOM on high-freq pointer events
+      handMove.schedule({ dx, dy, ids: new Set(selectedLayerIds) })
       dragStartRef.current.x = pt.x
       dragStartRef.current.y = pt.y
       return
     }
 
     if (handleDrag && selectedLayers.length > 0 && bounds) {
+      // Skip if a frame is already queued — prevents flooding during fast pointer moves
+      if (handleDragRafRef.current !== null) return
+      handleDragRafRef.current = requestAnimationFrame(() => { handleDragRafRef.current = null })
+
       const pt = getSvgPoint(e)
       const cx = handleStartRef.current.cx
       const cy = handleStartRef.current.cy
@@ -700,10 +751,14 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
     const lx = pt.x - (layer?.offsetX ?? 0)
     const ly = pt.y - (layer?.offsetY ?? 0)
     pointsRef.current.push({ x: lx, y: ly })
+    // Cap raw points to prevent unbounded growth on very long strokes
+    if (pointsRef.current.length > 4000) {
+      pointsRef.current = simplifyPoints(pointsRef.current, 3)
+    }
     if (pointsRef.current.length % 2 === 0) {
       setCurrentPoints([...pointsRef.current])
     }
-  }, [isDragging, isDrawing, activeTool, getSvgPoint, selectedLayerId, slideId, handleDrag, selectedLayer, bounds, updateDrawingLayerTransform, layers, shapeDrag, selectedLayerIds])
+  }, [isDragging, isDrawing, activeTool, getSvgPoint, selectedLayerId, slideId, handleDrag, selectedLayer, bounds, updateDrawingLayerTransform, layers, shapeDrag, selectedLayerIds, handMove])
 
   const handlePointerUp = useCallback(() => {
     // Finalize shape
@@ -738,11 +793,17 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
     }
 
     if (isDragging) {
+      handMove.flush() // apply any pending RAF move before ending drag
       setIsDragging(false)
       return
     }
 
     if (handleDrag) {
+      // Cancel any pending RAF for rotate/scale
+      if (handleDragRafRef.current !== null) {
+        cancelAnimationFrame(handleDragRafRef.current)
+        handleDragRafRef.current = null
+      }
       setHandleDrag(null)
       return
     }

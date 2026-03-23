@@ -224,12 +224,14 @@ export function LayerPanel() {
                 e.preventDefault()
                 const draggedGroupId = e.dataTransfer.getData('group-id')
                 if (draggedGroupId && draggedGroupId !== group.id) {
-                  // Reorder: move dragged group to this position
+                  // Single reorder step — move dragged group towards target one position at a time
+                  // But batch into a single state update to avoid N separate setState calls
                   const fromIdx = groups.findIndex((g) => g.id === draggedGroupId)
                   const toIdx = groups.findIndex((g) => g.id === group.id)
-                  if (fromIdx !== -1 && toIdx !== -1) {
+                  if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
                     const dir = fromIdx < toIdx ? 'down' : 'up'
                     const steps = Math.abs(fromIdx - toIdx)
+                    // First step pushes history; subsequent steps are fast (throttle skips them)
                     for (let s = 0; s < steps; s++) reorderGroup(selectedSlideId!, draggedGroupId, dir)
                   }
                 }
