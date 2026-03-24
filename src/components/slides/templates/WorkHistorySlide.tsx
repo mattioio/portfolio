@@ -210,8 +210,8 @@ export function WorkHistorySlide({ content, slideId, editable = false, styleVari
   const entryRowH = Math.min(maxRowH, 100)
   const totalEntriesH = entries.length * entryRowH
   const blockH = headingH + totalEntriesH
-  const remainingSpace = 1080 - blockH
-  const blockTop = Math.max(m, remainingSpace * (1 - 1 / 1.618)) // golden ratio — content sits slightly above center
+  // Top empty box matches the heading section height so the grid looks balanced
+  const blockTop = m + headingH
   const headingBottom = blockTop + headingH
   const entryAreaTop = headingBottom
 
