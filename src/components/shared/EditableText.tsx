@@ -23,14 +23,19 @@ export function EditableText({
   const lastValueRef = useRef(value)
   const isFocusedRef = useRef(false)
 
-  // Set initial content and sync external changes (only when not focused)
+  // Keep a ref to the latest value so the setRef callback always has it
+  const valueRef = useRef(value)
+  valueRef.current = value
+
+  // Set content when the DOM element mounts (or remounts after mode switch)
   const setRef = useCallback((el: HTMLElement | null) => {
     (ref as React.MutableRefObject<HTMLElement | null>).current = el
-    if (el && el.innerHTML !== value) {
-      el.innerHTML = value
-      lastValueRef.current = value
+    if (el) {
+      // Always sync to the latest prop value when attaching to a new element
+      el.innerHTML = valueRef.current
+      lastValueRef.current = valueRef.current
     }
-  }, []) // intentionally no deps — only runs on mount
+  }, [])
 
   useEffect(() => {
     // Sync prop → DOM only when the user isn't editing
