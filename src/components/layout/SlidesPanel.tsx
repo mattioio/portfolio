@@ -18,6 +18,7 @@ import { usePortfolioStore } from '../../store/portfolio-store'
 import type { Slide } from '../../store/types'
 import { SlideFrame } from '../slides/SlideFrame'
 import { SlideRenderer } from '../slides/SlideRenderer'
+import { DrawingOverlay } from '../draw/DrawingOverlay'
 import { DragHandle } from '../shared/DragHandle'
 
 const THUMB_SCALE = 0.108
@@ -104,10 +105,15 @@ const SortableSlide = memo(function SortableSlide({
                 : 'border-transparent hover:border-zinc-600'
             }`}
           >
-            <div className="overflow-hidden rounded-md">
+            <div className="relative overflow-hidden rounded-md">
               {ready ? (
                 <SlideFrame scale={THUMB_SCALE}>
-                  <SlideRenderer slide={slide} />
+                  <div className="relative">
+                    <SlideRenderer slide={slide} />
+                    {(slide.drawingLayers?.length ?? 0) > 0 && (
+                      <DrawingOverlay slideId={slide.id} interactive={false} />
+                    )}
+                  </div>
                 </SlideFrame>
               ) : (
                 <div
@@ -115,6 +121,8 @@ const SortableSlide = memo(function SortableSlide({
                   style={{ height: `${1080 * THUMB_SCALE}px` }}
                 />
               )}
+              {/* Inert overlay — blocks links/buttons/drop zones inside the thumbnail */}
+              <div className="absolute inset-0 z-50" />
             </div>
           </button>
           <div className="flex items-center justify-between px-0.5 pt-0.5">

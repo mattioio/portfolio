@@ -4,6 +4,32 @@ import { nanoid } from 'nanoid'
 import type { Slide, SlideType, SlideContent, BentoContent, ImageTransform, CVContent, DrawingPath, DrawingLayer, DrawingGroup } from './types'
 import { idbStorage } from './idb-storage'
 
+// ── Save to repo: Cmd+S writes state to portfolio-data.json via dev server ──
+async function saveToRepo(state: Record<string, unknown>): Promise<boolean> {
+  try {
+    const res = await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state, null, 2),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+// ── Seed from repo: on first load with empty IDB, hydrate from portfolio-data.json ──
+async function loadSeedData(): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch('/portfolio-data.json')
+    if (!res.ok) return null
+    const data = await res.json()
+    return data?.state ?? data ?? null
+  } catch {
+    return null
+  }
+}
+
 const BENTO_DEFAULT_DESCRIPTIONS: string[] = [
   'Charity profile page',
   'Donation impact calculator',
@@ -232,6 +258,8 @@ interface PortfolioState {
   duplicateGroup: (slideId: string, groupId: string) => void
   moveGroup: (slideId: string, groupId: string, dx: number, dy: number) => void
   reorderGroup: (slideId: string, groupId: string, direction: 'up' | 'down') => void
+
+  saveToFile: () => Promise<boolean>
 
   setColorPalette: (id: string) => void
   setHeaderFont: (font: string) => void
@@ -981,6 +1009,33 @@ export const usePortfolioStore = create<PortfolioState>()(
         }))
       },
 
+      saveToFile: async () => {
+        const state = get()
+        // Save the same fields that persist to IDB
+        const data = {
+          state: {
+            slides: state.slides,
+            selectedSlideId: state.selectedSlideId,
+            colorPaletteId: state.colorPaletteId,
+            headerFont: state.headerFont,
+            bodyFont: state.bodyFont,
+            footerName: state.footerName,
+            footerTitle: state.footerTitle,
+            footerShowYear: state.footerShowYear,
+            headerUppercase: state.headerUppercase,
+            headerLetterSpacing: state.headerLetterSpacing,
+            slidePadding: state.slidePadding,
+            slideRounding: state.slideRounding,
+            backgroundLibrary: state.backgroundLibrary,
+            textureImage: state.textureImage,
+            textureBlendMode: state.textureBlendMode,
+            textureOpacity: state.textureOpacity,
+            imageTransforms: state.imageTransforms,
+          },
+        }
+        return saveToRepo(data)
+      },
+
       setColorPalette: (id) => { get()._pushHistory(); set({ colorPaletteId: id }) },
       setHeaderFont: (font) => { get()._pushHistory(); set({ headerFont: font }) },
       setBodyFont: (font) => { get()._pushHistory(); set({ bodyFont: font }) },
@@ -1038,6 +1093,27 @@ export const usePortfolioStore = create<PortfolioState>()(
     }
   )
 )
+
+// Expose store on window in dev mode for debugging / preview seeding
+if (import.meta.env.DEV) {
+  ;(window as any).__portfolioStore = usePortfolioStore
+}
+
+// ── Seed from repo: if IDB has no data, load from portfolio-data.json ──
+// Check IDB directly (bypassing Zustand) to know if this is a truly fresh session.
+async function _trySeedFromFile() {
+  // Check if IDB has any stored data at all
+  const existing = await idbStorage.getItem('portfolio-builder')
+  if (existing) return // IDB has data — no seed needed
+
+  const seed = await loadSeedData()
+  if (seed && Array.isArray((seed as any).slides) && (seed as any).slides.length > 0) {
+    usePortfolioStore.setState(seed)
+  }
+}
+
+// Run after a short delay to let IDB initialize
+setTimeout(_trySeedFromFile, 300)
 
 // ── Bento migration: old flat layoutVariant (0–6) → new image-count model ──
 // Old system: layoutVariant was an index into a flat 7-item array (0–6)

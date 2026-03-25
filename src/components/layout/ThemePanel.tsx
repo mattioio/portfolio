@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react'
 import { usePortfolioStore } from '../../store/portfolio-store'
 import { ALL_HEADER_FONTS, ALL_BODY_FONTS, COLOR_PALETTES } from '../../themes'
-import { Palette, Type, User, Maximize, Circle, ImageIcon, Plus, X, Layers } from 'lucide-react'
+import { Palette, Type, User, Maximize, ImageIcon, Plus, X, Layers } from 'lucide-react'
 
 export function ThemePanel() {
   const colorPaletteId = usePortfolioStore((s) => s.colorPaletteId)

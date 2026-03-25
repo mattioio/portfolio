@@ -33,6 +33,7 @@ function App() {
     applyPalette(colorPaletteId, headerFont, bodyFont, false, slideRounding, slidePadding, headerUppercase, headerLetterSpacing)
   }, [colorPaletteId, headerFont, bodyFont, slideRounding, slidePadding, headerUppercase, headerLetterSpacing])
 
+
   if (isFullscreen) {
     return <div className="flex h-full flex-col"><Canvas /></div>
   }

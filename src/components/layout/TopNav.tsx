@@ -1,4 +1,4 @@
-import { Download, Undo2, Redo2, Loader2 } from 'lucide-react'
+import { Download, Save, Undo2, Redo2, Loader2 } from 'lucide-react'
 import { useEffect, useRef, useLayoutEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { toJpeg } from 'html-to-image'
@@ -43,6 +43,30 @@ function ModeTabBar({ appMode, setAppMode }: { appMode: 'design' | 'draw'; setAp
         style={{ left: indicator.left, width: indicator.width }}
       />
     </div>
+  )
+}
+
+function SaveButton() {
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const saveToFile = usePortfolioStore((s) => s.saveToFile)
+
+  const handleSave = async () => {
+    setStatus('saving')
+    const ok = await saveToFile()
+    setStatus(ok ? 'saved' : 'idle')
+    if (ok) setTimeout(() => setStatus('idle'), 1500)
+  }
+
+  return (
+    <button
+      onClick={handleSave}
+      disabled={status === 'saving'}
+      className="flex items-center gap-1.5 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-sm text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200 disabled:opacity-40"
+      title="Save to repo"
+    >
+      <Save size={14} />
+      {status === 'saving' ? 'Saving...' : status === 'saved' ? 'Saved ✓' : 'Save'}
+    </button>
   )
 }
 
@@ -228,6 +252,8 @@ export function TopNav() {
         </button>
 
         <div className="mx-2 h-5 w-px bg-zinc-800" />
+
+        <SaveButton />
 
         <button
           onClick={handleExport}

@@ -35,7 +35,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
     content.paragraphs.map((p, i) => (
       <EditableText key={i} value={p} as="p" editable={editable} multiline
         onChange={(v) => { const paragraphs = [...content.paragraphs]; paragraphs[i] = v; update(slideId, { paragraphs } as any) }}
-        style={{ fontFamily: 'var(--font-body)', fontSize, lineHeight: 1.6, color: 'var(--color-text)', opacity: i === 0 ? 1 : 0.7, ...extra }} />
+        style={{ fontFamily: 'var(--font-body)', fontSize: i === 0 ? stepType('xl', bodySizeStep) : fontSize, lineHeight: i === 0 ? 1.4 : 1.6, color: 'var(--color-text)', ...extra }} />
     ))
 
   const imgBox = (w: string, h: string, round?: string) => (
