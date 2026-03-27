@@ -1,0 +1,128 @@
+---
+
+---
+
+<footer class="footer" id="contact">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <h2 class="footer__name">Gavin Batty</h2>
+      <p class="footer__tagline">Photographer</p>
+    </div>
+
+    <div class="footer__contact">
+      <h3>Get in Touch</h3>
+      <a href="mailto:hello@gavinbatty.com">hello@gavinbatty.com</a>
+    </div>
+
+    <div class="footer__links">
+      <h3>Follow</h3>
+      <nav class="footer__link-list">
+        <a href="https://instagram.com/gavinbatty" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <span class="footer__sep">/</span>
+        <a href="https://linkedin.com/in/gavinbatty" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <span class="footer__sep">/</span>
+        <a href="https://twitter.com/gavinbatty" target="_blank" rel="noopener noreferrer">X</a>
+      </nav>
+    </div>
+
+    <div class="footer__bottom">
+      <p>&copy; {new Date().getFullYear()} Gavin Batty. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    padding: var(--space-xl) 0 var(--space-md);
+  }
+
+  :global(.page-home) .footer {
+    position: relative;
+    z-index: 4;
+  }
+
+  .footer__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 769px) {
+    .footer__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-lg);
+    }
+  }
+
+  .footer__name {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .footer__tagline {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .footer h3 {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .footer__contact a {
+    font-size: 1rem;
+    transition: color 0.2s;
+  }
+
+  .footer__contact a:hover {
+    color: var(--color-accent);
+  }
+
+  .footer__link-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer__link-list a {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .footer__link-list a:hover {
+    opacity: 1;
+  }
+
+  .footer__sep {
+    opacity: 0.25;
+    font-size: 0.8rem;
+  }
+
+  .footer__bottom {
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 769px) {
+    .footer__bottom {
+      grid-column: 1 / -1;
+      padding-top: var(--space-lg);
+    }
+  }
+</style>

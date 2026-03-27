@@ -1,0 +1,529 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScrollCarousel from "../components/ScrollCarousel.astro";
+import { categories, getImagesForCategory } from "../data/categories";
+---
+
+<BaseLayout title="Gavin Batty — Photographer">
+  <ScrollCarousel />
+
+  <!-- Intro section: fixed behind hero, revealed as hero scrolls away -->
+  <section class="reveal-section">
+    <div class="reveal-section__sticky">
+      <section class="intro">
+        <div class="container">
+          <div class="intro__content">
+            <img src="/images/profile-pic.jpg" alt="Gavin Batty" class="intro__portrait" />
+            <h2 class="intro__title" data-blur-reveal>Capturing moments that <em>matter.</em></h2>
+            <p class="intro__sub" data-blur-reveal>From wedding days to <em>stadium lights,</em> restaurant tables to <em>mountain peaks.</em></p>
+            <button class="intro__cta" id="open-services" data-blur-reveal>View Services &rarr;</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Gallery overlay — slides up over everything, carousel stays alive behind -->
+  <div class="gallery-overlay" id="gallery-overlay" aria-hidden="true">
+    <div class="gallery-overlay__inner">
+      <div class="gallery-overlay__hero">
+        <button class="gallery-overlay__back" id="gallery-close">&larr; Back</button>
+        <h1 class="gallery-overlay__title" id="gallery-title"></h1>
+        <p class="gallery-overlay__desc" id="gallery-desc"></p>
+      </div>
+      <div class="gallery-overlay__grid" id="gallery-grid"></div>
+    </div>
+  </div>
+
+  <!-- Pre-rendered gallery data for each category (hidden, used by JS) -->
+  {categories.map(cat => {
+    const images = getImagesForCategory(cat);
+    return (
+      <template data-gallery={cat.slug}>
+        {images.map(src => (
+          <div class="gallery-overlay__item">
+            <img src={src} alt={cat.name} loading="lazy" />
+          </div>
+        ))}
+      </template>
+    );
+  })}
+</BaseLayout>
+
+<style>
+  /* Two-part trick: the section is tall enough for the sticky child
+     to stay pinned for one full viewport, then scroll away naturally. */
+  .reveal-section {
+    position: relative;
+    height: auto;
+    background: transparent;
+    z-index: 3;
+    /* Pull up so card appears after text fades but while image is locked */
+    margin-top: -50vh;
+    pointer-events: none;
+  }
+
+  .reveal-section__sticky {
+    background: var(--color-bg);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    pointer-events: auto;
+    padding: 10vh 0;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Keep card below the nav — leaves hero image strip visible behind logo */
+    margin-top: 8vh;
+    margin-bottom: 0;
+  }
+
+
+  .intro {
+    padding: var(--space-xl) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .intro__content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+  }
+
+  .intro__portrait {
+    width: 220px;
+    height: 220px;
+    border-radius: 16%;
+    object-fit: cover;
+    margin: 0 auto var(--space-md);
+    display: block;
+    border: 2px solid var(--color-border, rgba(0,0,0,0.08));
+    will-change: transform;
+    transform-origin: center center;
+  }
+
+  .intro__title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+    letter-spacing: -0.02em;
+  }
+
+  .intro__title em {
+    font-style: italic;
+  }
+
+  .intro__sub {
+    font-family: var(--font-heading);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text-muted, #999);
+    margin-bottom: var(--space-lg);
+    letter-spacing: -0.01em;
+    max-width: 32ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .intro__sub em {
+    font-style: italic;
+    color: var(--color-text-muted, #888);
+  }
+
+  .intro__cta {
+    display: inline-block;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.75rem 2rem;
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+  }
+
+  .intro__cta:hover {
+    background-color: var(--color-text);
+    color: var(--color-text-light);
+  }
+
+  /* Blur reveal — per-character, scroll-scrubbed.
+     NO will-change on individual chars — 100+ GPU layers kills perf.
+     Browser composites them naturally within the parent layer. */
+  [data-blur-reveal] .char {
+    display: inline-block;
+  }
+
+  /* ===== Gallery Overlay — slides up, carousel stays alive behind ===== */
+  .gallery-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--color-bg);
+    transform: translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .gallery-overlay.open {
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .gallery-overlay__inner {
+    min-height: 100vh;
+    padding-bottom: 4rem;
+  }
+
+  .gallery-overlay__hero {
+    text-align: center;
+    padding: 8rem 2rem 3rem;
+  }
+
+  .gallery-overlay__back {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: color 0.2s;
+  }
+
+  .gallery-overlay__back:hover {
+    color: var(--color-text);
+  }
+
+  .gallery-overlay__title {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+  }
+
+  .gallery-overlay__desc {
+    font-family: var(--font-heading);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-style: italic;
+    color: var(--color-text-muted);
+    max-width: 40ch;
+    margin: 0 auto;
+  }
+
+  .gallery-overlay__grid {
+    display: columns;
+    columns: 3;
+    column-gap: 1rem;
+    padding: 0 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .gallery-overlay__item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .gallery-overlay__item img {
+    width: 100%;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-overlay__grid {
+      columns: 2;
+      padding: 0 1rem;
+    }
+    .gallery-overlay__hero {
+      padding: 6rem 1.5rem 2rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+  if (!document.querySelector('.reveal-section')) return; // not on homepage
+
+  // "View Services" button opens the panel
+  const openBtn = document.getElementById('open-services');
+  const panel = document.getElementById('services-panel');
+  if (openBtn && panel) {
+    openBtn.addEventListener('click', () => {
+      panel.classList.add('active');
+      panel.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  // ===== Gallery overlay — slides up, carousel stays alive =====
+  const overlay = document.getElementById('gallery-overlay');
+  const galleryTitle = document.getElementById('gallery-title');
+  const galleryDesc = document.getElementById('gallery-desc');
+  const galleryGrid = document.getElementById('gallery-grid');
+  const galleryClose = document.getElementById('gallery-close');
+
+  // Category metadata (matches categories.ts)
+  const catMeta: Record<string, { name: string; desc: string }> = {
+    music: { name: 'Music', desc: 'The energy, the crowd, the moment — live music photography' },
+    portraits: { name: 'Portraits', desc: 'Authentic portraits that reveal character and emotion' },
+    wedding: { name: 'Wedding', desc: 'Capturing love stories, from intimate ceremonies to grand celebrations' },
+    food: { name: 'Food', desc: 'Editorial food and hospitality photography that tells a story' },
+    sport: { name: 'Sport', desc: 'Peak action and athletic moments frozen in time' },
+    travel: { name: 'Travel', desc: 'Landscapes, cultures, and stories from around the world' },
+  };
+
+  function openGallery(slug: string) {
+    if (!overlay || !galleryTitle || !galleryDesc || !galleryGrid) return;
+
+    const meta = catMeta[slug];
+    if (!meta) return;
+
+    // Set content
+    galleryTitle.textContent = meta.name;
+    galleryDesc.textContent = meta.desc;
+
+    // Load images from pre-rendered template
+    const tpl = document.querySelector(`template[data-gallery="${slug}"]`) as HTMLTemplateElement;
+    galleryGrid.innerHTML = '';
+    if (tpl) {
+      galleryGrid.appendChild(tpl.content.cloneNode(true));
+    }
+
+    // Slide up
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+
+    // Update URL without navigation
+    history.pushState({ gallery: slug }, '', `/gallery/${slug}`);
+
+    // Stagger images in
+    galleryGrid.querySelectorAll('.gallery-overlay__item').forEach((el, i) => {
+      const e = el as HTMLElement;
+      e.style.opacity = '0';
+      e.style.transform = 'translateY(30px)';
+      e.animate([
+        { opacity: 0, transform: 'translateY(30px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], {
+        duration: 600,
+        delay: 300 + i * 40,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        fill: 'forwards'
+      });
+    });
+  }
+
+  function closeGallery() {
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    // Restore URL
+    if (window.location.pathname !== '/') {
+      history.pushState({}, '', '/');
+    }
+  }
+
+  // Listen for carousel's open-gallery event
+  document.addEventListener('open-gallery', ((e: CustomEvent) => {
+    openGallery(e.detail);
+  }) as EventListener);
+
+  // Close button
+  galleryClose?.addEventListener('click', closeGallery);
+
+  // Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay?.classList.contains('open')) closeGallery();
+  });
+
+  // Browser back button
+  window.addEventListener('popstate', () => {
+    if (overlay?.classList.contains('open')) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // If loaded directly on a gallery URL, open it
+  const pathMatch = window.location.pathname.match(/^\/gallery\/(.+)$/);
+  if (pathMatch) {
+    openGallery(pathMatch[1]);
+  }
+
+  // ===== Blurry text reveal — per-character, scroll-scrubbed =====
+  // PERF NOTES:
+  // - No will-change on individual chars (100+ GPU layers = worse than CPU paint)
+  // - Only update chars in the active transition zone (skip done/not-started)
+  // - Portrait uses transform:scale() not width/height (no layout reflow)
+  // - Cached rect, rAF-gated, rounded filter values
+
+  function splitIntoChars(el: Element) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    const textNodes: Text[] = [];
+    let node: Text | null;
+    while (node = walker.nextNode() as Text) {
+      if (node.textContent) textNodes.push(node);
+    }
+
+    textNodes.forEach(textNode => {
+      const text = textNode.textContent!;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === ' ' || ch === '\n' || ch === '\t') {
+          frag.appendChild(document.createTextNode(ch));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.textContent = ch;
+          span.style.filter = 'blur(10px) brightness(300%)';
+          span.style.opacity = '0';
+          frag.appendChild(span);
+        }
+      }
+      textNode.parentNode?.replaceChild(frag, textNode);
+    });
+  }
+
+  document.querySelectorAll('[data-blur-reveal]:not(button)').forEach(el => splitIntoChars(el));
+
+  const allChars = Array.from(document.querySelectorAll('[data-blur-reveal] .char')) as HTMLElement[];
+  const ctaBtn = document.querySelector('.intro__cta[data-blur-reveal]') as HTMLElement;
+  if (ctaBtn) {
+    ctaBtn.style.filter = 'blur(8px) brightness(300%)';
+    ctaBtn.style.opacity = '0';
+  }
+
+  const stickyIntro = document.querySelector('.reveal-section__sticky') as HTMLElement;
+  const portraitEl = document.querySelector('.intro__portrait') as HTMLElement;
+  const totalItems = allChars.length + 1;
+  const charWindow = 0.15;
+
+  // Pre-compute each char's start threshold (never changes)
+  const charStarts = allChars.map((_, i) => (i / totalItems) * (1 - charWindow));
+  const ctaStart = (allChars.length / totalItems) * (1 - charWindow);
+
+  // Track per-char done state — once revealed, never touch again until scroll back
+  const charDone = new Uint8Array(allChars.length); // 0=pending, 1=done, 2=not-started
+  let ctaDone = false;
+  let prevProgress = -1;
+  let revealTicking = false;
+
+  function scrubBlurReveal() {
+    revealTicking = false;
+    if (!stickyIntro) return;
+
+    const rect = stickyIntro.getBoundingClientRect();
+    const vh   = window.innerHeight;
+    // Start when card top is at 90% of viewport (text just entering at bottom edge)
+    // End when card top is at 20% of viewport (text well centred on screen)
+    const startY = vh * 0.9;
+    const endY   = vh * 0.2;
+    const progress = Math.min(1, Math.max(0, (startY - rect.top) / (startY - endY)));
+
+    // Early-out: progress hasn't changed meaningfully
+    if (Math.abs(progress - prevProgress) < 0.001) return;
+    prevProgress = progress;
+
+    // Only update chars in the active zone — skip fully revealed and not-yet-started
+    for (let i = 0; i < allChars.length; i++) {
+      const charStart = charStarts[i];
+      const charEnd = charStart + charWindow;
+
+      // Skip chars that haven't entered their window yet
+      if (progress < charStart) {
+        if (charDone[i] !== 2) {
+          allChars[i].style.filter = 'blur(10px) brightness(300%)';
+          allChars[i].style.opacity = '0';
+          charDone[i] = 2;
+        }
+        continue;
+      }
+
+      // Skip chars that are fully revealed
+      if (progress >= charEnd) {
+        if (charDone[i] !== 1) {
+          allChars[i].style.filter = 'none';
+          allChars[i].style.opacity = '1';
+          charDone[i] = 1;
+        }
+        continue;
+      }
+
+      // This char is actively transitioning — update it
+      charDone[i] = 0;
+      const charProgress = (progress - charStart) / charWindow;
+
+      // Round filter values — avoids sub-pixel recomputation
+      const blur = (10 * (1 - charProgress)) | 0; // integer blur px
+      const brightness = (300 - 200 * charProgress) | 0;
+      const opacity = Math.min(1, charProgress / 0.6);
+
+      allChars[i].style.filter = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
+      allChars[i].style.opacity = opacity >= 1 ? '1' : opacity.toFixed(2);
+    }
+
+    // CTA
+    if (ctaBtn) {
+      if (progress < ctaStart) {
+        if (!ctaDone) {
+          ctaBtn.style.filter = 'blur(8px) brightness(300%)';
+          ctaBtn.style.opacity = '0';
+        }
+      } else if (progress >= ctaStart + charWindow) {
+        if (!ctaDone) {
+          ctaBtn.style.filter = 'none';
+          ctaBtn.style.opacity = '1';
+          ctaDone = true;
+        }
+      } else {
+        ctaDone = false;
+        const ctaProgress = (progress - ctaStart) / charWindow;
+        const blur = (8 * (1 - ctaProgress)) | 0;
+        const brightness = (300 - 200 * ctaProgress) | 0;
+        ctaBtn.style.opacity = Math.min(1, ctaProgress / 0.6).toFixed(2);
+        ctaBtn.style.filter = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
+      }
+    }
+
+    // Portrait: transform:scale() + borderRadius (no layout reflow)
+    if (portraitEl) {
+      const scale = (220 - 80 * progress) / 220; // 1.0 → 0.636
+      const radius = 16 + 34 * progress; // 16% → 50%
+      portraitEl.style.transform = `scale(${scale.toFixed(3)})`;
+      portraitEl.style.borderRadius = `${radius | 0}%`;
+    }
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!revealTicking) {
+      requestAnimationFrame(scrubBlurReveal);
+      revealTicking = true;
+    }
+  }, { passive: true });
+  }); // end astro:page-load
+</script>
