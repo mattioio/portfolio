@@ -7,11 +7,15 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "lqip": "node scripts/generate-lqip.mjs",
+    "optimize": "node scripts/optimize-images.mjs",
+    "prebuild": "node scripts/generate-lqip.mjs && node scripts/optimize-images.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
     "astro": "^6.0.8"
   }
 }

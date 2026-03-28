@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { dayRate, services } from "../data/services";
+import { CONTACT_MAILTO } from "../data/contact";
 ---
 
 <BaseLayout title="Services — Gavin Batty" description="Photography packages and day rates for weddings, music, food & hospitality, and sport.">
@@ -50,7 +51,7 @@ import { dayRate, services } from "../data/services";
       <div class="services-cta__inner">
         <h2>Let's create something together</h2>
         <p>Every project is unique. Get in touch to discuss your vision and receive a custom quote.</p>
-        <a href="mailto:hello@gavinbatty.com" class="services-cta__btn">Get in Touch</a>
+        <a href={CONTACT_MAILTO} class="services-cta__btn">Get in Touch</a>
       </div>
     </div>
   </section>

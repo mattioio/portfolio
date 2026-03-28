@@ -107,6 +107,20 @@ p {
   border-width: 0;
 }
 
+/* ===== Focus ===== */
+:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Dark backgrounds — light focus ring */
+.footer :focus-visible,
+.lightbox :focus-visible,
+.hero__sticky :focus-visible {
+  outline-color: rgba(255, 255, 255, 0.8);
+}
+
 /* ===== Selection ===== */
 ::selection {
   background-color: var(--color-accent);

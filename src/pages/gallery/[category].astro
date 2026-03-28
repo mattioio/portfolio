@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { categories, getImagesForCategory } from "../../data/categories";
+import lqipData from "../../data/lqip.json";
+import imageManifest from "../../data/image-manifest.json";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths: GetStaticPaths = () => {
@@ -27,6 +29,7 @@ images.forEach((src, i) => {
 <BaseLayout
   title={`${category.name} — Gavin Batty`}
   description={category.description}
+  ogImage={category.cover}
   showFooter={false}
 >
   <section class="gallery-hero">
@@ -38,8 +41,8 @@ images.forEach((src, i) => {
         <span>Close</span>
       </a>
 
-      <h1>{category.name}</h1>
-      <p class="gallery-hero__desc">{category.description}</p>
+      <h1 transition:name="gallery-title">{category.name}</h1>
+      <p class="gallery-hero__desc" transition:name="gallery-desc">{category.description}</p>
 
       <!-- Mobile-only category pagination -->
       <nav class="cat-pagination" aria-label="Browse categories">
@@ -68,6 +71,7 @@ images.forEach((src, i) => {
         <div class="column" data-col={colIndex}>
           {col.map((src, imgIndex) => {
             const globalIndex = imgIndex * 3 + colIndex;
+            const isAboveFold = globalIndex < 6;
             return (
               <button
                 class="column__item"
@@ -75,14 +79,30 @@ images.forEach((src, i) => {
                 data-src={src}
                 aria-label={`View ${category.name} photo ${globalIndex + 1}`}
               >
-                <div class="column__item-imgwrap">
-                  <img
-                    src={src}
-                    alt={`${category.name} photo ${globalIndex + 1}`}
-                    loading="eager"
-                    decoding="async"
-                    class="column__item-img"
-                  />
+                <div
+                  class="column__item-imgwrap"
+                  style={[
+                    lqipData[src as keyof typeof lqipData] ? `background-image:url(${lqipData[src as keyof typeof lqipData]})` : '',
+                    imageManifest[src as keyof typeof imageManifest] ? `aspect-ratio:${imageManifest[src as keyof typeof imageManifest].width}/${imageManifest[src as keyof typeof imageManifest].height}` : '',
+                  ].filter(Boolean).join(';') || undefined}
+                >
+                  <picture>
+                    {imageManifest[src as keyof typeof imageManifest]?.webp && (
+                      <source
+                        srcset={imageManifest[src as keyof typeof imageManifest].webp}
+                        type="image/webp"
+                      />
+                    )}
+                    <img
+                      src={src}
+                      alt={`${category.name} photo ${globalIndex + 1}`}
+                      width={imageManifest[src as keyof typeof imageManifest]?.width}
+                      height={imageManifest[src as keyof typeof imageManifest]?.height}
+                      loading={isAboveFold ? "eager" : "lazy"}
+                      decoding="async"
+                      class="column__item-img"
+                    />
+                  </picture>
                 </div>
               </button>
             );
@@ -91,6 +111,28 @@ images.forEach((src, i) => {
       ))}
     </div>
   </section>
+
+  <!-- Sticky category bar — appears on scroll -->
+  <nav class="cat-bar" id="cat-bar" aria-label="Gallery navigation">
+    <div class="cat-bar__inner">
+      {prevCategory
+        ? <a href={`/gallery/${prevCategory.slug}`} class="cat-bar__arrow" aria-label={`Previous: ${prevCategory.name}`}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </a>
+        : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
+      }
+      <span class="cat-bar__title">{category.name}</span>
+      {nextCategory
+        ? <a href={`/gallery/${nextCategory.slug}`} class="cat-bar__arrow" aria-label={`Next: ${nextCategory.name}`}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
+      }
+      <button class="cat-bar__top" id="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+      </button>
+    </div>
+  </nav>
 
   <!-- Bottom category pagination -->
   <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
@@ -124,6 +166,15 @@ images.forEach((src, i) => {
       <img class="lightbox__img" src="" alt="" />
     </div>
     <div class="lightbox__counter"></div>
+    <div class="lightbox__swipe-hint" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      <span>Swipe to navigate</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </div>
   </div>
 </BaseLayout>
 
@@ -248,6 +299,83 @@ images.forEach((src, i) => {
     text-align: center;
   }
 
+  /* ── Sticky category bar ── */
+  .cat-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 202;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .cat-bar.visible {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .cat-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.6rem var(--space-md);
+    background: rgba(245, 244, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .cat-bar__title {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    min-width: 6rem;
+    text-align: center;
+  }
+
+  .cat-bar__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+
+  .cat-bar__arrow:hover {
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .cat-bar__arrow--disabled {
+    opacity: 0;
+    pointer-events: none;
+    width: 32px;
+  }
+
+  .cat-bar__top {
+    position: absolute;
+    right: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+
+  .cat-bar__top:hover {
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
   /* ===== Columns with scroll animation ===== */
   .columns-wrap {
     overflow: hidden;
@@ -291,6 +419,10 @@ images.forEach((src, i) => {
     position: relative;
     /* Ensure border-radius clips even when column is on its own GPU layer */
     transform: translateZ(0);
+    /* LQIP: tiny base64 thumbnail as background, visible until real image loads */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .column__item-img {
@@ -421,6 +553,53 @@ images.forEach((src, i) => {
     opacity: 0.5;
   }
 
+  /* Swipe hint — mobile only, first open */
+  .lightbox__swipe-hint {
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .lightbox__swipe-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 15;
+      transition: opacity 0.4s ease;
+    }
+
+    .lightbox__swipe-hint.visible {
+      opacity: 0.7;
+    }
+
+    .lightbox__swipe-hint svg:first-child {
+      animation: hint-left 1.2s ease-in-out infinite;
+    }
+
+    .lightbox__swipe-hint svg:last-child {
+      animation: hint-right 1.2s ease-in-out infinite;
+    }
+
+    @keyframes hint-left {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-6px); }
+    }
+
+    @keyframes hint-right {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+  }
+
   /* Mobile: bigger images, hide desktop nav arrows, use swipe */
   @media (max-width: 600px) {
     .lightbox__prev,
@@ -459,6 +638,34 @@ images.forEach((src, i) => {
     } else {
       img.addEventListener('load', show, { once: true });
     }
+  });
+
+  // ===== Sticky category bar + back-to-top =====
+  const catBar = document.getElementById('cat-bar');
+  const galleryHero = document.querySelector('.gallery-hero') as HTMLElement;
+  const backToTop = document.getElementById('back-to-top');
+
+  if (catBar && galleryHero) {
+    const showThreshold = () => galleryHero.offsetHeight + galleryHero.offsetTop;
+    let barVisible = false;
+
+    const navEl2 = document.querySelector('.nav') as HTMLElement | null;
+
+    function updateCatBar() {
+      const shouldShow = window.scrollY > showThreshold();
+      if (shouldShow !== barVisible) {
+        barVisible = shouldShow;
+        catBar!.classList.toggle('visible', shouldShow);
+        if (navEl2) navEl2.style.transform = shouldShow ? 'translateY(-100%)' : '';
+      }
+    }
+
+    window.addEventListener('scroll', updateCatBar, { passive: true });
+    updateCatBar();
+  }
+
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // ===== On-scroll column animation (Codrops style) =====
@@ -522,18 +729,38 @@ images.forEach((src, i) => {
     sources.push(item.dataset.src || "");
   });
 
+  // Swipe hint — show once per session on mobile
+  const swipeHint = lightbox.querySelector('.lightbox__swipe-hint') as HTMLElement | null;
+  let hintShown = sessionStorage.getItem('lb-swipe-hint') === '1';
+
+  function showSwipeHint() {
+    if (hintShown || !swipeHint || window.innerWidth > 600) return;
+    hintShown = true;
+    sessionStorage.setItem('lb-swipe-hint', '1');
+    // Small delay so the lightbox is fully visible first
+    setTimeout(() => {
+      swipeHint.classList.add('visible');
+      setTimeout(() => swipeHint.classList.remove('visible'), 2500);
+    }, 400);
+  }
+
+  const navEl = document.querySelector('.nav') as HTMLElement | null;
+
   function open(index: number) {
     currentIndex = index;
     show();
     lightbox.classList.add("active");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    if (navEl) navEl.style.display = 'none';
+    showSwipeHint();
   }
 
   function close() {
     lightbox.classList.remove("active");
     lightbox.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    if (navEl) navEl.style.display = '';
     resetTransform();
   }
 

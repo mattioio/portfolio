@@ -1,0 +1,412 @@
+{
+  "/images/Music/music1.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music1.webp"
+  },
+  "/images/Music/music10.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music10.webp"
+  },
+  "/images/Music/music11.jpg": {
+    "width": 1920,
+    "height": 2559,
+    "webp": "/images/Music/music11.webp"
+  },
+  "/images/Music/music12.jpg": {
+    "width": 1920,
+    "height": 2877,
+    "webp": "/images/Music/music12.webp"
+  },
+  "/images/Music/music13.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music13.webp"
+  },
+  "/images/Music/music14.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music14.webp"
+  },
+  "/images/Music/music2.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music2.webp"
+  },
+  "/images/Music/music3.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music3.webp"
+  },
+  "/images/Music/music4.jpg": {
+    "width": 1920,
+    "height": 2559,
+    "webp": "/images/Music/music4.webp"
+  },
+  "/images/Music/music5.jpg": {
+    "width": 1920,
+    "height": 2877,
+    "webp": "/images/Music/music5.webp"
+  },
+  "/images/Music/music6.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music6.webp"
+  },
+  "/images/Music/music7.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music7.webp"
+  },
+  "/images/Music/music8.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music8.webp"
+  },
+  "/images/Music/music9.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Music/music9.webp"
+  },
+  "/images/Portraits/portrait1.jpg": {
+    "width": 1920,
+    "height": 2644,
+    "webp": "/images/Portraits/portrait1.webp"
+  },
+  "/images/Portraits/portrait10.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Portraits/portrait10.webp"
+  },
+  "/images/Portraits/portrait2.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Portraits/portrait2.webp"
+  },
+  "/images/Portraits/portrait3.jpg": {
+    "width": 1920,
+    "height": 1498,
+    "webp": "/images/Portraits/portrait3.webp"
+  },
+  "/images/Portraits/portrait4.jpg": {
+    "width": 1920,
+    "height": 1281,
+    "webp": "/images/Portraits/portrait4.webp"
+  },
+  "/images/Portraits/portrait5.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Portraits/portrait5.webp"
+  },
+  "/images/Portraits/portrait6.jpg": {
+    "width": 1920,
+    "height": 2644,
+    "webp": "/images/Portraits/portrait6.webp"
+  },
+  "/images/Portraits/portrait7.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Portraits/portrait7.webp"
+  },
+  "/images/Portraits/portrait8.jpg": {
+    "width": 1920,
+    "height": 1498,
+    "webp": "/images/Portraits/portrait8.webp"
+  },
+  "/images/Portraits/portrait9.jpg": {
+    "width": 1920,
+    "height": 1281,
+    "webp": "/images/Portraits/portrait9.webp"
+  },
+  "/images/Wedding/wedding1.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding1.webp"
+  },
+  "/images/Wedding/wedding10.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Wedding/wedding10.webp"
+  },
+  "/images/Wedding/wedding11.jpg": {
+    "width": 1920,
+    "height": 1282,
+    "webp": "/images/Wedding/wedding11.webp"
+  },
+  "/images/Wedding/wedding12.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding12.webp"
+  },
+  "/images/Wedding/wedding13.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding13.webp"
+  },
+  "/images/Wedding/wedding14.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding14.webp"
+  },
+  "/images/Wedding/wedding15.jpg": {
+    "width": 1920,
+    "height": 1282,
+    "webp": "/images/Wedding/wedding15.webp"
+  },
+  "/images/Wedding/wedding16.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding16.webp"
+  },
+  "/images/Wedding/wedding2.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Wedding/wedding2.webp"
+  },
+  "/images/Wedding/wedding3.jpg": {
+    "width": 1920,
+    "height": 1282,
+    "webp": "/images/Wedding/wedding3.webp"
+  },
+  "/images/Wedding/wedding4.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding4.webp"
+  },
+  "/images/Wedding/wedding5.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding5.webp"
+  },
+  "/images/Wedding/wedding6.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding6.webp"
+  },
+  "/images/Wedding/wedding7.jpg": {
+    "width": 1920,
+    "height": 1282,
+    "webp": "/images/Wedding/wedding7.webp"
+  },
+  "/images/Wedding/wedding8.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding8.webp"
+  },
+  "/images/Wedding/wedding9.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Wedding/wedding9.webp"
+  },
+  "/images/Food/food1.jpg": {
+    "width": 1920,
+    "height": 2722,
+    "webp": "/images/Food/food1.webp"
+  },
+  "/images/Food/food10.jpg": {
+    "width": 1547,
+    "height": 2000,
+    "webp": "/images/Food/food10.webp"
+  },
+  "/images/Food/food11.jpg": {
+    "width": 1920,
+    "height": 2320,
+    "webp": "/images/Food/food11.webp"
+  },
+  "/images/Food/food12.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Food/food12.webp"
+  },
+  "/images/Food/food13.jpg": {
+    "width": 1920,
+    "height": 1920,
+    "webp": "/images/Food/food13.webp"
+  },
+  "/images/Food/food14.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Food/food14.webp"
+  },
+  "/images/Food/food15.jpg": {
+    "width": 1920,
+    "height": 2320,
+    "webp": "/images/Food/food15.webp"
+  },
+  "/images/Food/food16.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Food/food16.webp"
+  },
+  "/images/Food/food2.jpg": {
+    "width": 1547,
+    "height": 2000,
+    "webp": "/images/Food/food2.webp"
+  },
+  "/images/Food/food3.jpg": {
+    "width": 1920,
+    "height": 2320,
+    "webp": "/images/Food/food3.webp"
+  },
+  "/images/Food/food4.jpg": {
+    "width": 1920,
+    "height": 2400,
+    "webp": "/images/Food/food4.webp"
+  },
+  "/images/Food/food5.jpg": {
+    "width": 1920,
+    "height": 1920,
+    "webp": "/images/Food/food5.webp"
+  },
+  "/images/Food/food6.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Food/food6.webp"
+  },
+  "/images/Food/food7.jpg": {
+    "width": 1920,
+    "height": 2320,
+    "webp": "/images/Food/food7.webp"
+  },
+  "/images/Food/food8.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Food/food8.webp"
+  },
+  "/images/Food/food9.jpg": {
+    "width": 1920,
+    "height": 2722,
+    "webp": "/images/Food/food9.webp"
+  },
+  "/images/Sport/sport1.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport1.webp"
+  },
+  "/images/Sport/sport10.jpg": {
+    "width": 1920,
+    "height": 1283,
+    "webp": "/images/Sport/sport10.webp"
+  },
+  "/images/Sport/sport2.jpg": {
+    "width": 1920,
+    "height": 3413,
+    "webp": "/images/Sport/sport2.webp"
+  },
+  "/images/Sport/sport3.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport3.webp"
+  },
+  "/images/Sport/sport4.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport4.webp"
+  },
+  "/images/Sport/sport5.jpg": {
+    "width": 1920,
+    "height": 1283,
+    "webp": "/images/Sport/sport5.webp"
+  },
+  "/images/Sport/sport6.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport6.webp"
+  },
+  "/images/Sport/sport7.jpg": {
+    "width": 1920,
+    "height": 3413,
+    "webp": "/images/Sport/sport7.webp"
+  },
+  "/images/Sport/sport8.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport8.webp"
+  },
+  "/images/Sport/sport9.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Sport/sport9.webp"
+  },
+  "/images/Travel/travel1.jpg": {
+    "width": 1853,
+    "height": 2398,
+    "webp": "/images/Travel/travel1.webp"
+  },
+  "/images/Travel/travel10.jpg": {
+    "width": 1920,
+    "height": 2890,
+    "webp": "/images/Travel/travel10.webp"
+  },
+  "/images/Travel/travel11.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Travel/travel11.webp"
+  },
+  "/images/Travel/travel12.jpg": {
+    "width": 1920,
+    "height": 2912,
+    "webp": "/images/Travel/travel12.webp"
+  },
+  "/images/Travel/travel13.jpg": {
+    "width": 1920,
+    "height": 1281,
+    "webp": "/images/Travel/travel13.webp"
+  },
+  "/images/Travel/travel14.jpg": {
+    "width": 1920,
+    "height": 1200,
+    "webp": "/images/Travel/travel14.webp"
+  },
+  "/images/Travel/travel15.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Travel/travel15.webp"
+  },
+  "/images/Travel/travel16.jpg": {
+    "width": 1920,
+    "height": 2560,
+    "webp": "/images/Travel/travel16.webp"
+  },
+  "/images/Travel/travel2.jpg": {
+    "width": 1920,
+    "height": 2890,
+    "webp": "/images/Travel/travel2.webp"
+  },
+  "/images/Travel/travel3.jpg": {
+    "width": 1920,
+    "height": 2880,
+    "webp": "/images/Travel/travel3.webp"
+  },
+  "/images/Travel/travel4.jpg": {
+    "width": 1920,
+    "height": 2912,
+    "webp": "/images/Travel/travel4.webp"
+  },
+  "/images/Travel/travel5.jpg": {
+    "width": 1920,
+    "height": 1281,
+    "webp": "/images/Travel/travel5.webp"
+  },
+  "/images/Travel/travel6.jpg": {
+    "width": 1920,
+    "height": 1200,
+    "webp": "/images/Travel/travel6.webp"
+  },
+  "/images/Travel/travel7.jpg": {
+    "width": 1920,
+    "height": 1280,
+    "webp": "/images/Travel/travel7.webp"
+  },
+  "/images/Travel/travel8.jpg": {
+    "width": 1920,
+    "height": 2560,
+    "webp": "/images/Travel/travel8.webp"
+  },
+  "/images/Travel/travel9.jpg": {
+    "width": 1853,
+    "height": 2398,
+    "webp": "/images/Travel/travel9.webp"
+  }
+}

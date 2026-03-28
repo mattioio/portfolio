@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScrollCarousel from "../components/ScrollCarousel.astro";
+import { Image } from "astro:assets";
+import profilePic from "../assets/profile-pic.jpg";
 ---
 
 <BaseLayout title="Gavin Batty — Photographer">
@@ -12,10 +14,15 @@ import ScrollCarousel from "../components/ScrollCarousel.astro";
       <section class="intro">
         <div class="container">
           <div class="intro__content">
-            <img src="/images/profile-pic.jpg" alt="Gavin Batty" class="intro__portrait" />
+            <Image src={profilePic} alt="Gavin Batty" class="intro__portrait" width={440} quality={80} format="webp" loading="lazy" />
             <h2 class="intro__title" data-blur-reveal>Capturing moments that <em>matter.</em></h2>
             <p class="intro__sub" data-blur-reveal>From wedding days to <em>stadium lights,</em> restaurant tables to <em>mountain peaks.</em></p>
-            <button class="intro__cta" id="open-services" data-blur-reveal>View Services &rarr;</button>
+            <button class="intro__cta" id="open-services" data-blur-reveal>
+              View Services
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>
@@ -111,21 +118,34 @@ import ScrollCarousel from "../components/ScrollCarousel.astro";
   }
 
   .intro__cta {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.875rem;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    padding: 0.75rem 2rem;
+    /* optical centering: letter-spacing adds trailing space after last char,
+       shifting visual weight right — compensate with extra padding-left */
+    padding: 0.75rem 2rem 0.75rem calc(2rem + 0.15em);
     border: 1px solid var(--color-text);
     color: var(--color-text);
     transition: background-color 0.3s, color 0.3s;
     cursor: pointer;
   }
 
+  .intro__cta svg {
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   .intro__cta:hover {
     background-color: var(--color-text);
     color: var(--color-text-light);
+  }
+
+  .intro__cta:hover svg {
+    transform: translate(2px, -2px);
   }
 
   [data-blur-reveal] .char { display: inline-block; }
@@ -248,6 +268,9 @@ import ScrollCarousel from "../components/ScrollCarousel.astro";
     window.addEventListener('scroll', () => {
       if (!revealTicking) { requestAnimationFrame(scrubBlurReveal); revealTicking = true; }
     }, { passive: true });
+
+    // Sync state immediately — handles pre-scrolled pages (HMR, back-nav, etc.)
+    scrubBlurReveal();
 
   }); // end astro:page-load
 </script>
