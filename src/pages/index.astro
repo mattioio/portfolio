@@ -155,8 +155,9 @@ import { categories, getImagesForCategory } from "../data/categories";
   .intro__portrait {
     width: 220px;
     height: 220px;
-    border-radius: 16%;
+    clip-path: inset(0% round 16%);
     object-fit: cover;
+    will-change: clip-path, transform;
     margin: 0 auto var(--space-md);
     display: block;
     border: 2px solid var(--color-border, rgba(0,0,0,0.08));
@@ -445,6 +446,7 @@ import { categories, getImagesForCategory } from "../data/categories";
     width: 100%;
     display: block;
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
   }
 
   .ov-item:hover .ov-item__wrap img {
@@ -834,10 +836,13 @@ import { categories, getImagesForCategory } from "../data/categories";
         colEls.forEach((col, i) => {
           col.style.transform = window.innerWidth > 500 ? `translateY(${frac * speeds[i]}%)` : '';
         });
-        imgWraps.forEach((wrap, i) => {
-          const rect = wrap.getBoundingClientRect();
-          const vis  = (rect.top + rect.height / 2 - window.innerHeight / 2) / window.innerHeight;
-          if (imgEls[i]) imgEls[i].style.transform = `translateY(${vis * -30}px)`;
+        // Batch all layout reads first, then all writes — prevents thrashing
+        const halfVh = window.innerHeight / 2;
+        const vh     = window.innerHeight;
+        const rects  = imgWraps.map(w => w.getBoundingClientRect());
+        rects.forEach((rect, i) => {
+          const vis = (rect.top + rect.height / 2 - halfVh) / vh;
+          if (imgEls[i]) imgEls[i].style.transform = `translateY(${(vis * -30).toFixed(1)}px)`;
         });
       });
     }, { signal, passive: true });
@@ -1156,8 +1161,8 @@ import { categories, getImagesForCategory } from "../data/categories";
     if (portraitEl) {
       const scale  = (220 - 80 * progress) / 220;
       const radius = 16 + 34 * progress;
-      portraitEl.style.transform    = `scale(${scale.toFixed(3)})`;
-      portraitEl.style.borderRadius = `${radius | 0}%`;
+      portraitEl.style.transform = `scale(${scale.toFixed(3)})`;
+      portraitEl.style.clipPath  = `inset(0% round ${radius | 0}%)`;
     }
   }
 

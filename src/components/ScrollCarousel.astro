@@ -211,7 +211,7 @@ const count = slides.length;
     z-index: 20;
     transform: translate(-50%, -50%) scale(0);
     opacity: 0;
-    will-change: left, top;
+    will-change: translate;
     mix-blend-mode: difference;
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -972,8 +972,8 @@ const count = slides.length;
   function animateCursor() {
     cursorX += (targetX - cursorX) * 0.3;
     cursorY += (targetY - cursorY) * 0.3;
-    dotEl.style.left = `${cursorX}px`;
-    dotEl.style.top = `${cursorY}px`;
+    // CSS `translate` property composes with `transform` independently — GPU only, no layout
+    dotEl.style.translate = `${cursorX}px ${cursorY}px`;
     if (cursorVisible) cursorRaf = requestAnimationFrame(animateCursor);
   }
 
