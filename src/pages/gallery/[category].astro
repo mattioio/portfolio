@@ -29,16 +29,6 @@ images.forEach((src, i) => {
   description={category.description}
   showFooter={false}
 >
-  <!-- Full-bleed cover image — view transition morph anchor from carousel slide -->
-  <div class="gallery-cover">
-    <img
-      src={category.cover}
-      alt={category.name}
-      class="gallery-cover__img"
-      transition:name={`hero-cover-${category.slug}`}
-    />
-  </div>
-
   <section class="gallery-hero">
     <div class="container">
       <a href="/" class="gallery-back" data-back>
@@ -139,29 +129,9 @@ images.forEach((src, i) => {
 
 <style>
 
-  /* ── Full-bleed cover image (view transition morph anchor) ── */
-  .gallery-cover {
-    width: 100%;
-    /* Height matches roughly what's visible in the carousel minus the nav bar,
-       so the morph feels like the image collapses in place rather than jumping */
-    height: calc(100svh - var(--nav-height, 72px));
-    min-height: 320px;
-    max-height: 680px;
-    overflow: hidden;
-    position: relative;
-    background: #111;
-  }
-
-  .gallery-cover__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
   /* Hero */
   .gallery-hero {
-    padding: var(--space-lg) 0 var(--space-md);
+    padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
     text-align: center;
   }
 

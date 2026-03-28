@@ -76,33 +76,6 @@ const isHome = Astro.url.pathname === "/";
         animation: none;
       }
 
-      /* Hero cover image — morph group timing (position + size animation) */
-      ::view-transition-group(hero-cover-music),
-      ::view-transition-group(hero-cover-portraits),
-      ::view-transition-group(hero-cover-wedding),
-      ::view-transition-group(hero-cover-food),
-      ::view-transition-group(hero-cover-sport),
-      ::view-transition-group(hero-cover-travel) {
-        animation-duration: 0.55s;
-        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      /* Simple cross-dissolve — old fades out as new fades in over the same duration */
-      ::view-transition-old(hero-cover-music),
-      ::view-transition-old(hero-cover-portraits),
-      ::view-transition-old(hero-cover-wedding),
-      ::view-transition-old(hero-cover-food),
-      ::view-transition-old(hero-cover-sport),
-      ::view-transition-old(hero-cover-travel),
-      ::view-transition-new(hero-cover-music),
-      ::view-transition-new(hero-cover-portraits),
-      ::view-transition-new(hero-cover-wedding),
-      ::view-transition-new(hero-cover-food),
-      ::view-transition-new(hero-cover-sport),
-      ::view-transition-new(hero-cover-travel) {
-        animation-duration: 0.55s;
-        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      }
     </style>
 
     <script>
