@@ -19,7 +19,6 @@ const count = slides.length;
             alt={cat.name}
             loading={i < 2 ? "eager" : "lazy"}
             decoding={i === 0 ? "sync" : "async"}
-            transition:name={`hero-cover-${cat.slug}`}
           />
           <div class="hero__slide-darken"></div>
         </div>
@@ -962,11 +961,29 @@ const count = slides.length;
     }
   });
 
-  if (heroTextEl) {
-    heroTextEl.addEventListener('click', () => {
-      // Navigate via the enter link — Astro ClientRouter intercepts and applies view transition
-      if (enterEl?.classList.contains('visible')) enterEl.click();
+  // Set view-transition-name on the ACTIVE slide image only, right before navigation.
+  // Doing this in JS (not in the template) prevents the "peek strip" of the next
+  // slide — which is partially visible at opacity:1 — from also getting a
+  // transition name and creating a fighting morph animation.
+  function navigateToGallery() {
+    if (!enterEl?.classList.contains('visible')) return;
+    const slug = slideEls[currentSlide]?.dataset.slug;
+    if (!slug) return;
+    slideEls.forEach((slide, i) => {
+      const img = slide.querySelector('img') as HTMLImageElement | null;
+      if (!img) return;
+      if (i === currentSlide) {
+        img.style.setProperty('view-transition-name', `hero-cover-${slug}`);
+      } else {
+        // Explicitly disable any inherited/cached name on other slides
+        img.style.setProperty('view-transition-name', 'none');
+      }
     });
+    enterEl.click();
+  }
+
+  if (heroTextEl) {
+    heroTextEl.addEventListener('click', navigateToGallery);
   }
   // enterLink href is kept up-to-date by updateEnterCTA — no override needed
 
@@ -1051,7 +1068,7 @@ const count = slides.length;
     } else if (e.key === 'Enter') {
       if (enterEl?.classList.contains('visible')) {
         e.preventDefault();
-        enterEl.click();
+        navigateToGallery();
       }
     }
   }, { signal });
