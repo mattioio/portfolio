@@ -79,15 +79,6 @@ const isHome = Astro.url.pathname === "/";
     </style>
 
     <script>
-      // Back links use history.back() — browser restores exact scroll position
-      document.addEventListener('click', (e) => {
-        const link = (e.target as HTMLElement).closest('[data-back]');
-        if (link && history.length > 1) {
-          e.preventDefault();
-          history.back();
-        }
-      });
-
       // Stagger-in content elements after navigation
       document.addEventListener('astro:page-load', () => {
         const main = document.querySelector('main');
