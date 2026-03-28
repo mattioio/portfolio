@@ -21,6 +21,7 @@ import { categories, getImagesForCategory } from "../data/categories";
           </button>
           <h1 class="ov-title" id="gallery-title"></h1>
           <p class="ov-desc" id="gallery-desc"></p>
+          <nav class="ov-cat-pagination" id="gallery-cat-pagination-top" aria-label="Browse categories"></nav>
         </div>
       </section>
 
@@ -28,21 +29,21 @@ import { categories, getImagesForCategory } from "../data/categories";
         <div class="ov-columns" id="gallery-columns"></div>
       </section>
 
-      <!-- Scroll-to-close footer — content reveals as it scrolls into view -->
-      <div class="ov-footer" id="gallery-footer">
-        <div class="ov-footer-fill"></div>
-        <div class="ov-footer-content">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
-          </svg>
-          <span>scroll to close</span>
-        </div>
+      <nav class="ov-cat-pagination ov-cat-pagination--bottom" id="gallery-cat-pagination-bottom" aria-label="Browse categories"></nav>
+
+      <!-- Pull-to-close handle — appears when over-pulling at the bottom -->
+      <div class="ov-pull-hint" id="gallery-pull-hint" aria-hidden="true">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="1" x2="5" y2="9"/><polyline points="2,6 5,9 8,6"/>
+        </svg>
+        <span>keep pulling</span>
       </div>
 
     </div>
 
     <!-- Lightbox lives inside the overlay so z-index is isolated -->
     <div class="ov-lb" id="gallery-lb" aria-hidden="true" role="dialog" aria-label="Image viewer">
+      <span class="ov-lb__hint">Double tap to zoom</span>
       <button class="ov-lb__close" aria-label="Close">&times;</button>
       <button class="ov-lb__prev" aria-label="Previous">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -241,6 +242,7 @@ import { categories, getImagesForCategory } from "../data/categories";
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: none;
   }
 
   /* Hero */
@@ -270,6 +272,7 @@ import { categories, getImagesForCategory } from "../data/categories";
   .ov-back__arrow {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 2px;
   }
 
   .ov-back:hover {
@@ -299,72 +302,110 @@ import { categories, getImagesForCategory } from "../data/categories";
     text-align: center;
   }
 
+  /* ── Category pagination ── */
+  .ov-cat-pagination {
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .ov-cat-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding: 0 0.25rem;
+    }
+  }
+
+  .ov-cat-pagination--bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .ov-cat-pagination a,
+  .ov-cat-pagination span.ov-cat-pagination__arrow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    min-width: 5rem;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .ov-cat-pagination a.ov-cat-pagination__next,
+  .ov-cat-pagination span.ov-cat-pagination__next {
+    justify-content: flex-end;
+  }
+
+  .ov-cat-pagination a.ov-cat-pagination__disabled,
+  .ov-cat-pagination span.ov-cat-pagination__disabled {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .ov-cat-pagination a:hover {
+    color: var(--color-text);
+  }
+
+  .ov-cat-pagination__pos {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
+  }
+
   /* Masonry columns */
   .ov-columns-wrap {
     overflow: hidden;
     padding-bottom: var(--space-xl);
   }
 
-  /* ── Scroll-to-close footer: plain in-flow, revealed naturally by scrolling ── */
-  .ov-footer {
-    position: relative;
-    overflow: hidden;
-    height: 30vh;
-    background: #1c1b19;
-    border-radius: 1rem 1rem 0 0;
+  /* ── Pull-to-close hint ── */
+  .ov-pull-hint {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
+    gap: 0.45rem;
+    height: 5rem;
     font-family: var(--font-heading);
     font-style: italic;
-    font-size: 0.8rem;
-    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
-    cursor: default;
-    transition: color 0.15s ease, transform 0.1s ease;
-  }
-
-  /* Progress fill — grows left→right as user overscrolls */
-  .ov-footer-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    height: 100%;
-    width: 0%;
-    background: rgba(255, 255, 255, 0.06);
-    transition: width 0.08s linear;
-    pointer-events: none;
-  }
-
-  /* Content starts invisible — revealed by IntersectionObserver */
-  .ov-footer-content {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
+    color: var(--color-text-muted);
     opacity: 0;
-    transform: translateY(18px);
-    transition:
-      opacity  0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(-8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    user-select: none;
   }
 
-  .ov-footer.visible .ov-footer-content {
-    opacity: 1;
+  .ov-pull-hint.visible {
+    opacity: 0.5;
     transform: translateY(0);
   }
 
-  .ov-footer-content svg {
-    animation: footer-bounce 1.9s ease-in-out infinite;
-    /* delay bounce until after reveal */
-    animation-delay: 0.7s;
+  .ov-pull-hint svg {
+    animation: pull-hint-bounce 1.6s ease-in-out infinite;
     flex-shrink: 0;
   }
 
-  @keyframes footer-bounce {
+  @keyframes pull-hint-bounce {
     0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(4px); }
+    50%       { transform: translateY(3px); }
   }
 
   .ov-columns {
@@ -429,6 +470,28 @@ import { categories, getImagesForCategory } from "../data/categories";
   .ov-lb.active {
     opacity: 1;
     pointer-events: all;
+  }
+
+  .ov-lb__hint {
+    display: none;
+    position: absolute;
+    top: var(--space-md);
+    right: calc(var(--space-md) + 2.5rem + 0.75rem);
+    color: white;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+    padding-top: 0.2rem;
+  }
+
+  @media (pointer: coarse) {
+    .ov-lb__hint { display: block; }
+    .ov-lb.zoomed .ov-lb__hint { display: none; }
   }
 
   .ov-lb__close {
@@ -545,6 +608,26 @@ import { categories, getImagesForCategory } from "../data/categories";
     travel:    { name: 'Travel',    desc: 'Landscapes, cultures, and stories from around the world' },
   };
 
+  const catOrder = ['music', 'portraits', 'wedding', 'food', 'sport', 'travel'];
+
+  function buildPaginationHTML(slug: string): string {
+    const idx   = catOrder.indexOf(slug);
+    const total = catOrder.length;
+    const prevSlug = idx > 0 ? catOrder[idx - 1] : null;
+    const nextSlug = idx < total - 1 ? catOrder[idx + 1] : null;
+    const prevName = prevSlug ? catMeta[prevSlug].name : '';
+    const nextName = nextSlug ? catMeta[nextSlug].name : '';
+    const chevLeft  = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const chevRight = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    const prevEl = prevSlug
+      ? `<a href="/gallery/${prevSlug}" class="ov-cat-pagination__prev" data-cat-nav aria-label="Previous: ${prevName}">${chevLeft}<span>${prevName}</span></a>`
+      : `<span class="ov-cat-pagination__prev ov-cat-pagination__disabled"></span>`;
+    const nextEl = nextSlug
+      ? `<a href="/gallery/${nextSlug}" class="ov-cat-pagination__next" data-cat-nav aria-label="Next: ${nextName}"><span>${nextName}</span>${chevRight}</a>`
+      : `<span class="ov-cat-pagination__next ov-cat-pagination__disabled"></span>`;
+    return `${prevEl}<span class="ov-cat-pagination__pos">${idx + 1} / ${total}</span>${nextEl}`;
+  }
+
   // AbortController lets us cleanly tear down all gallery-specific listeners on close
   let galleryAC: AbortController | null = null;
 
@@ -559,6 +642,13 @@ import { categories, getImagesForCategory } from "../data/categories";
     titleEl.textContent = meta.name;
     descEl.textContent  = meta.desc;
 
+    // Populate category pagination navs
+    const paginationHTML = buildPaginationHTML(slug);
+    const catPagTop = document.getElementById('gallery-cat-pagination-top');
+    const catPagBot = document.getElementById('gallery-cat-pagination-bottom');
+    if (catPagTop) catPagTop.innerHTML = paginationHTML;
+    if (catPagBot) catPagBot.innerHTML = paginationHTML;
+
     // Clone pre-rendered column template into the grid
     const tpl = document.querySelector(`template[data-gallery="${slug}"]`) as HTMLTemplateElement;
     ovColumns.innerHTML = '';
@@ -567,11 +657,9 @@ import { categories, getImagesForCategory } from "../data/categories";
     // Show overlay — reset any leftover state from last visit
     overlay.style.transform = '';
     overlay.style.opacity   = '';
-    // Reset footer overscroll state
-    const _fill = document.querySelector('.ov-footer-fill') as HTMLElement | null;
-    if (_fill) _fill.style.width = '0%';
-    const _footer = document.getElementById('gallery-footer') as HTMLElement | null;
-    if (_footer) { _footer.style.transform = ''; _footer.classList.remove('visible'); }
+    // Reset any leftover pull-to-close state
+    overlay.style.borderRadius = '';
+    overlay.style.transformOrigin = '';
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     ovScroll.scrollTop = 0;
@@ -625,75 +713,109 @@ import { categories, getImagesForCategory } from "../data/categories";
       );
     });
 
-    // ── Scroll-to-close footer ──
-    // Click still works, but the primary action is scrolling past the bottom.
-    // When the scroll container is at its maximum scrollTop, additional wheel/touch
-    // delta is accumulated. Once it crosses the threshold the gallery closes.
-    const footerEl = document.getElementById('gallery-footer')!;
-    const closeFill = footerEl.querySelector('.ov-footer-fill') as HTMLElement | null;
-    footerEl.addEventListener('click', closeGallery, { signal });
-
-    // Reveal footer content when it scrolls into view; hide when scrolled back up
-    const footerObserver = new IntersectionObserver(
-      ([entry]) => footerEl.classList.toggle('visible', entry.isIntersecting),
-      { root: ovScroll, threshold: 0.25 }
-    );
-    footerObserver.observe(footerEl);
-    // Disconnect when gallery closes (signal abort)
-    signal.addEventListener('abort', () => footerObserver.disconnect());
-
-    let overDelta = 0;
-    const OVER_THRESHOLD = 140; // px of extra scroll needed to close
+    // ── Pull-to-close: compress + round the overlay like a sheet dismissing ──
+    const pullHint = document.getElementById('gallery-pull-hint') as HTMLElement | null;
 
     function atBottom() {
       return ovScroll.scrollTop + ovScroll.clientHeight >= ovScroll.scrollHeight - 8;
     }
 
-    function applyOverProgress(p: number) {
-      // Drive the fill bar width (0→1) and nudge the footer up slightly
-      if (closeFill) closeFill.style.width = `${Math.min(p * 100, 100)}%`;
-      footerEl.style.transform = p > 0 ? `translateY(${-p * 8}px)` : '';
+    const PULL_THRESHOLD = 150; // finger px to commit close
+    let pullStartY = 0, pullCurrentY = 0, pullActive = false;
+
+    // Gummy damping: responsive at first, then resists. sqrt feel = snappy + springy.
+    function dampen(raw: number) {
+      return Math.pow(Math.max(0, raw), 0.5) * 4.2;
     }
 
-    // Wheel — desktop
+    function applyPull(raw: number) {
+      const px      = dampen(raw);                          // visual height reduction in px
+      const h       = window.innerHeight;
+      const scaleY  = Math.max(0.6, 1 - px / h);
+      const progress = Math.min(raw / PULL_THRESHOLD, 1);
+      const radius  = Math.round(progress * 32);            // 0 → 32px bottom corners
+      const fade    = 1 - progress * 0.15;                  // very subtle opacity loss
+
+      overlay.style.transition     = 'none';
+      overlay.style.transformOrigin = 'top center';
+      overlay.style.transform      = `scaleY(${scaleY.toFixed(4)})`;
+      overlay.style.borderRadius   = `0 0 ${radius}px ${radius}px`;
+      overlay.style.opacity        = String(fade.toFixed(3));
+
+      // Show the pull hint once user has pulled a bit
+      if (pullHint) pullHint.classList.toggle('visible', progress > 0.25);
+    }
+
+    // Spring back with a bouncy overshoot — the "gummy" snap
+    function springBack() {
+      pullActive = false;
+      if (pullHint) pullHint.classList.remove('visible');
+      overlay.style.transition =
+        'transform 0.55s cubic-bezier(0.34,1.56,0.64,1), ' +
+        'border-radius 0.4s cubic-bezier(0.16,1,0.3,1), ' +
+        'opacity 0.35s ease';
+      overlay.style.transform    = '';
+      overlay.style.borderRadius = '';
+      overlay.style.opacity      = '';
+    }
+
+    // Commit: collapse the sheet from the bottom then close
+    function commitClose() {
+      pullActive = false;
+      if (pullHint) pullHint.classList.remove('visible');
+      overlay.style.transition =
+        'transform 0.32s cubic-bezier(0.4,0,1,1), ' +
+        'border-radius 0.2s ease, ' +
+        'opacity 0.28s ease';
+      overlay.style.transformOrigin = 'top center';
+      overlay.style.transform       = 'scaleY(0)';
+      overlay.style.borderRadius    = '0';
+      overlay.style.opacity         = '0';
+      setTimeout(closeGallery, 320);
+    }
+
+    // Wheel — desktop: accumulate overscroll and squish visually
+    let overDelta = 0;
+    const WHEEL_THRESHOLD = 180;
+
     ovScroll.addEventListener('wheel', (e) => {
       if (!atBottom() || e.deltaY <= 0) {
-        if (overDelta > 0) { overDelta = 0; applyOverProgress(0); }
+        if (overDelta > 0) { overDelta = 0; springBack(); }
         return;
       }
-      overDelta = Math.min(overDelta + e.deltaY, OVER_THRESHOLD);
-      const p = overDelta / OVER_THRESHOLD;
-      applyOverProgress(p);
-      if (overDelta >= OVER_THRESHOLD) {
-        overDelta = 0;
-        applyOverProgress(0);
-        closeGallery();
-      }
+      overDelta = Math.min(overDelta + e.deltaY, WHEEL_THRESHOLD);
+      applyPull(overDelta * (PULL_THRESHOLD / WHEEL_THRESHOLD));
+      if (overDelta >= WHEEL_THRESHOLD) { overDelta = 0; commitClose(); }
     }, { signal, passive: true });
 
-    // Touch — mobile
-    let touchCloseStartY = 0;
+    // Touch — gummy pull-to-close
     ovScroll.addEventListener('touchstart', (e) => {
-      if (atBottom()) touchCloseStartY = e.touches[0].clientY;
+      pullStartY   = e.touches[0].clientY;
+      pullCurrentY = pullStartY;
+      pullActive   = false;
     }, { signal, passive: true });
 
     ovScroll.addEventListener('touchmove', (e) => {
-      if (!atBottom() || touchCloseStartY === 0) return;
-      const drag = touchCloseStartY - e.touches[0].clientY; // positive = scrolling up (overscroll down)
-      overDelta = Math.max(0, Math.min(drag, OVER_THRESHOLD));
-      applyOverProgress(overDelta / OVER_THRESHOLD);
-    }, { signal, passive: true });
+      pullCurrentY = e.touches[0].clientY;
+      if (!atBottom()) { if (pullActive) springBack(); return; }
+      const raw = pullStartY - pullCurrentY; // positive = finger moving up past bottom
+      if (raw <= 0) { if (pullActive) springBack(); return; }
+      pullActive = true;
+      if (e.cancelable) e.preventDefault();
+      applyPull(raw);
+    }, { signal, passive: false });
 
     ovScroll.addEventListener('touchend', () => {
-      if (overDelta >= OVER_THRESHOLD * 0.75) {
-        overDelta = 0;
-        applyOverProgress(0);
-        closeGallery();
-      } else {
-        overDelta = 0;
-        applyOverProgress(0);
-      }
-      touchCloseStartY = 0;
+      if (!pullActive) return;
+      const raw = pullStartY - pullCurrentY;
+      if (raw >= PULL_THRESHOLD) commitClose();
+      else springBack();
+      pullActive = false;
+    }, { signal, passive: true });
+
+    ovScroll.addEventListener('touchcancel', () => {
+      if (pullActive) springBack();
+      pullActive = false;
     }, { signal, passive: true });
 
     // ── Column scroll parallax (driven by overlay scroll, not window) ──
@@ -757,14 +879,16 @@ import { categories, getImagesForCategory } from "../data/categories";
     function lbApply(animated = false) {
       lbImg.style.transition = animated ? 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' : 'none';
       lbImg.style.transform  = lbScale === 1 ? '' : `translate(${lbPanX}px,${lbPanY}px) scale(${lbScale})`;
+      lb.classList.toggle('zoomed', lbScale > 1);
     }
 
     function lbReset(animated = false) {
       lbScale = 1; lbPanX = 0; lbPanY = 0; lbApply(animated);
     }
 
-    const lbOpen  = (i: number) => { current = i; lbReset(); lbShow(); lb.classList.add('active'); lb.setAttribute('aria-hidden','false'); nav?.classList.add('lb-hidden'); };
-    const lbClose = () => { lb.classList.remove('active'); lb.setAttribute('aria-hidden','true'); lbReset(); nav?.classList.remove('lb-hidden'); };
+    const lbCloseBtn = lb.querySelector<HTMLElement>('.ov-lb__close')!;
+    const lbOpen  = (i: number) => { current = i; lbReset(); lbShow(); lb.classList.add('active'); lb.setAttribute('aria-hidden','false'); nav?.classList.add('lb-hidden'); lbCloseBtn.focus(); };
+    const lbClose = () => { (lb.querySelector<HTMLElement>(':focus'))?.blur(); lb.classList.remove('active'); lb.setAttribute('aria-hidden','true'); lbReset(); nav?.classList.remove('lb-hidden'); };
     const lbNext  = () => { current = (current + 1) % sources.length; lbReset(); lbShow(); };
     const lbPrev  = () => { current = (current - 1 + sources.length) % sources.length; lbReset(); lbShow(); };
 
@@ -895,10 +1019,12 @@ import { categories, getImagesForCategory } from "../data/categories";
   function closeGallery() {
     lb.classList.remove('active');
     lb.setAttribute('aria-hidden', 'true');
-    // Clear any inline overrides left by the scroll-to-dismiss rubber-band
-    overlay.style.transition = '';
-    overlay.style.transform  = '';
-    overlay.style.opacity    = '';
+    // Clear any inline overrides left by the pull-to-close animation
+    overlay.style.transition     = '';
+    overlay.style.transform      = '';
+    overlay.style.opacity        = '';
+    overlay.style.borderRadius   = '';
+    overlay.style.transformOrigin = '';
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
@@ -922,6 +1048,15 @@ import { categories, getImagesForCategory } from "../data/categories";
   // Browser back button closes the overlay instead of leaving the page
   window.addEventListener('popstate', () => {
     if (overlay.classList.contains('open')) closeGallery();
+  });
+
+  // Category pagination nav links inside the overlay — intercept and SPA-navigate
+  overlay.addEventListener('click', (e) => {
+    const link = (e.target as Element).closest<HTMLAnchorElement>('[data-cat-nav]');
+    if (!link) return;
+    e.preventDefault();
+    const slug = link.getAttribute('href')?.replace('/gallery/', '');
+    if (slug) openGallery(slug);
   });
 
   // Direct URL: /gallery/slug loads the real standalone page — no special handling needed here

@@ -13,6 +13,10 @@ export const getStaticPaths: GetStaticPaths = () => {
 const { category } = Astro.props;
 const images = getImagesForCategory(category);
 
+const categoryIndex = categories.findIndex(c => c.slug === category.slug);
+const prevCategory = categories[categoryIndex - 1] ?? null;
+const nextCategory = categories[categoryIndex + 1] ?? null;
+
 // Distribute images across 3 columns for the scroll effect
 const columns: string[][] = [[], [], []];
 images.forEach((src, i) => {
@@ -33,8 +37,28 @@ images.forEach((src, i) => {
         </svg>
         <span>Back</span>
       </a>
+
       <h1>{category.name}</h1>
       <p class="gallery-hero__desc">{category.description}</p>
+
+      <!-- Mobile-only category pagination -->
+      <nav class="cat-pagination" aria-label="Browse categories">
+        {prevCategory
+          ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span>{prevCategory.name}</span>
+            </a>
+          : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
+        }
+        <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
+        {nextCategory
+          ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+              <span>{nextCategory.name}</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
+        }
+      </nav>
     </div>
   </section>
 
@@ -67,6 +91,25 @@ images.forEach((src, i) => {
       ))}
     </div>
   </section>
+
+  <!-- Bottom category pagination -->
+  <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
+    {prevCategory
+      ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>{prevCategory.name}</span>
+        </a>
+      : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
+    }
+    <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
+    {nextCategory
+      ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+          <span>{nextCategory.name}</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
+    }
+  </nav>
 
   <!-- Scroll-to-close footer -->
   <div class="dismiss-bar" id="dismiss-bar">
@@ -132,6 +175,70 @@ images.forEach((src, i) => {
     text-align: center;
   }
 
+  /* ── Category pagination ── */
+  .cat-pagination {
+    display: none;
+  }
+
+  /* Hero pagination: mobile-only, below title+desc */
+  @media (max-width: 600px) {
+    .gallery-hero {
+      padding-top: calc(var(--nav-height, 70px) + 1rem);
+    }
+
+    .cat-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding: 0 0.25rem;
+    }
+  }
+
+  /* Bottom pagination: always visible */
+  .cat-pagination--bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .cat-pagination__arrow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    min-width: 5rem;
+    transition: color 0.2s;
+  }
+
+  .cat-pagination__arrow--next {
+    justify-content: flex-end;
+  }
+
+  .cat-pagination__arrow--disabled {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .cat-pagination__arrow:not(.cat-pagination__arrow--disabled):hover {
+    color: var(--color-text);
+  }
+
+  .cat-pagination__pos {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
+  }
+
   .gallery-back {
     display: inline-flex;
     align-items: center;
@@ -150,6 +257,7 @@ images.forEach((src, i) => {
   .gallery-back__arrow {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 2px;
   }
 
   .gallery-back:hover {
