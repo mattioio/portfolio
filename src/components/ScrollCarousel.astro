@@ -430,7 +430,7 @@ const count = slides.length;
     font-size: 1.05rem;
     color: rgba(255, 255, 255, 0.3);
     letter-spacing: 0.05em;
-    cursor: pointer;
+    cursor: none;
     transition: color 0.3s;
     padding: 0.6rem 0.85rem;
     position: relative;
@@ -858,10 +858,12 @@ const count = slides.length;
     const isOverText = pointInRect(e.clientX, e.clientY, textRect, 15);
 
     if (isOverPagination) {
-      dotEl.style.opacity = '0';
-      stickyEl.classList.remove('cursor-active');
+      // Keep the inverting dot visible over pagination — just reset to plain dot mode
+      dotEl.style.opacity = '';
+      stickyEl.classList.add('cursor-active');
       dotMode = 'dot';
       dotEl.classList.remove('arrow-left', 'arrow-right', 'eye-mode');
+      updateDotLabel();
       return;
     }
 
