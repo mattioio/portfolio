@@ -7,16 +7,20 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
   showFooter?: boolean;
 }
 
 const {
   title = "Gavin Batty — Photographer",
   description = "Professional photography portfolio — weddings, music, food, sport, travel, and portraits.",
+  ogImage = "/images/Wedding/wedding3.jpg",
   showFooter = true,
 } = Astro.props;
 
 const isHome = Astro.url.pathname === "/";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://gavinbatty.com");
+const ogImageURL = new URL(ogImage, Astro.site ?? "https://gavinbatty.com");
 ---
 
 <!doctype html>
@@ -26,6 +30,19 @@ const isHome = Astro.url.pathname === "/";
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="canonical" href={canonicalURL.href} />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL.href} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -75,39 +92,14 @@ const isHome = Astro.url.pathname === "/";
       ::view-transition-new(root) {
         animation: none;
       }
+
     </style>
 
     <script>
-      // Back links use history.back() — browser restores exact scroll position
-      document.addEventListener('click', (e) => {
-        const link = (e.target as HTMLElement).closest('[data-back]');
-        if (link && history.length > 1) {
-          e.preventDefault();
-          history.back();
-        }
-      });
-
       // Stagger-in content elements after navigation
       document.addEventListener('astro:page-load', () => {
         const main = document.querySelector('main');
         if (!main) return;
-
-        // Gallery page elements
-        const items = main.querySelectorAll('.column__item');
-        if (items.length) {
-          items.forEach((el, i) => {
-            const e = el as HTMLElement;
-            e.animate([
-              { opacity: 0, transform: 'translateY(40px)' },
-              { opacity: 1, transform: 'translateY(0)' }
-            ], {
-              duration: 700,
-              delay: 200 + i * 40,
-              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'both'
-            });
-          });
-        }
 
         // Gallery heading — char reveal
         const h1 = main.querySelector('.gallery-hero h1');

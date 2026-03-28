@@ -1,0 +1,420 @@
+---
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
+---
+
+<!-- Services slide-out panel — available on every page -->
+<div class="panel" id="services-panel" aria-hidden="true">
+  <div class="panel__backdrop"></div>
+  <aside class="panel__drawer">
+    <div class="panel__header">
+      <h2>Services</h2>
+    </div>
+    <div class="panel__body">
+
+      <div class="panel__hero">
+        <h3>Get in Touch</h3>
+        <p>Every project starts with a conversation. Tell me what you're working on and I'll come back with a tailored approach.</p>
+        <a href={CONTACT_MAILTO} class="panel__hero-link">{CONTACT_EMAIL}</a>
+      </div>
+
+      <h3 class="panel__section-title">Rates</h3>
+      <div class="panel__rates">
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Half Day</span>
+          <span class="panel__rate-duration">up to 4 hrs</span>
+          <span class="panel__rate-price">From £350</span>
+        </div>
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Full Day</span>
+          <span class="panel__rate-duration">up to 10 hrs</span>
+          <span class="panel__rate-price">From £600</span>
+        </div>
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Multi-Day</span>
+          <span class="panel__rate-duration">2+ days</span>
+          <span class="panel__rate-price">From £500 / day</span>
+        </div>
+      </div>
+
+      <h3 class="panel__section-title">Types of Shoots</h3>
+      <div class="panel__cards">
+        <div class="panel__card">
+          <h4>Wedding</h4>
+          <p class="panel__note">Intimate elopements to grand celebrations</p>
+          <ul>
+            <li>Full day coverage (up to 10 hours)</li>
+            <li>Second shooter available</li>
+            <li>400+ edited images</li>
+            <li>Highlight slideshow</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Music & Events</h4>
+          <p class="panel__note">Gigs, festivals, and everything in between</p>
+          <ul>
+            <li>Live performance coverage</li>
+            <li>Backstage & candid shots</li>
+            <li>Artist portraits</li>
+            <li>Fast turnaround for press</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Food & Hospitality</h4>
+          <p class="panel__note">Restaurants, bars, hotels, and brands</p>
+          <ul>
+            <li>Menu & dish photography</li>
+            <li>Interior & ambiance shots</li>
+            <li>Social media ready crops</li>
+            <li>Seasonal refresh packages</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Sport</h4>
+          <p class="panel__note">Grassroots to professional level</p>
+          <ul>
+            <li>Match & event coverage</li>
+            <li>Athlete portraits</li>
+            <li>Training & behind-the-scenes</li>
+            <li>Season-long packages</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="panel__section-title">What You Get</h3>
+      <div class="panel__deliverables">
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="panel__deliv-label">Consultation</span>
+          <span class="panel__deliv-desc">Pre-shoot planning &amp; creative direction</span>
+        </div>
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+          <span class="panel__deliv-label">Editing</span>
+          <span class="panel__deliv-desc">Professional colour grading &amp; retouching</span>
+        </div>
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span class="panel__deliv-label">Online Gallery</span>
+          <span class="panel__deliv-desc">Private gallery for viewing &amp; downloads</span>
+        </div>
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="panel__deliv-label">Hi-Res Files</span>
+          <span class="panel__deliv-desc">Full resolution for print &amp; web</span>
+        </div>
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="panel__deliv-label">Fast Turnaround</span>
+          <span class="panel__deliv-desc">5–10 working days delivery</span>
+        </div>
+        <div class="panel__deliv-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span class="panel__deliv-label">Usage Rights</span>
+          <span class="panel__deliv-desc">Commercial licence included</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<style>
+  /* ===== Slide-out Panel ===== */
+  .panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .panel.active {
+    pointer-events: all;
+  }
+
+  .panel__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+
+  .panel.active .panel__backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+  }
+
+  .panel__drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(520px, 90vw);
+    background: var(--color-bg);
+    transform: translateX(100%);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel.active .panel__drawer {
+    transform: translateX(0);
+  }
+
+  .panel__header {
+    padding: 1.75rem 2rem 0;
+    flex-shrink: 0;
+  }
+
+  .panel__header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+  }
+
+  .panel__body {
+    padding: 1.5rem 2rem 3rem;
+    flex: 1;
+  }
+
+  /* ── Hero CTA card ── */
+  .panel__hero {
+    background: var(--color-bg-dark, #1a1a1a);
+    color: #fff;
+    border-radius: 12px;
+    padding: 2.25rem 2rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .panel__hero h3 {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .panel__hero p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.6;
+    max-width: 34ch;
+    margin: 0 auto 1.25rem;
+  }
+
+  .panel__hero-link {
+    display: inline-block;
+    color: #fff;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    padding-bottom: 2px;
+    transition: border-color 0.2s;
+  }
+
+  .panel__hero-link:hover {
+    border-color: #fff;
+  }
+
+  /* ── Section titles ── */
+  .panel__section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .panel__section-title:first-child {
+    margin-top: 0;
+  }
+
+  /* ── Day-rate rows ── */
+  .panel__rates {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel__rate-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel__rate-row:last-child {
+    border-bottom: none;
+  }
+
+  .panel__rate-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text);
+    width: 7rem;
+    flex-shrink: 0;
+  }
+
+  .panel__rate-duration {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+  }
+
+  .panel__rate-price {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    text-align: right;
+  }
+
+  @media (max-width: 440px) {
+    .panel__rate-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.15rem 0;
+    }
+
+    .panel__rate-label {
+      grid-column: 1;
+      width: auto;
+    }
+
+    .panel__rate-price {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      align-self: center;
+    }
+
+    .panel__rate-duration {
+      grid-column: 1;
+      font-size: 0.85rem;
+    }
+  }
+
+  /* ── Service cards ── */
+  .panel__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .panel__card {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+  }
+
+  .panel__card h4 {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.1rem;
+  }
+
+  .panel__note {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel__card ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .panel__card li {
+    font-size: 1rem;
+    padding: 0.2rem 0 0.2rem 1.1rem;
+    position: relative;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+
+  .panel__card li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    opacity: 0.4;
+  }
+
+  /* ── Deliverables grid ── */
+  .panel__deliverables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel__deliv-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem 0.75rem;
+    background: var(--color-bg);
+    gap: 0.35rem;
+  }
+
+  .panel__deliv-item svg {
+    width: 26px;
+    height: 26px;
+    color: var(--color-text-muted);
+    opacity: 0.5;
+    margin-bottom: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .panel__deliv-label {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+  }
+
+  .panel__deliv-desc {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    line-height: 1.35;
+  }
+
+  @media (max-width: 768px) {
+    .panel__card ul {
+      grid-template-columns: 1fr;
+    }
+
+    .panel__body {
+      padding: 1.25rem 1.5rem 2.5rem;
+    }
+
+    .panel__hero h3 {
+      font-size: 1.9rem;
+    }
+
+    .panel__rate-price {
+      font-size: 1.05rem;
+    }
+  }
+</style>

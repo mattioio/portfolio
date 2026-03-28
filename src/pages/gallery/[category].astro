@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { categories, getImagesForCategory } from "../../data/categories";
+import lqipData from "../../data/lqip.json";
+import imageManifest from "../../data/image-manifest.json";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths: GetStaticPaths = () => {
@@ -13,6 +15,10 @@ export const getStaticPaths: GetStaticPaths = () => {
 const { category } = Astro.props;
 const images = getImagesForCategory(category);
 
+const categoryIndex = categories.findIndex(c => c.slug === category.slug);
+const prevCategory = categories[categoryIndex - 1] ?? null;
+const nextCategory = categories[categoryIndex + 1] ?? null;
+
 // Distribute images across 3 columns for the scroll effect
 const columns: string[][] = [[], [], []];
 images.forEach((src, i) => {
@@ -23,18 +29,39 @@ images.forEach((src, i) => {
 <BaseLayout
   title={`${category.name} — Gavin Batty`}
   description={category.description}
+  ogImage={category.cover}
   showFooter={false}
 >
   <section class="gallery-hero">
     <div class="container">
-      <a href="/" class="gallery-back" data-back>
+      <a href="/" class="gallery-back">
         <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 17L7 7M7 7H17M7 7V17"/>
         </svg>
-        <span>Back</span>
+        <span>Close</span>
       </a>
-      <h1>{category.name}</h1>
-      <p class="gallery-hero__desc">{category.description}</p>
+
+      <h1 transition:name="gallery-title">{category.name}</h1>
+      <p class="gallery-hero__desc" transition:name="gallery-desc">{category.description}</p>
+
+      <!-- Mobile-only category pagination -->
+      <nav class="cat-pagination" aria-label="Browse categories">
+        {prevCategory
+          ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span>{prevCategory.name}</span>
+            </a>
+          : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
+        }
+        <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
+        {nextCategory
+          ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+              <span>{nextCategory.name}</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
+        }
+      </nav>
     </div>
   </section>
 
@@ -44,6 +71,7 @@ images.forEach((src, i) => {
         <div class="column" data-col={colIndex}>
           {col.map((src, imgIndex) => {
             const globalIndex = imgIndex * 3 + colIndex;
+            const isAboveFold = globalIndex < 6;
             return (
               <button
                 class="column__item"
@@ -51,14 +79,30 @@ images.forEach((src, i) => {
                 data-src={src}
                 aria-label={`View ${category.name} photo ${globalIndex + 1}`}
               >
-                <div class="column__item-imgwrap">
-                  <img
-                    src={src}
-                    alt={`${category.name} photo ${globalIndex + 1}`}
-                    loading="eager"
-                    decoding="async"
-                    class="column__item-img"
-                  />
+                <div
+                  class="column__item-imgwrap"
+                  style={[
+                    lqipData[src as keyof typeof lqipData] ? `background-image:url(${lqipData[src as keyof typeof lqipData]})` : '',
+                    imageManifest[src as keyof typeof imageManifest] ? `aspect-ratio:${imageManifest[src as keyof typeof imageManifest].width}/${imageManifest[src as keyof typeof imageManifest].height}` : '',
+                  ].filter(Boolean).join(';') || undefined}
+                >
+                  <picture>
+                    {imageManifest[src as keyof typeof imageManifest]?.webp && (
+                      <source
+                        srcset={imageManifest[src as keyof typeof imageManifest].webp}
+                        type="image/webp"
+                      />
+                    )}
+                    <img
+                      src={src}
+                      alt={`${category.name} photo ${globalIndex + 1}`}
+                      width={imageManifest[src as keyof typeof imageManifest]?.width}
+                      height={imageManifest[src as keyof typeof imageManifest]?.height}
+                      loading={isAboveFold ? "eager" : "lazy"}
+                      decoding="async"
+                      class="column__item-img"
+                    />
+                  </picture>
                 </div>
               </button>
             );
@@ -68,13 +112,46 @@ images.forEach((src, i) => {
     </div>
   </section>
 
-  <!-- Scroll-to-close footer -->
-  <div class="dismiss-bar" id="dismiss-bar">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
-    </svg>
-    <span>scroll to close</span>
-  </div>
+  <!-- Sticky category bar — appears on scroll -->
+  <nav class="cat-bar" id="cat-bar" aria-label="Gallery navigation">
+    <div class="cat-bar__inner">
+      {prevCategory
+        ? <a href={`/gallery/${prevCategory.slug}`} class="cat-bar__arrow" aria-label={`Previous: ${prevCategory.name}`}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </a>
+        : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
+      }
+      <span class="cat-bar__title">{category.name}</span>
+      {nextCategory
+        ? <a href={`/gallery/${nextCategory.slug}`} class="cat-bar__arrow" aria-label={`Next: ${nextCategory.name}`}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
+      }
+      <button class="cat-bar__top" id="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Bottom category pagination -->
+  <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
+    {prevCategory
+      ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>{prevCategory.name}</span>
+        </a>
+      : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
+    }
+    <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
+    {nextCategory
+      ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+          <span>{nextCategory.name}</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
+    }
+  </nav>
 
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image viewer">
@@ -89,47 +166,83 @@ images.forEach((src, i) => {
       <img class="lightbox__img" src="" alt="" />
     </div>
     <div class="lightbox__counter"></div>
+    <div class="lightbox__swipe-hint" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      <span>Swipe to navigate</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </div>
   </div>
 </BaseLayout>
 
 <style>
-  /* ── Scroll-to-close footer: plain in-flow, revealed naturally by scrolling ── */
-  .dismiss-bar {
-    height: 30vh;
-    background: #1c1b19;
-    border-radius: 1rem 1rem 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    font-family: var(--font-heading);
-    font-style: italic;
-    font-size: 0.8rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-
-  .dismiss-bar:hover {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .dismiss-bar svg {
-    animation: dismiss-bounce 1.9s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes dismiss-bounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(4px); }
-  }
 
   /* Hero */
   .gallery-hero {
     padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
     text-align: center;
+  }
+
+  /* ── Category pagination ── */
+  .cat-pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .gallery-hero {
+      padding-top: calc(var(--nav-height, 70px) + 1rem);
+    }
+  }
+
+  /* Bottom pagination: always visible */
+  .cat-pagination--bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .cat-pagination__arrow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    min-width: 5rem;
+    transition: color 0.2s;
+  }
+
+  .cat-pagination__arrow--next {
+    justify-content: flex-end;
+  }
+
+  .cat-pagination__arrow--disabled {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .cat-pagination__arrow:not(.cat-pagination__arrow--disabled):hover {
+    color: var(--color-text);
+  }
+
+  .cat-pagination__pos {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
   }
 
   .gallery-back {
@@ -138,6 +251,7 @@ images.forEach((src, i) => {
     gap: 0.5rem;
     font-family: var(--font-body);
     font-size: 0.7rem;
+    line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--color-text-muted);
@@ -150,6 +264,13 @@ images.forEach((src, i) => {
   .gallery-back__arrow {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Benne has its cap-height centre ~0.2em above the em-square centre;
+     nudge the text span down to optically align with SVG icons */
+  .gallery-back span,
+  .cat-pagination__arrow span {
+    translate: 0 0.2em;
   }
 
   .gallery-back:hover {
@@ -176,6 +297,83 @@ images.forEach((src, i) => {
     font-size: 1.15rem;
     margin: 0 auto;
     text-align: center;
+  }
+
+  /* ── Sticky category bar ── */
+  .cat-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 202;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .cat-bar.visible {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .cat-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.6rem var(--space-md);
+    background: rgba(245, 244, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .cat-bar__title {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    min-width: 6rem;
+    text-align: center;
+  }
+
+  .cat-bar__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+
+  .cat-bar__arrow:hover {
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .cat-bar__arrow--disabled {
+    opacity: 0;
+    pointer-events: none;
+    width: 32px;
+  }
+
+  .cat-bar__top {
+    position: absolute;
+    right: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+
+  .cat-bar__top:hover {
+    color: var(--color-text);
+    background-color: rgba(0, 0, 0, 0.05);
   }
 
   /* ===== Columns with scroll animation ===== */
@@ -221,12 +419,22 @@ images.forEach((src, i) => {
     position: relative;
     /* Ensure border-radius clips even when column is on its own GPU layer */
     transform: translateZ(0);
+    /* LQIP: tiny base64 thumbnail as background, visible until real image loads */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .column__item-img {
     width: 100%;
     display: block;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  .column__item-img.loaded {
+    opacity: 1;
   }
 
   .column__item:hover .column__item-img {
@@ -345,6 +553,53 @@ images.forEach((src, i) => {
     opacity: 0.5;
   }
 
+  /* Swipe hint — mobile only, first open */
+  .lightbox__swipe-hint {
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .lightbox__swipe-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 15;
+      transition: opacity 0.4s ease;
+    }
+
+    .lightbox__swipe-hint.visible {
+      opacity: 0.7;
+    }
+
+    .lightbox__swipe-hint svg:first-child {
+      animation: hint-left 1.2s ease-in-out infinite;
+    }
+
+    .lightbox__swipe-hint svg:last-child {
+      animation: hint-right 1.2s ease-in-out infinite;
+    }
+
+    @keyframes hint-left {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-6px); }
+    }
+
+    @keyframes hint-right {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+  }
+
   /* Mobile: bigger images, hide desktop nav arrows, use swipe */
   @media (max-width: 600px) {
     .lightbox__prev,
@@ -372,277 +627,5 @@ images.forEach((src, i) => {
 </style>
 
 <script>
-  document.addEventListener('astro:page-load', () => {
-  // ===== On-scroll column animation (Codrops style) =====
-  const columnsEl = document.querySelector('[data-columns]') as HTMLElement;
-  const columnEls = Array.from(document.querySelectorAll('.column')) as HTMLElement[];
-  const allImgWraps = Array.from(document.querySelectorAll('.column__item-imgwrap')) as HTMLElement[];
-  const allImgs = Array.from(document.querySelectorAll('.column__item-img')) as HTMLElement[];
-
-  // Column speed multipliers — different columns scroll at different rates
-  const columnSpeeds = [-3, 5, -8]; // yPercent offsets per column
-
-  function updateScrollAnimation() {
-    const scrollY = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollFraction = scrollY / docHeight;
-
-    // Apply different vertical offsets to each column (desktop only)
-    columnEls.forEach((col, i) => {
-      if (window.innerWidth <= 500) {
-        col.style.transform = '';
-        return;
-      }
-      const speed = columnSpeeds[i] || 0;
-      const yOffset = scrollFraction * speed;
-      col.style.transform = `translateY(${yOffset}%)`;
-    });
-
-    // Parallax on individual images — images move opposite to scroll within their containers
-    allImgWraps.forEach((wrap, i) => {
-      const rect = wrap.getBoundingClientRect();
-      const vh = window.innerHeight;
-
-      // How far through the viewport is this item? (-1 to 1)
-      const visibility = (rect.top + rect.height / 2 - vh / 2) / vh;
-
-      // Images shift vertically within their clip — subtle parallax
-      const img = allImgs[i];
-      if (img) {
-        const yShift = visibility * -30; // ±30px parallax
-        img.style.transform = `translateY(${yShift}px)`;
-      }
-    });
-  }
-
-  window.addEventListener('scroll', () => {
-    requestAnimationFrame(updateScrollAnimation);
-  }, { passive: true });
-
-  updateScrollAnimation();
-
-  // Scroll-to-close footer: sticky reveal via CSS, click goes home
-  const dismissBar = document.getElementById('dismiss-bar') as HTMLElement;
-  dismissBar.addEventListener('click', () => {
-    if (history.length > 1) history.back();
-    else window.location.href = '/';
-  });
-
-  // ===== Lightbox =====
-  const lightbox = document.getElementById("lightbox")!;
-  const lbImg = lightbox.querySelector(".lightbox__img") as HTMLImageElement;
-  const lbCounter = lightbox.querySelector(".lightbox__counter")!;
-  const items = document.querySelectorAll<HTMLElement>(".column__item");
-  const sources: string[] = [];
-  let currentIndex = 0;
-
-  // Build sources in visual order (column interleaved)
-  items.forEach((item) => {
-    sources.push(item.dataset.src || "");
-  });
-
-  function open(index: number) {
-    currentIndex = index;
-    show();
-    lightbox.classList.add("active");
-    lightbox.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-
-  function close() {
-    lightbox.classList.remove("active");
-    lightbox.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-    resetTransform();
-  }
-
-  function show() {
-    lbImg.src = sources[currentIndex];
-    lbImg.alt = `Photo ${currentIndex + 1} of ${sources.length}`;
-    lbCounter.textContent = `${currentIndex + 1} / ${sources.length}`;
-    [currentIndex - 1, currentIndex + 1].forEach((i) => {
-      if (i >= 0 && i < sources.length) {
-        const img = new Image();
-        img.src = sources[i];
-      }
-    });
-  }
-
-  function next() {
-    currentIndex = (currentIndex + 1) % sources.length;
-    scale = 1; panX = 0; panY = 0;
-    lbImg.style.transform = '';
-    show();
-  }
-
-  function prev() {
-    currentIndex = (currentIndex - 1 + sources.length) % sources.length;
-    scale = 1; panX = 0; panY = 0;
-    lbImg.style.transform = '';
-    show();
-  }
-
-  items.forEach((item, i) => {
-    item.addEventListener("click", () => open(i));
-  });
-
-  lightbox.querySelector(".lightbox__close")!.addEventListener("click", close);
-  lightbox.querySelector(".lightbox__prev")!.addEventListener("click", prev);
-  lightbox.querySelector(".lightbox__next")!.addEventListener("click", next);
-
-  lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox || (e.target as Element).classList.contains("lightbox__image-wrap")) {
-      close();
-    }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (!lightbox.classList.contains("active")) return;
-    if (e.key === "Escape") close();
-    if (e.key === "ArrowRight") next();
-    if (e.key === "ArrowLeft") prev();
-  });
-
-  // ===== Mobile: pinch-to-zoom, pan, and swipe =====
-  let scale = 1;
-  let panX = 0;
-  let panY = 0;
-  let startDist = 0;
-  let startScale = 1;
-  let startPanX = 0;
-  let startPanY = 0;
-  let startMidX = 0;
-  let startMidY = 0;
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let isPinching = false;
-  let isPanning = false;
-
-  function resetTransform() {
-    scale = 1;
-    panX = 0;
-    panY = 0;
-    lbImg.style.transform = '';
-  }
-
-  function applyTransform() {
-    lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-    lbImg.style.transition = 'none';
-  }
-
-  function dist(t1: Touch, t2: Touch) {
-    return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-  }
-
-  const imageWrap = lightbox.querySelector('.lightbox__image-wrap') as HTMLElement;
-
-  imageWrap.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      // Pinch start
-      isPinching = true;
-      startDist = dist(e.touches[0], e.touches[1]);
-      startScale = scale;
-      startMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      startMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      startPanX = panX;
-      startPanY = panY;
-      e.preventDefault();
-    } else if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      startPanX = panX;
-      startPanY = panY;
-      isPanning = scale > 1;
-    }
-  }, { passive: false });
-
-  imageWrap.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && isPinching) {
-      e.preventDefault();
-      const curDist = dist(e.touches[0], e.touches[1]);
-      const newScale = Math.max(1, Math.min(5, startScale * (curDist / startDist)));
-
-      // Pan to keep pinch center stable
-      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      panX = startPanX + (midX - startMidX);
-      panY = startPanY + (midY - startMidY);
-      scale = newScale;
-      applyTransform();
-    } else if (e.touches.length === 1 && !isPinching) {
-      const dx = e.touches[0].clientX - touchStartX;
-      const dy = e.touches[0].clientY - touchStartY;
-
-      if (scale > 1) {
-        // Panning zoomed image
-        e.preventDefault();
-        panX = startPanX + dx;
-        panY = startPanY + dy;
-        applyTransform();
-      }
-    }
-  }, { passive: false });
-
-  imageWrap.addEventListener('touchend', (e) => {
-    if (isPinching) {
-      isPinching = false;
-      if (scale <= 1.1) {
-        scale = 1;
-        panX = 0;
-        panY = 0;
-        lbImg.style.transition = 'transform 0.2s ease';
-        lbImg.style.transform = '';
-      }
-      return;
-    }
-
-    // Single touch end — handle swipe if not zoomed
-    if (scale <= 1 && e.changedTouches.length === 1) {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        // Horizontal swipe → prev/next
-        resetTransform();
-        dx > 0 ? prev() : next();
-      } else if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx)) {
-        // Vertical swipe down → close
-        close();
-        resetTransform();
-      }
-    }
-  });
-
-  // Double-tap to zoom on mobile
-  let lastTap = 0;
-  imageWrap.addEventListener('touchend', (e) => {
-    if (e.changedTouches.length !== 1 || isPinching) return;
-    const now = Date.now();
-    if (now - lastTap < 300) {
-      e.preventDefault();
-      if (scale > 1) {
-        // Zoom out
-        scale = 1;
-        panX = 0;
-        panY = 0;
-        lbImg.style.transition = 'transform 0.3s ease';
-        lbImg.style.transform = '';
-      } else {
-        // Zoom in to 2.5x centered on tap point
-        const rect = lbImg.getBoundingClientRect();
-        const tapX = e.changedTouches[0].clientX;
-        const tapY = e.changedTouches[0].clientY;
-        const imgCenterX = rect.left + rect.width / 2;
-        const imgCenterY = rect.top + rect.height / 2;
-        scale = 2.5;
-        panX = (imgCenterX - tapX) * 1.5;
-        panY = (imgCenterY - tapY) * 1.5;
-        lbImg.style.transition = 'transform 0.3s ease';
-        lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-      }
-    }
-    lastTap = now;
-  });
-
-  }); // end astro:page-load
+  import "../../scripts/gallery";
 </script>
