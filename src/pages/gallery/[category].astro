@@ -177,21 +177,16 @@ images.forEach((src, i) => {
 
   /* ── Category pagination ── */
   .cat-pagination {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding: 0 0.25rem;
   }
 
-  /* Hero pagination: mobile-only, below title+desc */
   @media (max-width: 600px) {
     .gallery-hero {
       padding-top: calc(var(--nav-height, 70px) + 1rem);
-    }
-
-    .cat-pagination {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1.5rem;
-      padding: 0 0.25rem;
     }
   }
 
