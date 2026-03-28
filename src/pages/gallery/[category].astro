@@ -224,7 +224,6 @@ images.forEach((src, i) => {
   .column__item-img {
     width: 100%;
     display: block;
-    will-change: transform;
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -386,8 +385,12 @@ images.forEach((src, i) => {
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const scrollFraction = scrollY / docHeight;
 
-    // Apply different vertical offsets to each column
+    // Apply different vertical offsets to each column (desktop only)
     columnEls.forEach((col, i) => {
+      if (window.innerWidth <= 500) {
+        col.style.transform = '';
+        return;
+      }
       const speed = columnSpeeds[i] || 0;
       const yOffset = scrollFraction * speed;
       col.style.transform = `translateY(${yOffset}%)`;
