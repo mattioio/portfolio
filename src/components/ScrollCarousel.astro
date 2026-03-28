@@ -89,7 +89,7 @@ const count = slides.length;
     position: sticky;
     top: 0;
     height: 100vh;
-    height: 100dvh;
+    height: 100svh;
     overflow: hidden;
     z-index: 2;
     background: var(--color-bg);
@@ -703,12 +703,19 @@ const count = slides.length;
   }
 
   // ===== SCROLL HANDLER — single listener, cached values =====
+  // Use svh (small viewport height) as stable base — immune to Chrome URL-bar show/hide
+  const svh = () => window.screen.height * 0.01; // approximation; CSS handles actual svh
+  let stableW = window.innerWidth;
   let carouselHeight = window.innerHeight * 4.5;
   let heroTop = hero.offsetTop;
   let heroHeight = hero.offsetHeight;
   let vh = window.innerHeight;
 
   window.addEventListener('resize', () => {
+    // Ignore height-only changes (Chrome URL bar appearing/disappearing)
+    // Only recalculate on actual width changes (orientation, desktop resize)
+    if (window.innerWidth === stableW) return;
+    stableW = window.innerWidth;
     carouselHeight = window.innerHeight * 4.5;
     heroTop = hero.offsetTop;
     heroHeight = hero.offsetHeight;
@@ -755,7 +762,7 @@ const count = slides.length;
     if (shouldFix !== wasFixed) {
       wasFixed = shouldFix;
       if (shouldFix) {
-        stickyEl.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:1;height:100vh;height:100dvh;overflow:hidden;background:var(--color-bg)';
+        stickyEl.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:1;height:100vh;height:100svh;overflow:hidden;background:var(--color-bg)';
       } else {
         stickyEl.style.cssText = '';
       }
@@ -1050,53 +1057,7 @@ const count = slides.length;
     }
   }, { signal });
 
-  // Touch swipe — live horizontal drag drives scroll position, snaps on lift
-  let touchStartX = 0, touchStartY = 0, touchStartScroll = 0;
-  let touchDir: 'h' | 'v' | null = null;
-
-  stickyEl.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    touchStartX = t.clientX;
-    touchStartY = t.clientY;
-    touchStartScroll = window.scrollY;
-    touchDir = null;
-  }, { passive: true });
-
-  stickyEl.addEventListener('touchmove', (e) => {
-    const t = e.touches[0];
-    const dx = t.clientX - touchStartX;
-    const dy = t.clientY - touchStartY;
-
-    // Lock direction once we have enough movement
-    if (!touchDir) {
-      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-        touchDir = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-      }
-      return;
-    }
-
-    if (touchDir === 'v') return;
-
-    // Horizontal: prevent page scroll and map drag → carousel scroll position
-    if (!e.cancelable) return;
-    e.preventDefault();
-    const slideScrollDist = carouselHeight / (slideCount - 1);
-    const scrollPerPx = slideScrollDist / (window.innerWidth * 0.5); // half screen = 1 slide
-    const newScroll = Math.max(heroTop, Math.min(heroTop + carouselHeight, touchStartScroll - dx * scrollPerPx));
-    window.scrollTo(0, newScroll);
-  }, { passive: false });
-
-  const snapOnLift = () => {
-    if (touchDir === 'h') {
-      const scrolled = Math.max(0, window.scrollY - heroTop);
-      const nearestSlide = Math.round((scrolled / carouselHeight) * (slideCount - 1));
-      scrollToSlide(Math.max(0, Math.min(slideCount - 1, nearestSlide)));
-    }
-    touchDir = null;
-  };
-
-  stickyEl.addEventListener('touchend', snapOnLift, { passive: true });
-  stickyEl.addEventListener('touchcancel', snapOnLift, { passive: true });
+  // Touch: vertical scroll naturally drives the carousel — no special touch handler needed.
 
   // Mouse drag
   let mouseStartX = 0, mouseStartTime = 0, isMouseDragging = false;
