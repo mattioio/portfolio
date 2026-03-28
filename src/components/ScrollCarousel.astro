@@ -19,6 +19,7 @@ const count = slides.length;
             alt={cat.name}
             loading={i < 2 ? "eager" : "lazy"}
             decoding={i === 0 ? "sync" : "async"}
+            transition:name={`hero-cover-${cat.slug}`}
           />
           <div class="hero__slide-darken"></div>
         </div>
@@ -963,8 +964,8 @@ const count = slides.length;
 
   if (heroTextEl) {
     heroTextEl.addEventListener('click', () => {
-      const slug = slideEls[currentSlide]?.dataset.slug;
-      if (slug) document.dispatchEvent(new CustomEvent('open-gallery', { detail: slug }));
+      // Navigate via the enter link — Astro ClientRouter intercepts and applies view transition
+      if (enterEl?.classList.contains('visible')) enterEl.click();
     });
   }
   // enterLink href is kept up-to-date by updateEnterCTA — no override needed
@@ -1048,11 +1049,9 @@ const count = slides.length;
       e.preventDefault();
       scrollToSlide(Math.max(nearestSlide - 1, 0));
     } else if (e.key === 'Enter') {
-      const isSettled = enterEl?.classList.contains('visible');
-      if (isSettled) {
+      if (enterEl?.classList.contains('visible')) {
         e.preventDefault();
-        const slug = slideEls[currentSlide]?.dataset.slug;
-        if (slug) document.dispatchEvent(new CustomEvent('open-gallery', { detail: slug }));
+        enterEl.click();
       }
     }
   }, { signal });

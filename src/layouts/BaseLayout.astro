@@ -75,6 +75,48 @@ const isHome = Astro.url.pathname === "/";
       ::view-transition-new(root) {
         animation: none;
       }
+
+      /* Hero cover image morphs — cinematic ease between carousel and gallery header */
+      ::view-transition-group(hero-cover-music),
+      ::view-transition-group(hero-cover-portraits),
+      ::view-transition-group(hero-cover-wedding),
+      ::view-transition-group(hero-cover-food),
+      ::view-transition-group(hero-cover-sport),
+      ::view-transition-group(hero-cover-travel) {
+        animation-duration: 0.65s;
+        animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+      }
+
+      /* Cross-dissolve the image snapshots while morphing */
+      ::view-transition-old(hero-cover-music),
+      ::view-transition-old(hero-cover-portraits),
+      ::view-transition-old(hero-cover-wedding),
+      ::view-transition-old(hero-cover-food),
+      ::view-transition-old(hero-cover-sport),
+      ::view-transition-old(hero-cover-travel) {
+        animation: cover-fade-out 0.65s cubic-bezier(0.76, 0, 0.24, 1) both;
+      }
+
+      ::view-transition-new(hero-cover-music),
+      ::view-transition-new(hero-cover-portraits),
+      ::view-transition-new(hero-cover-wedding),
+      ::view-transition-new(hero-cover-food),
+      ::view-transition-new(hero-cover-sport),
+      ::view-transition-new(hero-cover-travel) {
+        animation: cover-fade-in 0.65s cubic-bezier(0.76, 0, 0.24, 1) both;
+      }
+
+      @keyframes cover-fade-out {
+        0%   { opacity: 1; }
+        40%  { opacity: 1; }
+        100% { opacity: 0; }
+      }
+
+      @keyframes cover-fade-in {
+        0%   { opacity: 0; }
+        60%  { opacity: 0; }
+        100% { opacity: 1; }
+      }
     </style>
 
     <script>
