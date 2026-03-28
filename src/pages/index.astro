@@ -28,13 +28,15 @@ import { categories, getImagesForCategory } from "../data/categories";
         <div class="ov-columns" id="gallery-columns"></div>
       </section>
 
-      <!-- Scroll-to-close footer — plain in-flow dark section -->
+      <!-- Scroll-to-close footer — content reveals as it scrolls into view -->
       <div class="ov-footer" id="gallery-footer">
         <div class="ov-footer-fill"></div>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
-        </svg>
-        <span>scroll to close</span>
+        <div class="ov-footer-content">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
+          </svg>
+          <span>scroll to close</span>
+        </div>
       </div>
 
     </div>
@@ -77,7 +79,7 @@ import { categories, getImagesForCategory } from "../data/categories";
                     <img
                       src={src}
                       alt={`${cat.name} ${idx + 1}`}
-                      loading="lazy"
+                      loading="eager"
                       decoding="async"
                     />
                   </div>
@@ -324,25 +326,40 @@ import { categories, getImagesForCategory } from "../data/categories";
     transition: color 0.15s ease, transform 0.1s ease;
   }
 
-  /* Progress fill — grows bottom→top as user overscrolls */
+  /* Progress fill — grows left→right as user overscrolls */
   .ov-footer-fill {
     position: absolute;
-    inset: auto 0 0 0;
-    width: 100%;
-    height: 0%;
+    inset: 0 auto 0 0;
+    height: 100%;
+    width: 0%;
     background: rgba(255, 255, 255, 0.06);
-    transition: height 0.08s linear;
+    transition: width 0.08s linear;
     pointer-events: none;
   }
 
-  .ov-footer svg {
+  /* Content starts invisible — revealed by IntersectionObserver */
+  .ov-footer-content {
     position: relative;
-    animation: footer-bounce 1.9s ease-in-out infinite;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity  0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .ov-footer span {
-    position: relative;
+  .ov-footer.visible .ov-footer-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ov-footer-content svg {
+    animation: footer-bounce 1.9s ease-in-out infinite;
+    /* delay bounce until after reveal */
+    animation-delay: 0.7s;
+    flex-shrink: 0;
   }
 
   @keyframes footer-bounce {
@@ -470,7 +487,7 @@ import { categories, getImagesForCategory } from "../data/categories";
   }
 
   @media (max-width: 768px) {
-    .ov-columns { gap: 0.5rem; padding: 0 0.75rem; }
+    .ov-columns { gap: 0.75rem; padding: 0 1rem; }
     .ov-col[data-col="1"] { margin-top: 4vh; }
     .ov-lb__prev, .ov-lb__next { display: none; }
     .ov-lb__img { max-width: 100vw; max-height: 100vh; }
@@ -478,7 +495,8 @@ import { categories, getImagesForCategory } from "../data/categories";
   }
 
   @media (max-width: 500px) {
-    .ov-columns { flex-direction: column; }
+    .ov-columns { flex-direction: column; gap: 0.5rem; padding: 0 1rem; }
+    .ov-col { flex: none; width: 100%; gap: 0.5rem; }
     .ov-col[data-col="1"] { margin-top: 0; }
   }
 </style>
@@ -550,9 +568,9 @@ import { categories, getImagesForCategory } from "../data/categories";
     overlay.style.opacity   = '';
     // Reset footer overscroll state
     const _fill = document.querySelector('.ov-footer-fill') as HTMLElement | null;
-    if (_fill) _fill.style.height = '0%';
+    if (_fill) _fill.style.width = '0%';
     const _footer = document.getElementById('gallery-footer') as HTMLElement | null;
-    if (_footer) _footer.style.transform = '';
+    if (_footer) { _footer.style.transform = ''; _footer.classList.remove('visible'); }
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     ovScroll.scrollTop = 0;
@@ -614,6 +632,15 @@ import { categories, getImagesForCategory } from "../data/categories";
     const closeFill = footerEl.querySelector('.ov-footer-fill') as HTMLElement | null;
     footerEl.addEventListener('click', closeGallery, { signal });
 
+    // Reveal footer content when it scrolls into view; hide when scrolled back up
+    const footerObserver = new IntersectionObserver(
+      ([entry]) => footerEl.classList.toggle('visible', entry.isIntersecting),
+      { root: ovScroll, threshold: 0.25 }
+    );
+    footerObserver.observe(footerEl);
+    // Disconnect when gallery closes (signal abort)
+    signal.addEventListener('abort', () => footerObserver.disconnect());
+
     let overDelta = 0;
     const OVER_THRESHOLD = 140; // px of extra scroll needed to close
 
@@ -623,7 +650,7 @@ import { categories, getImagesForCategory } from "../data/categories";
 
     function applyOverProgress(p: number) {
       // Drive the fill bar width (0→1) and nudge the footer up slightly
-      if (closeFill) closeFill.style.height = `${Math.min(p * 100, 100)}%`;
+      if (closeFill) closeFill.style.width = `${Math.min(p * 100, 100)}%`;
       footerEl.style.transform = p > 0 ? `translateY(${-p * 8}px)` : '';
     }
 
@@ -680,9 +707,9 @@ import { categories, getImagesForCategory } from "../data/categories";
         const sh   = ovScroll.scrollHeight - ovScroll.clientHeight;
         const frac = sh > 0 ? st / sh : 0;
 
-        // Column parallax
+        // Column parallax — disabled on mobile where columns stack vertically
         colEls.forEach((col, i) => {
-          col.style.transform = `translateY(${frac * speeds[i]}%)`;
+          col.style.transform = window.innerWidth > 500 ? `translateY(${frac * speeds[i]}%)` : '';
         });
         imgWraps.forEach((wrap, i) => {
           const rect = wrap.getBoundingClientRect();
@@ -709,7 +736,33 @@ import { categories, getImagesForCategory } from "../data/categories";
         if (j >= 0 && j < sources.length) { const p = new Image(); p.src = sources[j]; }
       });
     };
-    const lbOpen  = (i: number) => { current = i; lbShow(); lb.classList.add('active'); lb.setAttribute('aria-hidden','false'); nav?.classList.add('lb-hidden'); };
+    // ── Zoom/pan state — declared here so lbNext/lbPrev/lbClose can call lbReset ──
+    let lbScale = 1, lbPanX = 0, lbPanY = 0;
+    const lbWrap = lb.querySelector<HTMLElement>('.ov-lb__wrap')!;
+
+    function lbClamp() {
+      if (lbScale <= 1) { lbPanX = 0; lbPanY = 0; return; }
+      const cW = lbWrap.clientWidth, cH = lbWrap.clientHeight;
+      const nW = lbImg.naturalWidth || cW, nH = lbImg.naturalHeight || cH;
+      const ratio = nW / nH;
+      const dispW = cW / cH > ratio ? cH * ratio : cW;
+      const dispH = cW / cH > ratio ? cH : cW / ratio;
+      const maxX = Math.max(0, (dispW * lbScale - cW) / 2);
+      const maxY = Math.max(0, (dispH * lbScale - cH) / 2);
+      lbPanX = Math.max(-maxX, Math.min(maxX, lbPanX));
+      lbPanY = Math.max(-maxY, Math.min(maxY, lbPanY));
+    }
+
+    function lbApply(animated = false) {
+      lbImg.style.transition = animated ? 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' : 'none';
+      lbImg.style.transform  = lbScale === 1 ? '' : `translate(${lbPanX}px,${lbPanY}px) scale(${lbScale})`;
+    }
+
+    function lbReset(animated = false) {
+      lbScale = 1; lbPanX = 0; lbPanY = 0; lbApply(animated);
+    }
+
+    const lbOpen  = (i: number) => { current = i; lbReset(); lbShow(); lb.classList.add('active'); lb.setAttribute('aria-hidden','false'); nav?.classList.add('lb-hidden'); };
     const lbClose = () => { lb.classList.remove('active'); lb.setAttribute('aria-hidden','true'); lbReset(); nav?.classList.remove('lb-hidden'); };
     const lbNext  = () => { current = (current + 1) % sources.length; lbReset(); lbShow(); };
     const lbPrev  = () => { current = (current - 1 + sources.length) % sources.length; lbReset(); lbShow(); };
@@ -729,41 +782,112 @@ import { categories, getImagesForCategory } from "../data/categories";
       if (e.key === 'ArrowLeft')   lbPrev();
     }, { signal });
 
-    // Touch swipe on lightbox
-    let swX = 0, swY = 0;
-    let lbScale = 1, lbPanX = 0, lbPanY = 0;
-    const lbWrap = lb.querySelector<HTMLElement>('.ov-lb__wrap')!;
+    // ── Lightbox touch: swipe nav + pinch zoom + pan while zoomed ──
+    // (lbClamp / lbApply / lbReset defined above alongside zoom state)
 
-    function lbReset() { lbScale = 1; lbPanX = 0; lbPanY = 0; lbImg.style.transform = ''; }
-    function lbApply() { lbImg.style.transform = `translate(${lbPanX}px,${lbPanY}px) scale(${lbScale})`; lbImg.style.transition = 'none'; }
+    // Track gesture state
+    let gestureMode: 'idle' | 'swipe' | 'pan' | 'pinch' = 'idle';
+    let swX = 0, swY = 0;              // swipe start
+    let panX0 = 0, panY0 = 0;          // pan start position
+    let panPX0 = 0, panPY0 = 0;        // pan offset at start
+    let pinchDist0 = 0, pinchScale0 = 1; // pinch start values
+    let lastTap = 0;
 
     lbWrap.addEventListener('touchstart', (e) => {
-      swX = e.touches[0].clientX;
-      swY = e.touches[0].clientY;
-    }, { signal, passive: true } as EventListenerOptions);
-
-    lbWrap.addEventListener('touchend', (e) => {
-      if (lbScale > 1) return;
-      const dx = e.changedTouches[0].clientX - swX;
-      const dy = e.changedTouches[0].clientY - swY;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        dx < 0 ? lbNext() : lbPrev();
-      } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
-        lbClose();
+      if (e.touches.length === 1) {
+        const t = e.touches[0];
+        swX = panX0 = t.clientX;
+        swY = panY0 = t.clientY;
+        panPX0 = lbPanX; panPY0 = lbPanY;
+        gestureMode = 'idle';
+      } else if (e.touches.length === 2) {
+        gestureMode = 'pinch';
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        pinchDist0  = Math.sqrt(dx * dx + dy * dy);
+        pinchScale0 = lbScale;
+        e.preventDefault(); // block browser native pinch-zoom
       }
-    }, { signal, passive: true } as EventListenerOptions);
+    }, { signal, passive: false } as EventListenerOptions);
 
-    // Double-tap zoom
-    let lastTap = 0;
-    lbWrap.addEventListener('touchend', (e) => {
-      if (e.changedTouches.length !== 1) return;
-      const now = Date.now();
-      if (now - lastTap < 300) {
+    lbWrap.addEventListener('touchmove', (e) => {
+      if (gestureMode === 'pinch' && e.touches.length === 2) {
         e.preventDefault();
-        if (lbScale > 1) { lbScale = 1; lbPanX = 0; lbPanY = 0; lbImg.style.transition = 'transform 0.3s ease'; lbImg.style.transform = ''; }
-        else { const r = lbImg.getBoundingClientRect(); lbScale = 2.5; lbPanX = (r.left + r.width / 2 - e.changedTouches[0].clientX) * 1.5; lbPanY = (r.top + r.height / 2 - e.changedTouches[0].clientY) * 1.5; lbImg.style.transition = 'transform 0.3s ease'; lbApply(); }
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        lbScale = Math.max(1, Math.min(5, pinchScale0 * Math.sqrt(dx*dx + dy*dy) / pinchDist0));
+        lbClamp();
+        lbApply();
+        return;
       }
-      lastTap = now;
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - panX0, dy = t.clientY - panY0;
+
+      if (lbScale > 1) {
+        // Already zoomed — pan the image
+        e.preventDefault();
+        gestureMode = 'pan';
+        lbPanX = panPX0 + dx;
+        lbPanY = panPY0 + dy;
+        lbClamp();
+        lbApply();
+      } else {
+        gestureMode = 'swipe';
+      }
+    }, { signal, passive: false } as EventListenerOptions);
+
+    lbWrap.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+
+      // Double-tap detection (always check, any gesture mode)
+      if (e.changedTouches.length === 1 && gestureMode !== 'pinch') {
+        const now = Date.now();
+        const tapDx = t.clientX - swX, tapDy = t.clientY - swY;
+        const wasTap = Math.sqrt(tapDx*tapDx + tapDy*tapDy) < 12;
+        if (wasTap && now - lastTap < 320) {
+          e.preventDefault();
+          if (lbScale > 1) {
+            lbReset(true);
+          } else {
+            // Zoom in centred on the tap point
+            const r = lbImg.getBoundingClientRect();
+            lbScale = 2.5;
+            // Pan so the tapped point stays centred under the finger
+            lbPanX = -(t.clientX - (r.left + r.width  / 2)) * (1 - 1 / lbScale);
+            lbPanY = -(t.clientY - (r.top  + r.height / 2)) * (1 - 1 / lbScale);
+            lbClamp();
+            lbApply(true);
+          }
+          lastTap = 0;
+          gestureMode = 'idle';
+          return;
+        }
+        lastTap = now;
+      }
+
+      if (gestureMode === 'pinch') {
+        // Snap back to 1× if barely pinched
+        if (lbScale < 1.15) lbReset(true);
+        gestureMode = 'idle';
+        return;
+      }
+
+      if (gestureMode === 'pan') {
+        gestureMode = 'idle';
+        return;
+      }
+
+      // Swipe navigation — only at 1× zoom
+      if (lbScale <= 1) {
+        const dx = t.clientX - swX, dy = t.clientY - swY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+          dx < 0 ? lbNext() : lbPrev();
+        } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+          lbClose();
+        }
+      }
+      gestureMode = 'idle';
     }, { signal } as EventListenerOptions);
   }
 
