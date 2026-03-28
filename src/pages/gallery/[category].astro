@@ -23,10 +23,16 @@ images.forEach((src, i) => {
 <BaseLayout
   title={`${category.name} — Gavin Batty`}
   description={category.description}
+  showFooter={false}
 >
   <section class="gallery-hero">
     <div class="container">
-      <a href="/" class="gallery-back" data-back>&larr; Back</a>
+      <a href="/" class="gallery-back" data-back>
+        <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 17L7 7M7 7H17M7 7V17"/>
+        </svg>
+        <span>Back</span>
+      </a>
       <h1>{category.name}</h1>
       <p class="gallery-hero__desc">{category.description}</p>
     </div>
@@ -49,7 +55,7 @@ images.forEach((src, i) => {
                   <img
                     src={src}
                     alt={`${category.name} photo ${globalIndex + 1}`}
-                    loading={globalIndex < 4 ? "eager" : "lazy"}
+                    loading="eager"
                     decoding="async"
                     class="column__item-img"
                   />
@@ -61,6 +67,14 @@ images.forEach((src, i) => {
       ))}
     </div>
   </section>
+
+  <!-- Scroll-to-close footer -->
+  <div class="dismiss-bar" id="dismiss-bar">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
+    </svg>
+    <span>scroll to close</span>
+  </div>
 
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image viewer">
@@ -79,6 +93,39 @@ images.forEach((src, i) => {
 </BaseLayout>
 
 <style>
+  /* ── Scroll-to-close footer: plain in-flow, revealed naturally by scrolling ── */
+  .dismiss-bar {
+    height: 30vh;
+    background: #1c1b19;
+    border-radius: 1rem 1rem 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .dismiss-bar:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .dismiss-bar svg {
+    animation: dismiss-bounce 1.9s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes dismiss-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(4px); }
+  }
+
   /* Hero */
   .gallery-hero {
     padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
@@ -86,17 +133,32 @@ images.forEach((src, i) => {
   }
 
   .gallery-back {
-    display: inline-block;
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-text-muted);
+    text-decoration: none;
     margin-bottom: var(--space-md);
-    opacity: 0.5;
-    transition: opacity 0.2s;
+    opacity: 0.55;
+    transition: opacity 0.25s ease, gap 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .gallery-back__arrow {
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .gallery-back:hover {
     opacity: 1;
+    gap: 0.85rem;
+  }
+
+  .gallery-back:hover .gallery-back__arrow {
+    transform: translate(-3px, -3px);
   }
 
   .gallery-hero h1 {
@@ -112,6 +174,8 @@ images.forEach((src, i) => {
     font-style: italic;
     color: var(--color-text-muted);
     font-size: 1.15rem;
+    margin: 0 auto;
+    text-align: center;
   }
 
   /* ===== Columns with scroll animation ===== */
@@ -160,7 +224,6 @@ images.forEach((src, i) => {
   .column__item-img {
     width: 100%;
     display: block;
-    will-change: transform;
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -170,8 +233,8 @@ images.forEach((src, i) => {
 
   @media (max-width: 768px) {
     .columns {
-      gap: 0.5rem;
-      padding: 0 0.75rem;
+      gap: 0.75rem;
+      padding: 0 1rem;
     }
 
     .column[data-col="1"] {
@@ -182,6 +245,14 @@ images.forEach((src, i) => {
   @media (max-width: 500px) {
     .columns {
       flex-direction: column;
+      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+
+    .column {
+      flex: none;
+      width: 100%;
+      gap: 0.5rem;
     }
 
     .column[data-col="1"] {
@@ -299,6 +370,7 @@ images.forEach((src, i) => {
 </style>
 
 <script>
+  document.addEventListener('astro:page-load', () => {
   // ===== On-scroll column animation (Codrops style) =====
   const columnsEl = document.querySelector('[data-columns]') as HTMLElement;
   const columnEls = Array.from(document.querySelectorAll('.column')) as HTMLElement[];
@@ -313,8 +385,12 @@ images.forEach((src, i) => {
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const scrollFraction = scrollY / docHeight;
 
-    // Apply different vertical offsets to each column
+    // Apply different vertical offsets to each column (desktop only)
     columnEls.forEach((col, i) => {
+      if (window.innerWidth <= 500) {
+        col.style.transform = '';
+        return;
+      }
       const speed = columnSpeeds[i] || 0;
       const yOffset = scrollFraction * speed;
       col.style.transform = `translateY(${yOffset}%)`;
@@ -342,6 +418,13 @@ images.forEach((src, i) => {
   }, { passive: true });
 
   updateScrollAnimation();
+
+  // Scroll-to-close footer: sticky reveal via CSS, click goes home
+  const dismissBar = document.getElementById('dismiss-bar') as HTMLElement;
+  dismissBar.addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else window.location.href = '/';
+  });
 
   // ===== Lightbox =====
   const lightbox = document.getElementById("lightbox")!;
@@ -559,4 +642,5 @@ images.forEach((src, i) => {
     lastTap = now;
   });
 
+  }); // end astro:page-load
 </script>

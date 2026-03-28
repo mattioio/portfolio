@@ -7,6 +7,91 @@ import { categories, getImagesForCategory } from "../data/categories";
 <BaseLayout title="Gavin Batty — Photographer">
   <ScrollCarousel />
 
+  <!-- Gallery overlay — SPA: never leaves the homepage, URL syncs via pushState -->
+  <div class="gallery-overlay" id="gallery-overlay" aria-hidden="true">
+    <div class="gallery-overlay__scroll" id="gallery-overlay-scroll">
+
+      <section class="ov-hero">
+        <div class="container">
+          <button class="ov-back" id="gallery-close">
+            <svg class="ov-back__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 17L7 7M7 7H17M7 7V17"/>
+            </svg>
+            <span>Back</span>
+          </button>
+          <h1 class="ov-title" id="gallery-title"></h1>
+          <p class="ov-desc" id="gallery-desc"></p>
+        </div>
+      </section>
+
+      <section class="ov-columns-wrap">
+        <div class="ov-columns" id="gallery-columns"></div>
+      </section>
+
+      <!-- Scroll-to-close footer — content reveals as it scrolls into view -->
+      <div class="ov-footer" id="gallery-footer">
+        <div class="ov-footer-fill"></div>
+        <div class="ov-footer-content">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="1" x2="6" y2="11"/><polyline points="2,7 6,11 10,7"/>
+          </svg>
+          <span>scroll to close</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Lightbox lives inside the overlay so z-index is isolated -->
+    <div class="ov-lb" id="gallery-lb" aria-hidden="true" role="dialog" aria-label="Image viewer">
+      <button class="ov-lb__close" aria-label="Close">&times;</button>
+      <button class="ov-lb__prev" aria-label="Previous">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="ov-lb__next" aria-label="Next">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="ov-lb__wrap">
+        <img class="ov-lb__img" src="" alt="" />
+      </div>
+      <div class="ov-lb__counter"></div>
+    </div>
+  </div>
+
+  <!-- Pre-rendered 3-column gallery structure per category -->
+  {categories.map(cat => {
+    const images = getImagesForCategory(cat);
+    const cols: string[][] = [[], [], []];
+    images.forEach((src, i) => cols[i % 3].push(src));
+    return (
+      <template data-gallery={cat.slug}>
+        {cols.map((col, ci) => (
+          <div class="ov-col" data-col={ci}>
+            {col.map((src, ri) => {
+              const idx = ri * 3 + ci;
+              return (
+                <button
+                  class="ov-item"
+                  data-src={src}
+                  data-index={idx}
+                  aria-label={`View ${cat.name} photo ${idx + 1}`}
+                >
+                  <div class="ov-item__wrap">
+                    <img
+                      src={src}
+                      alt={`${cat.name} ${idx + 1}`}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </template>
+    );
+  })}
+
   <!-- Intro section: fixed behind hero, revealed as hero scrolls away -->
   <section class="reveal-section">
     <div class="reveal-section__sticky">
@@ -23,42 +108,15 @@ import { categories, getImagesForCategory } from "../data/categories";
     </div>
   </section>
 
-  <!-- Gallery overlay — slides up over everything, carousel stays alive behind -->
-  <div class="gallery-overlay" id="gallery-overlay" aria-hidden="true">
-    <div class="gallery-overlay__inner">
-      <div class="gallery-overlay__hero">
-        <button class="gallery-overlay__back" id="gallery-close">&larr; Back</button>
-        <h1 class="gallery-overlay__title" id="gallery-title"></h1>
-        <p class="gallery-overlay__desc" id="gallery-desc"></p>
-      </div>
-      <div class="gallery-overlay__grid" id="gallery-grid"></div>
-    </div>
-  </div>
-
-  <!-- Pre-rendered gallery data for each category (hidden, used by JS) -->
-  {categories.map(cat => {
-    const images = getImagesForCategory(cat);
-    return (
-      <template data-gallery={cat.slug}>
-        {images.map(src => (
-          <div class="gallery-overlay__item">
-            <img src={src} alt={cat.name} loading="lazy" />
-          </div>
-        ))}
-      </template>
-    );
-  })}
 </BaseLayout>
 
 <style>
-  /* Two-part trick: the section is tall enough for the sticky child
-     to stay pinned for one full viewport, then scroll away naturally. */
+  /* ===== Reveal section ===== */
   .reveal-section {
     position: relative;
     height: auto;
     background: transparent;
     z-index: 3;
-    /* Pull up so card appears after text fades but while image is locked */
     margin-top: -50vh;
     pointer-events: none;
   }
@@ -74,11 +132,9 @@ import { categories, getImagesForCategory } from "../data/categories";
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Keep card below the nav — leaves hero image strip visible behind logo */
     margin-top: 8vh;
     margin-bottom: 0;
   }
-
 
   .intro {
     padding: var(--space-xl) 0;
@@ -120,9 +176,7 @@ import { categories, getImagesForCategory } from "../data/categories";
     letter-spacing: -0.02em;
   }
 
-  .intro__title em {
-    font-style: italic;
-  }
+  .intro__title em { font-style: italic; }
 
   .intro__sub {
     font-family: var(--font-heading);
@@ -159,104 +213,299 @@ import { categories, getImagesForCategory } from "../data/categories";
     color: var(--color-text-light);
   }
 
-  /* Blur reveal — per-character, scroll-scrubbed.
-     NO will-change on individual chars — 100+ GPU layers kills perf.
-     Browser composites them naturally within the parent layer. */
-  [data-blur-reveal] .char {
-    display: inline-block;
-  }
+  [data-blur-reveal] .char { display: inline-block; }
 
-  /* ===== Gallery Overlay — slides up, carousel stays alive behind ===== */
+  /* ===== Gallery Overlay ===== */
   .gallery-overlay {
     position: fixed;
     inset: 0;
     z-index: 50;
     background: var(--color-bg);
-    transform: translateY(100%);
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow-y: auto;
-    overflow-x: hidden;
-    will-change: transform;
+    opacity: 0;
+    transform: translateY(1.5%);
+    transition:
+      opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
     pointer-events: none;
   }
 
   .gallery-overlay.open {
+    opacity: 1;
     transform: translateY(0);
     pointer-events: all;
   }
 
-  .gallery-overlay__inner {
-    min-height: 100vh;
-    padding-bottom: 4rem;
+  /* Scrollable inner container — separate from fixed lightbox */
+  .gallery-overlay__scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
-  .gallery-overlay__hero {
+  /* Hero */
+  .ov-hero {
+    padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
     text-align: center;
-    padding: 8rem 2rem 3rem;
   }
 
-  .gallery-overlay__back {
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    font-style: italic;
+  .ov-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
     color: var(--color-text-muted);
     cursor: pointer;
-    margin-bottom: 1.5rem;
-    display: inline-block;
-    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: var(--space-md);
+    opacity: 0.55;
+    transition: opacity 0.25s ease, gap 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .gallery-overlay__back:hover {
-    color: var(--color-text);
+  .ov-back__arrow {
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .gallery-overlay__title {
+  .ov-back:hover {
+    opacity: 1;
+    gap: 0.85rem;
+  }
+
+  .ov-back:hover .ov-back__arrow {
+    transform: translate(-3px, -3px);
+  }
+
+  .ov-title {
     font-family: var(--font-heading);
-    font-size: clamp(3rem, 8vw, 5rem);
+    font-size: clamp(3rem, 8vw, 6rem);
     font-weight: 400;
     letter-spacing: -0.03em;
-    color: var(--color-text);
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--space-xs);
+    perspective: 600px;
   }
 
-  .gallery-overlay__desc {
+  .ov-desc {
     font-family: var(--font-heading);
-    font-size: clamp(1rem, 2vw, 1.25rem);
     font-style: italic;
     color: var(--color-text-muted);
-    max-width: 40ch;
+    font-size: 1.15rem;
     margin: 0 auto;
+    text-align: center;
   }
 
-  .gallery-overlay__grid {
-    display: columns;
-    columns: 3;
-    column-gap: 1rem;
-    padding: 0 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .gallery-overlay__item {
-    break-inside: avoid;
-    margin-bottom: 1rem;
-    border-radius: 4px;
+  /* Masonry columns */
+  .ov-columns-wrap {
     overflow: hidden;
+    padding-bottom: var(--space-xl);
   }
 
-  .gallery-overlay__item img {
+  /* ── Scroll-to-close footer: plain in-flow, revealed naturally by scrolling ── */
+  .ov-footer {
+    position: relative;
+    overflow: hidden;
+    height: 30vh;
+    background: #1c1b19;
+    border-radius: 1rem 1rem 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: default;
+    transition: color 0.15s ease, transform 0.1s ease;
+  }
+
+  /* Progress fill — grows left→right as user overscrolls */
+  .ov-footer-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+    width: 0%;
+    background: rgba(255, 255, 255, 0.06);
+    transition: width 0.08s linear;
+    pointer-events: none;
+  }
+
+  /* Content starts invisible — revealed by IntersectionObserver */
+  .ov-footer-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity  0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ov-footer.visible .ov-footer-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ov-footer-content svg {
+    animation: footer-bounce 1.9s ease-in-out infinite;
+    /* delay bounce until after reveal */
+    animation-delay: 0.7s;
+    flex-shrink: 0;
+  }
+
+  @keyframes footer-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(4px); }
+  }
+
+  .ov-columns {
+    display: flex;
+    gap: var(--space-sm);
+    padding: 0 var(--space-md);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .ov-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    will-change: transform;
+  }
+
+  .ov-col[data-col="1"] { margin-top: 8vh; }
+
+  .ov-item {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .ov-item__wrap {
+    overflow: hidden;
+    border-radius: 6px;
+  }
+
+  .ov-item__wrap img {
     width: 100%;
     display: block;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ov-item:hover .ov-item__wrap img {
+    transform: scale(1.05) !important;
+  }
+
+  /* Lightbox */
+  .ov-lb {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .ov-lb.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .ov-lb__close {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    color: white;
+    font-size: 2rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    z-index: 10;
+    line-height: 1;
+  }
+  .ov-lb__close:hover { opacity: 1; }
+
+  .ov-lb__prev, .ov-lb__next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    z-index: 10;
+    padding: var(--space-sm);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .ov-lb__prev:hover, .ov-lb__next:hover { opacity: 1; }
+  .ov-lb__prev { left: var(--space-sm); }
+  .ov-lb__next { right: var(--space-sm); }
+
+  .ov-lb__wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+  }
+
+  .ov-lb__img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    transition: opacity 0.2s;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .ov-lb__counter {
+    position: absolute;
+    bottom: var(--space-md);
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    opacity: 0.5;
   }
 
   @media (max-width: 768px) {
-    .gallery-overlay__grid {
-      columns: 2;
-      padding: 0 1rem;
-    }
-    .gallery-overlay__hero {
-      padding: 6rem 1.5rem 2rem;
-    }
+    .ov-columns { gap: 0.75rem; padding: 0 1rem; }
+    .ov-col[data-col="1"] { margin-top: 4vh; }
+    .ov-lb__prev, .ov-lb__next { display: none; }
+    .ov-lb__img { max-width: 100vw; max-height: 100vh; }
+    .ov-lb__close { top: 0.75rem; right: 0.75rem; font-size: 2.5rem; }
+  }
+
+  @media (max-width: 500px) {
+    .ov-columns { flex-direction: column; gap: 0.5rem; padding: 0 1rem; }
+    .ov-col { flex: none; width: 100%; gap: 0.5rem; }
+    .ov-col[data-col="1"] { margin-top: 0; }
+  }
+</style>
+
+<style is:global>
+  /* Hide nav while lightbox is open — scoped styles can't reach Nav.astro */
+  .nav.lb-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
   }
 </style>
 
@@ -264,7 +513,7 @@ import { categories, getImagesForCategory } from "../data/categories";
   document.addEventListener('astro:page-load', () => {
   if (!document.querySelector('.reveal-section')) return; // not on homepage
 
-  // "View Services" button opens the panel
+  // ===== Services panel =====
   const openBtn = document.getElementById('open-services');
   const panel = document.getElementById('services-panel');
   if (openBtn && panel) {
@@ -275,112 +524,408 @@ import { categories, getImagesForCategory } from "../data/categories";
     });
   }
 
-  // ===== Gallery overlay — slides up, carousel stays alive =====
-  const overlay = document.getElementById('gallery-overlay');
-  const galleryTitle = document.getElementById('gallery-title');
-  const galleryDesc = document.getElementById('gallery-desc');
-  const galleryGrid = document.getElementById('gallery-grid');
-  const galleryClose = document.getElementById('gallery-close');
+  // ===== Gallery Overlay — SPA: never navigates away =====
+  const overlay    = document.getElementById('gallery-overlay')!;
+  const ovScroll   = document.getElementById('gallery-overlay-scroll')!;
+  const ovColumns  = document.getElementById('gallery-columns')!;
+  const titleEl    = document.getElementById('gallery-title')!;
+  const descEl     = document.getElementById('gallery-desc')!;
+  const lb         = document.getElementById('gallery-lb')!;
+  const lbImg      = lb.querySelector<HTMLImageElement>('.ov-lb__img')!;
+  const lbCounter  = lb.querySelector('.ov-lb__counter')!;
 
-  // Category metadata (matches categories.ts)
   const catMeta: Record<string, { name: string; desc: string }> = {
-    music: { name: 'Music', desc: 'The energy, the crowd, the moment — live music photography' },
+    music:     { name: 'Music',     desc: 'The energy, the crowd, the moment — live music photography' },
     portraits: { name: 'Portraits', desc: 'Authentic portraits that reveal character and emotion' },
-    wedding: { name: 'Wedding', desc: 'Capturing love stories, from intimate ceremonies to grand celebrations' },
-    food: { name: 'Food', desc: 'Editorial food and hospitality photography that tells a story' },
-    sport: { name: 'Sport', desc: 'Peak action and athletic moments frozen in time' },
-    travel: { name: 'Travel', desc: 'Landscapes, cultures, and stories from around the world' },
+    wedding:   { name: 'Wedding',   desc: 'Capturing love stories, from intimate ceremonies to grand celebrations' },
+    food:      { name: 'Food',      desc: 'Editorial food and hospitality photography that tells a story' },
+    sport:     { name: 'Sport',     desc: 'Peak action and athletic moments frozen in time' },
+    travel:    { name: 'Travel',    desc: 'Landscapes, cultures, and stories from around the world' },
   };
 
-  function openGallery(slug: string) {
-    if (!overlay || !galleryTitle || !galleryDesc || !galleryGrid) return;
+  // AbortController lets us cleanly tear down all gallery-specific listeners on close
+  let galleryAC: AbortController | null = null;
 
+  // Push nav into its "on a gallery page" state (dark text, subtle bg)
+  const nav = document.querySelector('.nav') as HTMLElement | null;
+
+  function openGallery(slug: string) {
     const meta = catMeta[slug];
     if (!meta) return;
 
-    // Set content
-    galleryTitle.textContent = meta.name;
-    galleryDesc.textContent = meta.desc;
+    // Populate header
+    titleEl.textContent = meta.name;
+    descEl.textContent  = meta.desc;
 
-    // Load images from pre-rendered template
+    // Clone pre-rendered column template into the grid
     const tpl = document.querySelector(`template[data-gallery="${slug}"]`) as HTMLTemplateElement;
-    galleryGrid.innerHTML = '';
-    if (tpl) {
-      galleryGrid.appendChild(tpl.content.cloneNode(true));
-    }
+    ovColumns.innerHTML = '';
+    if (tpl) ovColumns.appendChild(tpl.content.cloneNode(true));
 
-    // Slide up
+    // Show overlay — reset any leftover state from last visit
+    overlay.style.transform = '';
+    overlay.style.opacity   = '';
+    // Reset footer overscroll state
+    const _fill = document.querySelector('.ov-footer-fill') as HTMLElement | null;
+    if (_fill) _fill.style.width = '0%';
+    const _footer = document.getElementById('gallery-footer') as HTMLElement | null;
+    if (_footer) { _footer.style.transform = ''; _footer.classList.remove('visible'); }
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
-    overlay.scrollTop = 0;
+    ovScroll.scrollTop = 0;
     document.body.style.overflow = 'hidden';
 
-    // Update URL without navigation
+    // Match nav state to a real gallery page: remove light tint, add scrolled bg
+    nav?.classList.remove('nav--light');
+    nav?.classList.add('scrolled');
+
+    // Sync URL without navigating
     history.pushState({ gallery: slug }, '', `/gallery/${slug}`);
 
-    // Stagger images in
-    galleryGrid.querySelectorAll('.gallery-overlay__item').forEach((el, i) => {
-      const e = el as HTMLElement;
-      e.style.opacity = '0';
-      e.style.transform = 'translateY(30px)';
-      e.animate([
-        { opacity: 0, transform: 'translateY(30px)' },
-        { opacity: 1, transform: 'translateY(0)' }
-      ], {
-        duration: 600,
-        delay: 300 + i * 40,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards'
-      });
+    // Tear down any previous gallery's listeners
+    galleryAC?.abort();
+    galleryAC = new AbortController();
+    const { signal } = galleryAC;
+
+    // ── Header entrance animations ──
+    // Title: per-char reveal (same as BaseLayout gallery page)
+    const titleText = meta.name;
+    const frag = document.createDocumentFragment();
+    for (const ch of titleText) {
+      const s = document.createElement('span');
+      s.style.display = 'inline-block';
+      s.textContent = ch;
+      frag.appendChild(s);
+    }
+    titleEl.textContent = '';
+    titleEl.appendChild(frag);
+    Array.from(titleEl.children).forEach((c, i) => {
+      (c as HTMLElement).animate(
+        [{ opacity: 0, transform: 'translateY(80%) rotateX(40deg)' },
+         { opacity: 1, transform: 'translateY(0) rotateX(0)' }],
+        { duration: 1200, delay: 80 + i * 25, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'both' }
+      );
     });
+    // Desc + back button fade up
+    [document.getElementById('gallery-close'), descEl].forEach((el, i) => {
+      (el as HTMLElement)?.animate(
+        [{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 700, delay: 300 + i * 80, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'both' }
+      );
+    });
+
+    // ── Masonry stagger entrance ──
+    const items = Array.from(ovColumns.querySelectorAll<HTMLElement>('.ov-item'));
+    items.forEach((el, i) => {
+      el.animate(
+        [{ opacity: 0, transform: 'translateY(30px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 600, delay: 150 + i * 25, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'both' }
+      );
+    });
+
+    // ── Scroll-to-close footer ──
+    // Click still works, but the primary action is scrolling past the bottom.
+    // When the scroll container is at its maximum scrollTop, additional wheel/touch
+    // delta is accumulated. Once it crosses the threshold the gallery closes.
+    const footerEl = document.getElementById('gallery-footer')!;
+    const closeFill = footerEl.querySelector('.ov-footer-fill') as HTMLElement | null;
+    footerEl.addEventListener('click', closeGallery, { signal });
+
+    // Reveal footer content when it scrolls into view; hide when scrolled back up
+    const footerObserver = new IntersectionObserver(
+      ([entry]) => footerEl.classList.toggle('visible', entry.isIntersecting),
+      { root: ovScroll, threshold: 0.25 }
+    );
+    footerObserver.observe(footerEl);
+    // Disconnect when gallery closes (signal abort)
+    signal.addEventListener('abort', () => footerObserver.disconnect());
+
+    let overDelta = 0;
+    const OVER_THRESHOLD = 140; // px of extra scroll needed to close
+
+    function atBottom() {
+      return ovScroll.scrollTop + ovScroll.clientHeight >= ovScroll.scrollHeight - 8;
+    }
+
+    function applyOverProgress(p: number) {
+      // Drive the fill bar width (0→1) and nudge the footer up slightly
+      if (closeFill) closeFill.style.width = `${Math.min(p * 100, 100)}%`;
+      footerEl.style.transform = p > 0 ? `translateY(${-p * 8}px)` : '';
+    }
+
+    // Wheel — desktop
+    ovScroll.addEventListener('wheel', (e) => {
+      if (!atBottom() || e.deltaY <= 0) {
+        if (overDelta > 0) { overDelta = 0; applyOverProgress(0); }
+        return;
+      }
+      overDelta = Math.min(overDelta + e.deltaY, OVER_THRESHOLD);
+      const p = overDelta / OVER_THRESHOLD;
+      applyOverProgress(p);
+      if (overDelta >= OVER_THRESHOLD) {
+        overDelta = 0;
+        applyOverProgress(0);
+        closeGallery();
+      }
+    }, { signal, passive: true });
+
+    // Touch — mobile
+    let touchCloseStartY = 0;
+    ovScroll.addEventListener('touchstart', (e) => {
+      if (atBottom()) touchCloseStartY = e.touches[0].clientY;
+    }, { signal, passive: true });
+
+    ovScroll.addEventListener('touchmove', (e) => {
+      if (!atBottom() || touchCloseStartY === 0) return;
+      const drag = touchCloseStartY - e.touches[0].clientY; // positive = scrolling up (overscroll down)
+      overDelta = Math.max(0, Math.min(drag, OVER_THRESHOLD));
+      applyOverProgress(overDelta / OVER_THRESHOLD);
+    }, { signal, passive: true });
+
+    ovScroll.addEventListener('touchend', () => {
+      if (overDelta >= OVER_THRESHOLD * 0.75) {
+        overDelta = 0;
+        applyOverProgress(0);
+        closeGallery();
+      } else {
+        overDelta = 0;
+        applyOverProgress(0);
+      }
+      touchCloseStartY = 0;
+    }, { signal, passive: true });
+
+    // ── Column scroll parallax (driven by overlay scroll, not window) ──
+    const colEls   = Array.from(ovColumns.querySelectorAll<HTMLElement>('.ov-col'));
+    const imgWraps = Array.from(ovColumns.querySelectorAll<HTMLElement>('.ov-item__wrap'));
+    const imgEls   = Array.from(ovColumns.querySelectorAll<HTMLImageElement>('.ov-item__wrap img'));
+    const speeds   = [-3, 5, -8];
+
+    ovScroll.addEventListener('scroll', () => {
+      requestAnimationFrame(() => {
+        const st   = ovScroll.scrollTop;
+        const sh   = ovScroll.scrollHeight - ovScroll.clientHeight;
+        const frac = sh > 0 ? st / sh : 0;
+
+        // Column parallax — disabled on mobile where columns stack vertically
+        colEls.forEach((col, i) => {
+          col.style.transform = window.innerWidth > 500 ? `translateY(${frac * speeds[i]}%)` : '';
+        });
+        imgWraps.forEach((wrap, i) => {
+          const rect = wrap.getBoundingClientRect();
+          const vis  = (rect.top + rect.height / 2 - window.innerHeight / 2) / window.innerHeight;
+          if (imgEls[i]) imgEls[i].style.transform = `translateY(${vis * -30}px)`;
+        });
+      });
+    }, { signal, passive: true });
+
+    // ── Lightbox ──
+    // Sources sorted by data-index so they match visual reading order
+    const sources = items
+      .slice()
+      .sort((a, b) => +(a.dataset.index ?? 0) - +(b.dataset.index ?? 0))
+      .map(el => el.dataset.src ?? '');
+    let current = 0;
+
+    const lbShow = () => {
+      lbImg.src = sources[current];
+      lbImg.alt = `Photo ${current + 1} of ${sources.length}`;
+      lbCounter.textContent = `${current + 1} / ${sources.length}`;
+      [-1, 1].forEach(d => {
+        const j = current + d;
+        if (j >= 0 && j < sources.length) { const p = new Image(); p.src = sources[j]; }
+      });
+    };
+    // ── Zoom/pan state — declared here so lbNext/lbPrev/lbClose can call lbReset ──
+    let lbScale = 1, lbPanX = 0, lbPanY = 0;
+    const lbWrap = lb.querySelector<HTMLElement>('.ov-lb__wrap')!;
+
+    function lbClamp() {
+      if (lbScale <= 1) { lbPanX = 0; lbPanY = 0; return; }
+      const cW = lbWrap.clientWidth, cH = lbWrap.clientHeight;
+      const nW = lbImg.naturalWidth || cW, nH = lbImg.naturalHeight || cH;
+      const ratio = nW / nH;
+      const dispW = cW / cH > ratio ? cH * ratio : cW;
+      const dispH = cW / cH > ratio ? cH : cW / ratio;
+      const maxX = Math.max(0, (dispW * lbScale - cW) / 2);
+      const maxY = Math.max(0, (dispH * lbScale - cH) / 2);
+      lbPanX = Math.max(-maxX, Math.min(maxX, lbPanX));
+      lbPanY = Math.max(-maxY, Math.min(maxY, lbPanY));
+    }
+
+    function lbApply(animated = false) {
+      lbImg.style.transition = animated ? 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' : 'none';
+      lbImg.style.transform  = lbScale === 1 ? '' : `translate(${lbPanX}px,${lbPanY}px) scale(${lbScale})`;
+    }
+
+    function lbReset(animated = false) {
+      lbScale = 1; lbPanX = 0; lbPanY = 0; lbApply(animated);
+    }
+
+    const lbOpen  = (i: number) => { current = i; lbReset(); lbShow(); lb.classList.add('active'); lb.setAttribute('aria-hidden','false'); nav?.classList.add('lb-hidden'); };
+    const lbClose = () => { lb.classList.remove('active'); lb.setAttribute('aria-hidden','true'); lbReset(); nav?.classList.remove('lb-hidden'); };
+    const lbNext  = () => { current = (current + 1) % sources.length; lbReset(); lbShow(); };
+    const lbPrev  = () => { current = (current - 1 + sources.length) % sources.length; lbReset(); lbShow(); };
+
+    items.forEach(item => {
+      item.addEventListener('click', () => lbOpen(+(item.dataset.index ?? 0)), { signal });
+    });
+    lb.querySelector('.ov-lb__close')!.addEventListener('click', lbClose, { signal });
+    lb.querySelector('.ov-lb__prev')!.addEventListener('click', lbPrev,  { signal });
+    lb.querySelector('.ov-lb__next')!.addEventListener('click', lbNext,  { signal });
+    lb.addEventListener('click', (e) => { if (e.target === lb) lbClose(); }, { signal });
+
+    document.addEventListener('keydown', (e) => {
+      if (!lb.classList.contains('active')) return;
+      if (e.key === 'Escape')      lbClose();
+      if (e.key === 'ArrowRight')  lbNext();
+      if (e.key === 'ArrowLeft')   lbPrev();
+    }, { signal });
+
+    // ── Lightbox touch: swipe nav + pinch zoom + pan while zoomed ──
+    // (lbClamp / lbApply / lbReset defined above alongside zoom state)
+
+    // Track gesture state
+    let gestureMode: 'idle' | 'swipe' | 'pan' | 'pinch' = 'idle';
+    let swX = 0, swY = 0;              // swipe start
+    let panX0 = 0, panY0 = 0;          // pan start position
+    let panPX0 = 0, panPY0 = 0;        // pan offset at start
+    let pinchDist0 = 0, pinchScale0 = 1; // pinch start values
+    let lastTap = 0;
+
+    lbWrap.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const t = e.touches[0];
+        swX = panX0 = t.clientX;
+        swY = panY0 = t.clientY;
+        panPX0 = lbPanX; panPY0 = lbPanY;
+        gestureMode = 'idle';
+      } else if (e.touches.length === 2) {
+        gestureMode = 'pinch';
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        pinchDist0  = Math.sqrt(dx * dx + dy * dy);
+        pinchScale0 = lbScale;
+        e.preventDefault(); // block browser native pinch-zoom
+      }
+    }, { signal, passive: false } as EventListenerOptions);
+
+    lbWrap.addEventListener('touchmove', (e) => {
+      if (gestureMode === 'pinch' && e.touches.length === 2) {
+        e.preventDefault();
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        lbScale = Math.max(1, Math.min(5, pinchScale0 * Math.sqrt(dx*dx + dy*dy) / pinchDist0));
+        lbClamp();
+        lbApply();
+        return;
+      }
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - panX0, dy = t.clientY - panY0;
+
+      if (lbScale > 1) {
+        // Already zoomed — pan the image
+        e.preventDefault();
+        gestureMode = 'pan';
+        lbPanX = panPX0 + dx;
+        lbPanY = panPY0 + dy;
+        lbClamp();
+        lbApply();
+      } else {
+        gestureMode = 'swipe';
+      }
+    }, { signal, passive: false } as EventListenerOptions);
+
+    lbWrap.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+
+      // Double-tap detection (always check, any gesture mode)
+      if (e.changedTouches.length === 1 && gestureMode !== 'pinch') {
+        const now = Date.now();
+        const tapDx = t.clientX - swX, tapDy = t.clientY - swY;
+        const wasTap = Math.sqrt(tapDx*tapDx + tapDy*tapDy) < 12;
+        if (wasTap && now - lastTap < 320) {
+          e.preventDefault();
+          if (lbScale > 1) {
+            lbReset(true);
+          } else {
+            // Zoom in centred on the tap point
+            const r = lbImg.getBoundingClientRect();
+            lbScale = 2.5;
+            // Pan so the tapped point stays centred under the finger
+            lbPanX = -(t.clientX - (r.left + r.width  / 2)) * (1 - 1 / lbScale);
+            lbPanY = -(t.clientY - (r.top  + r.height / 2)) * (1 - 1 / lbScale);
+            lbClamp();
+            lbApply(true);
+          }
+          lastTap = 0;
+          gestureMode = 'idle';
+          return;
+        }
+        lastTap = now;
+      }
+
+      if (gestureMode === 'pinch') {
+        // Snap back to 1× if barely pinched
+        if (lbScale < 1.15) lbReset(true);
+        gestureMode = 'idle';
+        return;
+      }
+
+      if (gestureMode === 'pan') {
+        gestureMode = 'idle';
+        return;
+      }
+
+      // Swipe navigation — only at 1× zoom
+      if (lbScale <= 1) {
+        const dx = t.clientX - swX, dy = t.clientY - swY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+          dx < 0 ? lbNext() : lbPrev();
+        } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+          lbClose();
+        }
+      }
+      gestureMode = 'idle';
+    }, { signal } as EventListenerOptions);
   }
 
   function closeGallery() {
-    if (!overlay) return;
+    lb.classList.remove('active');
+    lb.setAttribute('aria-hidden', 'true');
+    // Clear any inline overrides left by the scroll-to-dismiss rubber-band
+    overlay.style.transition = '';
+    overlay.style.transform  = '';
+    overlay.style.opacity    = '';
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    // Restore URL
-    if (window.location.pathname !== '/') {
-      history.pushState({}, '', '/');
-    }
+    galleryAC?.abort();
+    galleryAC = null;
+    if (window.location.pathname !== '/') history.pushState({}, '', '/');
+
+    // Restore nav: put back light class, let scroll handler re-evaluate scrolled
+    nav?.classList.add('nav--light');
+    window.dispatchEvent(new Event('scroll'));
   }
 
-  // Listen for carousel's open-gallery event
-  document.addEventListener('open-gallery', ((e: CustomEvent) => {
-    openGallery(e.detail);
-  }) as EventListener);
+  // Carousel dispatches this event
+  document.addEventListener('open-gallery', ((e: CustomEvent) => openGallery(e.detail)) as EventListener);
 
-  // Close button
-  galleryClose?.addEventListener('click', closeGallery);
-
-  // Escape key
+  // Close triggers
+  document.getElementById('gallery-close')?.addEventListener('click', closeGallery);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay?.classList.contains('open')) closeGallery();
+    if (e.key === 'Escape' && overlay.classList.contains('open') && !lb.classList.contains('active')) closeGallery();
   });
-
-  // Browser back button
+  // Browser back button closes the overlay instead of leaving the page
   window.addEventListener('popstate', () => {
-    if (overlay?.classList.contains('open')) {
-      overlay.classList.remove('open');
-      overlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-    }
+    if (overlay.classList.contains('open')) closeGallery();
   });
 
-  // If loaded directly on a gallery URL, open it
-  const pathMatch = window.location.pathname.match(/^\/gallery\/(.+)$/);
-  if (pathMatch) {
-    openGallery(pathMatch[1]);
-  }
+  // Direct URL: /gallery/slug loads the real standalone page — no special handling needed here
+  // (the standalone [category].astro page handles those)
 
   // ===== Blurry text reveal — per-character, scroll-scrubbed =====
-  // PERF NOTES:
-  // - No will-change on individual chars (100+ GPU layers = worse than CPU paint)
-  // - Only update chars in the active transition zone (skip done/not-started)
-  // - Portrait uses transform:scale() not width/height (no layout reflow)
-  // - Cached rect, rAF-gated, rounded filter values
-
   function splitIntoChars(el: Element) {
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
     const textNodes: Text[] = [];
@@ -388,7 +933,6 @@ import { categories, getImagesForCategory } from "../data/categories";
     while (node = walker.nextNode() as Text) {
       if (node.textContent) textNodes.push(node);
     }
-
     textNodes.forEach(textNode => {
       const text = textNode.textContent!;
       const frag = document.createDocumentFragment();
@@ -412,118 +956,77 @@ import { categories, getImagesForCategory } from "../data/categories";
   document.querySelectorAll('[data-blur-reveal]:not(button)').forEach(el => splitIntoChars(el));
 
   const allChars = Array.from(document.querySelectorAll('[data-blur-reveal] .char')) as HTMLElement[];
-  const ctaBtn = document.querySelector('.intro__cta[data-blur-reveal]') as HTMLElement;
-  if (ctaBtn) {
-    ctaBtn.style.filter = 'blur(8px) brightness(300%)';
-    ctaBtn.style.opacity = '0';
-  }
+  const ctaBtn   = document.querySelector('.intro__cta[data-blur-reveal]') as HTMLElement;
+  if (ctaBtn) { ctaBtn.style.filter = 'blur(8px) brightness(300%)'; ctaBtn.style.opacity = '0'; }
 
   const stickyIntro = document.querySelector('.reveal-section__sticky') as HTMLElement;
-  const portraitEl = document.querySelector('.intro__portrait') as HTMLElement;
-  const totalItems = allChars.length + 1;
-  const charWindow = 0.15;
-
-  // Pre-compute each char's start threshold (never changes)
-  const charStarts = allChars.map((_, i) => (i / totalItems) * (1 - charWindow));
-  const ctaStart = (allChars.length / totalItems) * (1 - charWindow);
-
-  // Track per-char done state — once revealed, never touch again until scroll back
-  const charDone = new Uint8Array(allChars.length); // 0=pending, 1=done, 2=not-started
-  let ctaDone = false;
-  let prevProgress = -1;
+  const portraitEl  = document.querySelector('.intro__portrait') as HTMLElement;
+  const totalItems  = allChars.length + 1;
+  const charWindow  = 0.15;
+  const charStarts  = allChars.map((_, i) => (i / totalItems) * (1 - charWindow));
+  const ctaStart    = (allChars.length / totalItems) * (1 - charWindow);
+  const charDone    = new Uint8Array(allChars.length);
+  let ctaDone       = false;
+  let prevProgress  = -1;
   let revealTicking = false;
 
   function scrubBlurReveal() {
     revealTicking = false;
     if (!stickyIntro) return;
-
     const rect = stickyIntro.getBoundingClientRect();
     const vh   = window.innerHeight;
-    // Start when card top is at 90% of viewport (text just entering at bottom edge)
-    // End when card top is at 20% of viewport (text well centred on screen)
     const startY = vh * 0.9;
     const endY   = vh * 0.2;
     const progress = Math.min(1, Math.max(0, (startY - rect.top) / (startY - endY)));
-
-    // Early-out: progress hasn't changed meaningfully
     if (Math.abs(progress - prevProgress) < 0.001) return;
     prevProgress = progress;
 
-    // Only update chars in the active zone — skip fully revealed and not-yet-started
     for (let i = 0; i < allChars.length; i++) {
       const charStart = charStarts[i];
-      const charEnd = charStart + charWindow;
-
-      // Skip chars that haven't entered their window yet
+      const charEnd   = charStart + charWindow;
       if (progress < charStart) {
-        if (charDone[i] !== 2) {
-          allChars[i].style.filter = 'blur(10px) brightness(300%)';
-          allChars[i].style.opacity = '0';
-          charDone[i] = 2;
-        }
+        if (charDone[i] !== 2) { allChars[i].style.filter = 'blur(10px) brightness(300%)'; allChars[i].style.opacity = '0'; charDone[i] = 2; }
         continue;
       }
-
-      // Skip chars that are fully revealed
       if (progress >= charEnd) {
-        if (charDone[i] !== 1) {
-          allChars[i].style.filter = 'none';
-          allChars[i].style.opacity = '1';
-          charDone[i] = 1;
-        }
+        if (charDone[i] !== 1) { allChars[i].style.filter = 'none'; allChars[i].style.opacity = '1'; charDone[i] = 1; }
         continue;
       }
-
-      // This char is actively transitioning — update it
       charDone[i] = 0;
-      const charProgress = (progress - charStart) / charWindow;
-
-      // Round filter values — avoids sub-pixel recomputation
-      const blur = (10 * (1 - charProgress)) | 0; // integer blur px
-      const brightness = (300 - 200 * charProgress) | 0;
-      const opacity = Math.min(1, charProgress / 0.6);
-
-      allChars[i].style.filter = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
+      const cp         = (progress - charStart) / charWindow;
+      const blur       = (10 * (1 - cp)) | 0;
+      const brightness = (300 - 200 * cp) | 0;
+      const opacity    = Math.min(1, cp / 0.6);
+      allChars[i].style.filter  = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
       allChars[i].style.opacity = opacity >= 1 ? '1' : opacity.toFixed(2);
     }
 
-    // CTA
     if (ctaBtn) {
       if (progress < ctaStart) {
-        if (!ctaDone) {
-          ctaBtn.style.filter = 'blur(8px) brightness(300%)';
-          ctaBtn.style.opacity = '0';
-        }
+        if (!ctaDone) { ctaBtn.style.filter = 'blur(8px) brightness(300%)'; ctaBtn.style.opacity = '0'; }
       } else if (progress >= ctaStart + charWindow) {
-        if (!ctaDone) {
-          ctaBtn.style.filter = 'none';
-          ctaBtn.style.opacity = '1';
-          ctaDone = true;
-        }
+        if (!ctaDone) { ctaBtn.style.filter = 'none'; ctaBtn.style.opacity = '1'; ctaDone = true; }
       } else {
         ctaDone = false;
-        const ctaProgress = (progress - ctaStart) / charWindow;
-        const blur = (8 * (1 - ctaProgress)) | 0;
-        const brightness = (300 - 200 * ctaProgress) | 0;
-        ctaBtn.style.opacity = Math.min(1, ctaProgress / 0.6).toFixed(2);
-        ctaBtn.style.filter = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
+        const cp         = (progress - ctaStart) / charWindow;
+        const blur       = (8 * (1 - cp)) | 0;
+        const brightness = (300 - 200 * cp) | 0;
+        ctaBtn.style.opacity = Math.min(1, cp / 0.6).toFixed(2);
+        ctaBtn.style.filter  = blur > 0 ? `blur(${blur}px) brightness(${brightness}%)` : 'none';
       }
     }
 
-    // Portrait: transform:scale() + borderRadius (no layout reflow)
     if (portraitEl) {
-      const scale = (220 - 80 * progress) / 220; // 1.0 → 0.636
-      const radius = 16 + 34 * progress; // 16% → 50%
-      portraitEl.style.transform = `scale(${scale.toFixed(3)})`;
+      const scale  = (220 - 80 * progress) / 220;
+      const radius = 16 + 34 * progress;
+      portraitEl.style.transform    = `scale(${scale.toFixed(3)})`;
       portraitEl.style.borderRadius = `${radius | 0}%`;
     }
   }
 
   window.addEventListener('scroll', () => {
-    if (!revealTicking) {
-      requestAnimationFrame(scrubBlurReveal);
-      revealTicking = true;
-    }
+    if (!revealTicking) { requestAnimationFrame(scrubBlurReveal); revealTicking = true; }
   }, { passive: true });
+
   }); // end astro:page-load
 </script>
