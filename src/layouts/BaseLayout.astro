@@ -1,0 +1,159 @@
+---
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  showFooter?: boolean;
+}
+
+const {
+  title = "Gavin Batty — Photographer",
+  description = "Professional photography portfolio — weddings, music, food, sport, travel, and portraits.",
+  showFooter = true,
+} = Astro.props;
+
+const isHome = Astro.url.pathname === "/";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alice&family=Averia+Serif+Libre:ital,wght@0,400;0,700;1,400&family=Benne&family=Caudex:ital,wght@0,400;0,700;1,400&family=Domine:wght@400;500;600;700&family=Gilda+Display&family=Inter:wght@300;400;500&family=Kavoon&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,700;1,7..72,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Prata&family=Solway:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Viaoda+Libre&display=swap"
+      rel="stylesheet"
+    />
+    <ClientRouter />
+  </head>
+  <body class:list={[{ "page-home": isHome }]}>
+    <Nav transition:persist />
+    <main transition:name="page" transition:animate="initial">
+      <slot />
+    </main>
+    {showFooter && <Footer transition:persist />}
+
+    <style is:global>
+      /* ===== Page transitions — native View Transitions API =====
+         The browser snapshots old + new states and composites on GPU.
+         No DOM cloning, no ghost divs, no jank. */
+
+      /* Old page fades out — opacity only, GPU-composited, zero jank */
+      ::view-transition-old(page) {
+        animation: page-exit 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+        z-index: 1;
+      }
+
+      /* New page slides up cleanly — opacity + translateY only */
+      ::view-transition-new(page) {
+        animation: page-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        z-index: 2;
+      }
+
+      @keyframes page-exit {
+        to { opacity: 0; }
+      }
+
+      @keyframes page-enter {
+        from {
+          opacity: 0;
+          transform: translateY(6%);
+        }
+      }
+
+      /* Root: instant, no animation */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+      }
+    </style>
+
+    <script>
+      // Back links use history.back() — browser restores exact scroll position
+      document.addEventListener('click', (e) => {
+        const link = (e.target as HTMLElement).closest('[data-back]');
+        if (link && history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+      });
+
+      // Stagger-in content elements after navigation
+      document.addEventListener('astro:page-load', () => {
+        const main = document.querySelector('main');
+        if (!main) return;
+
+        // Gallery page elements
+        const items = main.querySelectorAll('.column__item');
+        if (items.length) {
+          items.forEach((el, i) => {
+            const e = el as HTMLElement;
+            e.animate([
+              { opacity: 0, transform: 'translateY(40px)' },
+              { opacity: 1, transform: 'translateY(0)' }
+            ], {
+              duration: 700,
+              delay: 200 + i * 40,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both'
+            });
+          });
+        }
+
+        // Gallery heading — char reveal
+        const h1 = main.querySelector('.gallery-hero h1');
+        if (h1 && !h1.querySelector('.anim-char')) {
+          const text = h1.textContent || '';
+          const frag = document.createDocumentFragment();
+          for (const ch of text) {
+            if (ch === ' ') {
+              frag.appendChild(document.createTextNode(' '));
+            } else {
+              const s = document.createElement('span');
+              s.className = 'anim-char';
+              s.textContent = ch;
+              s.style.display = 'inline-block';
+              frag.appendChild(s);
+            }
+          }
+          h1.textContent = '';
+          h1.appendChild(frag);
+
+          h1.querySelectorAll('.anim-char').forEach((c, i) => {
+            (c as HTMLElement).animate([
+              { opacity: 0, transform: 'translateY(80%) rotateX(40deg)' },
+              { opacity: 1, transform: 'translateY(0) rotateX(0)' }
+            ], {
+              duration: 1200,
+              delay: 100 + i * 25,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both'
+            });
+          });
+        }
+
+        // Description + back link
+        main.querySelectorAll('.gallery-hero__desc, .gallery-back').forEach((el, i) => {
+          (el as HTMLElement).animate([
+            { opacity: 0, transform: 'translateY(20px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+          ], {
+            duration: 700,
+            delay: 300 + i * 80,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both'
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

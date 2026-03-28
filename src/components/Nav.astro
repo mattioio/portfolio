@@ -1,0 +1,515 @@
+---
+const currentPath = Astro.url.pathname;
+const isHome = currentPath === "/";
+---
+
+<header class:list={["nav", { "nav--light": isHome }]}>
+  <div class="nav__inner">
+    <a href="/" class="nav__logo">Gavin Batty</a>
+    <button class="nav__services-btn" id="open-panel">Services</button>
+    <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Services slide-out panel — available on every page -->
+<div class="panel" id="services-panel" aria-hidden="true">
+  <div class="panel__backdrop"></div>
+  <aside class="panel__drawer">
+    <div class="panel__header">
+      <h2>Services</h2>
+      <button class="panel__close" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel__body">
+
+      <div class="panel__hero">
+        <h3>Get in Touch</h3>
+        <p>Every project starts with a conversation. Tell me what you're working on and I'll come back with a tailored approach.</p>
+        <a href="mailto:hello@gavinbatty.com" class="panel__hero-link">hello@gavinbatty.com</a>
+      </div>
+
+      <div class="panel__rates">
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Half Day</span>
+          <span class="panel__rate-duration">up to 4 hrs</span>
+          <span class="panel__rate-price">From £350</span>
+        </div>
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Full Day</span>
+          <span class="panel__rate-duration">up to 10 hrs</span>
+          <span class="panel__rate-price">From £600</span>
+        </div>
+        <div class="panel__rate-row">
+          <span class="panel__rate-label">Multi-Day</span>
+          <span class="panel__rate-duration">2+ days</span>
+          <span class="panel__rate-price">From £500 / day</span>
+        </div>
+      </div>
+
+      <div class="panel__cards">
+        <div class="panel__card">
+          <h4>Wedding</h4>
+          <p class="panel__note">Intimate elopements to grand celebrations</p>
+          <ul>
+            <li>Full day coverage (up to 10 hours)</li>
+            <li>Second shooter available</li>
+            <li>400+ edited images</li>
+            <li>Highlight slideshow</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Music & Events</h4>
+          <p class="panel__note">Gigs, festivals, and everything in between</p>
+          <ul>
+            <li>Live performance coverage</li>
+            <li>Backstage & candid shots</li>
+            <li>Artist portraits</li>
+            <li>Fast turnaround for press</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Food & Hospitality</h4>
+          <p class="panel__note">Restaurants, bars, hotels, and brands</p>
+          <ul>
+            <li>Menu & dish photography</li>
+            <li>Interior & ambiance shots</li>
+            <li>Social media ready crops</li>
+            <li>Seasonal refresh packages</li>
+          </ul>
+        </div>
+        <div class="panel__card">
+          <h4>Sport</h4>
+          <p class="panel__note">Grassroots to professional level</p>
+          <ul>
+            <li>Match & event coverage</li>
+            <li>Athlete portraits</li>
+            <li>Training & behind-the-scenes</li>
+            <li>Season-long packages</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.25rem 0;
+    transition: background-color 0.3s, backdrop-filter 0.3s;
+  }
+
+  .nav--light {
+    color: #fff;
+  }
+
+  .nav.scrolled {
+    background-color: rgba(245, 244, 240, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--color-text);
+  }
+
+  .nav__inner {
+    padding: 0 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav__logo {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .nav__services-btn {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    color: inherit;
+    position: relative;
+    padding: 0.25rem 0;
+    opacity: 0.85;
+    transition: opacity 0.3s;
+  }
+
+  .nav__services-btn:hover {
+    opacity: 1;
+  }
+
+  .nav__services-btn::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: currentColor;
+    transition: width 0.3s ease;
+  }
+
+  .nav__services-btn:hover::after {
+    width: 100%;
+  }
+
+  .nav__toggle {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px;
+    z-index: 101;
+    color: inherit;
+  }
+
+  .nav__toggle span {
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+
+  .nav__toggle[aria-expanded="true"] span:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+
+  .nav__toggle[aria-expanded="true"] span:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  @media (max-width: 768px) {
+    .nav__inner {
+      padding: 0 1.5rem;
+    }
+
+    .nav__services-btn {
+      display: none;
+    }
+
+    .nav__toggle {
+      display: flex;
+    }
+  }
+
+  /* ===== Slide-out Panel ===== */
+  .panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .panel.active {
+    pointer-events: all;
+  }
+
+  .panel__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+
+  .panel.active .panel__backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+  }
+
+  .panel__drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(520px, 90vw);
+    background: var(--color-bg);
+    transform: translateX(100%);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel.active .panel__drawer {
+    transform: translateX(0);
+  }
+
+  .panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.75rem 2rem 0;
+    flex-shrink: 0;
+  }
+
+  .panel__header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+  }
+
+  .panel__close {
+    font-size: 1.75rem;
+    color: var(--color-text);
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    line-height: 1;
+    padding: 0.25rem;
+  }
+
+  .panel__close:hover {
+    opacity: 1;
+  }
+
+  .panel__body {
+    padding: 1.5rem 2rem 3rem;
+    flex: 1;
+  }
+
+  /* ── Hero CTA card ── */
+  .panel__hero {
+    background: var(--color-bg-dark, #1a1a1a);
+    color: #fff;
+    border-radius: 12px;
+    padding: 2.25rem 2rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .panel__hero h3 {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .panel__hero p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.6;
+    max-width: 34ch;
+    margin: 0 auto 1.25rem;
+  }
+
+  .panel__hero-link {
+    display: inline-block;
+    color: #fff;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    padding-bottom: 2px;
+    transition: border-color 0.2s;
+  }
+
+  .panel__hero-link:hover {
+    border-color: #fff;
+  }
+
+  /* ── Day-rate rows ── */
+  .panel__rates {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel__rate-row {
+    display: flex;
+    align-items: center;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel__rate-row:last-child {
+    border-bottom: none;
+  }
+
+  .panel__rate-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text);
+    width: 7rem;
+    flex-shrink: 0;
+  }
+
+  .panel__rate-duration {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+  }
+
+  .panel__rate-price {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    text-align: right;
+  }
+
+  /* ── Service cards ── */
+  .panel__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .panel__card {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .panel__card:hover {
+    border-color: var(--color-text);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .panel__card h4 {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.1rem;
+  }
+
+  .panel__note {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel__card ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .panel__card li {
+    font-size: 1rem;
+    padding: 0.2rem 0 0.2rem 1.1rem;
+    position: relative;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+
+  .panel__card li::before {
+    content: "\2014";
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    opacity: 0.4;
+  }
+
+  @media (max-width: 768px) {
+    .panel__card ul {
+      grid-template-columns: 1fr;
+    }
+
+    .panel__body {
+      padding: 1.25rem 1.5rem 2.5rem;
+    }
+
+    .panel__hero h3 {
+      font-size: 1.9rem;
+    }
+
+    .panel__rate-price {
+      font-size: 1.05rem;
+    }
+  }
+</style>
+
+<script>
+  // Use an AbortController so scroll/keydown listeners are cleaned up on each navigation
+  let navAC: AbortController | null = null;
+
+  function initNav() {
+    navAC?.abort();
+    navAC = new AbortController();
+    const { signal } = navAC;
+
+    const nav = document.querySelector(".nav") as HTMLElement;
+    const toggle = document.querySelector(".nav__toggle") as HTMLElement;
+    const panel = document.getElementById("services-panel")!;
+
+    if (!nav || !panel) return;
+
+    // ── Reset nav state for the current page ──────────────────────────────
+    const isHome = window.location.pathname === "/";
+    nav.classList.remove("scrolled", "lb-hidden");
+    nav.classList.toggle("nav--light", isHome);
+
+    // ── Panel open / close ────────────────────────────────────────────────
+    function openPanel() {
+      panel.classList.add("active");
+      panel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      toggle?.setAttribute("aria-expanded", "true");
+    }
+
+    function closePanel() {
+      panel.classList.remove("active");
+      panel.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      toggle?.setAttribute("aria-expanded", "false");
+    }
+
+    document.getElementById("open-panel")?.addEventListener("click", openPanel, { signal });
+    document.getElementById("open-services")?.addEventListener("click", openPanel, { signal });
+
+    toggle?.addEventListener("click", () => {
+      panel.classList.contains("active") ? closePanel() : openPanel();
+    }, { signal });
+
+    panel.querySelector(".panel__close")?.addEventListener("click", closePanel, { signal });
+    panel.querySelector(".panel__backdrop")?.addEventListener("click", closePanel, { signal });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
+    }, { signal });
+
+    // ── Scroll behaviour ──────────────────────────────────────────────────
+    const hero = document.querySelector(".hero") as HTMLElement;
+    const revealSection = document.querySelector(".reveal-section") as HTMLElement;
+
+    function updateScrolled() {
+      if (isHome && revealSection) {
+        const card = revealSection.querySelector(".reveal-section__sticky") as HTMLElement;
+        if (card) {
+          nav.classList.toggle("scrolled", card.getBoundingClientRect().top <= 70);
+        }
+      } else {
+        const threshold = hero ? hero.offsetHeight - 100 : 80;
+        nav.classList.toggle("scrolled", window.scrollY > threshold);
+      }
+    }
+
+    window.addEventListener("scroll", updateScrolled, { passive: true, signal });
+
+    // Evaluate immediately so the correct state shows without needing to scroll
+    updateScrolled();
+  }
+
+  // Run on every page load (initial + ClientRouter navigations)
+  document.addEventListener("astro:page-load", initNav);
+</script>
