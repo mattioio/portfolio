@@ -388,65 +388,75 @@ const isHome = currentPath === "/";
 </style>
 
 <script>
-  const nav = document.querySelector(".nav")!;
-  const toggle = document.querySelector(".nav__toggle") as HTMLElement;
-  const panel = document.getElementById("services-panel")!;
+  // Use an AbortController so scroll/keydown listeners are cleaned up on each navigation
+  let navAC: AbortController | null = null;
 
-  // Desktop: Services button opens panel
-  document.getElementById("open-panel")?.addEventListener("click", openPanel);
+  function initNav() {
+    navAC?.abort();
+    navAC = new AbortController();
+    const { signal } = navAC;
 
-  // Mobile: hamburger opens panel too (since Services is hidden on mobile)
-  if (toggle) {
-    toggle.addEventListener("click", () => {
-      if (panel.classList.contains("active")) {
-        closePanel();
-      } else {
-        openPanel();
-      }
-    });
-  }
+    const nav = document.querySelector(".nav") as HTMLElement;
+    const toggle = document.querySelector(".nav__toggle") as HTMLElement;
+    const panel = document.getElementById("services-panel")!;
 
-  // Also open panel from "View Services" button on homepage
-  document.getElementById("open-services")?.addEventListener("click", openPanel);
+    if (!nav || !panel) return;
 
-  function openPanel() {
-    panel.classList.add("active");
-    panel.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-    toggle?.setAttribute("aria-expanded", "true");
-  }
+    // ── Reset nav state for the current page ──────────────────────────────
+    const isHome = window.location.pathname === "/";
+    nav.classList.remove("scrolled", "lb-hidden");
+    nav.classList.toggle("nav--light", isHome);
 
-  function closePanel() {
-    panel.classList.remove("active");
-    panel.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-    toggle?.setAttribute("aria-expanded", "false");
-  }
-
-  // Close triggers
-  panel.querySelector(".panel__close")?.addEventListener("click", closePanel);
-  panel.querySelector(".panel__backdrop")?.addEventListener("click", closePanel);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
-  });
-
-  // Nav scroll behavior — stay light while hero image strip is visible
-  const isLight = nav.classList.contains("nav--light");
-  const hero = document.querySelector(".hero") as HTMLElement;
-  const revealSection = document.querySelector(".reveal-section") as HTMLElement;
-
-  window.addEventListener("scroll", () => {
-    if (isLight && revealSection) {
-      // Switch to dark text when the cream card reaches the nav area
-      const card = revealSection.querySelector('.reveal-section__sticky') as HTMLElement;
-      if (card) {
-        const cardTop = card.getBoundingClientRect().top;
-        // When card top is near the nav height (~70px), switch to scrolled
-        nav.classList.toggle("scrolled", cardTop <= 70);
-      }
-    } else {
-      const threshold = hero ? hero.offsetHeight - 100 : 80;
-      nav.classList.toggle("scrolled", window.scrollY > threshold);
+    // ── Panel open / close ────────────────────────────────────────────────
+    function openPanel() {
+      panel.classList.add("active");
+      panel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      toggle?.setAttribute("aria-expanded", "true");
     }
-  });
+
+    function closePanel() {
+      panel.classList.remove("active");
+      panel.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      toggle?.setAttribute("aria-expanded", "false");
+    }
+
+    document.getElementById("open-panel")?.addEventListener("click", openPanel, { signal });
+    document.getElementById("open-services")?.addEventListener("click", openPanel, { signal });
+
+    toggle?.addEventListener("click", () => {
+      panel.classList.contains("active") ? closePanel() : openPanel();
+    }, { signal });
+
+    panel.querySelector(".panel__close")?.addEventListener("click", closePanel, { signal });
+    panel.querySelector(".panel__backdrop")?.addEventListener("click", closePanel, { signal });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
+    }, { signal });
+
+    // ── Scroll behaviour ──────────────────────────────────────────────────
+    const hero = document.querySelector(".hero") as HTMLElement;
+    const revealSection = document.querySelector(".reveal-section") as HTMLElement;
+
+    function updateScrolled() {
+      if (isHome && revealSection) {
+        const card = revealSection.querySelector(".reveal-section__sticky") as HTMLElement;
+        if (card) {
+          nav.classList.toggle("scrolled", card.getBoundingClientRect().top <= 70);
+        }
+      } else {
+        const threshold = hero ? hero.offsetHeight - 100 : 80;
+        nav.classList.toggle("scrolled", window.scrollY > threshold);
+      }
+    }
+
+    window.addEventListener("scroll", updateScrolled, { passive: true, signal });
+
+    // Evaluate immediately so the correct state shows without needing to scroll
+    updateScrolled();
+  }
+
+  // Run on every page load (initial + ClientRouter navigations)
+  document.addEventListener("astro:page-load", initNav);
 </script>

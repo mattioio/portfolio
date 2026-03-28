@@ -7,11 +7,13 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  showFooter?: boolean;
 }
 
 const {
   title = "Gavin Batty — Photographer",
   description = "Professional photography portfolio — weddings, music, food, sport, travel, and portraits.",
+  showFooter = true,
 } = Astro.props;
 
 const isHome = Astro.url.pathname === "/";
@@ -38,7 +40,7 @@ const isHome = Astro.url.pathname === "/";
     <main transition:name="page" transition:animate="initial">
       <slot />
     </main>
-    <Footer transition:persist />
+    {showFooter && <Footer transition:persist />}
 
     <style is:global>
       /* ===== Page transitions — native View Transitions API =====
