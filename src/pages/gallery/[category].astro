@@ -253,7 +253,13 @@ images.forEach((src, i) => {
   .gallery-back__arrow {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: 2px;
+  }
+
+  /* Benne has its cap-height centre ~0.2em above the em-square centre;
+     nudge the text span down to optically align with SVG icons */
+  .gallery-back span,
+  .cat-pagination__arrow span {
+    translate: 0 0.2em;
   }
 
   .gallery-back:hover {

@@ -275,7 +275,12 @@ import { categories, getImagesForCategory } from "../data/categories";
   .ov-back__arrow {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-top: 2px;
+  }
+
+  /* Benne cap-height offset — nudge text down to align with SVG icons */
+  .ov-back span,
+  .ov-cat-pagination a span {
+    translate: 0 0.2em;
   }
 
   .ov-back:hover {
