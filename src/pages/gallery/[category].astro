@@ -219,6 +219,8 @@ images.forEach((src, i) => {
     overflow: hidden;
     border-radius: 6px;
     position: relative;
+    /* Ensure border-radius clips even when column is on its own GPU layer */
+    transform: translateZ(0);
   }
 
   .column__item-img {

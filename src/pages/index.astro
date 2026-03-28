@@ -396,6 +396,8 @@ import { categories, getImagesForCategory } from "../data/categories";
   .ov-item__wrap {
     overflow: hidden;
     border-radius: 6px;
+    /* Force own compositing layer so border-radius clips correctly when parent column animates */
+    transform: translateZ(0);
   }
 
   .ov-item__wrap img {
