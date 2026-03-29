@@ -146,25 +146,6 @@ document.addEventListener('astro:page-load', () => {
     }, 300);
   }
 
-  // ── Toolbar auto-hide on mobile ──
-  let hideTimer: ReturnType<typeof setTimeout> | null = null;
-  const isMobile = () => window.innerWidth <= 600;
-
-  function showToolbar() {
-    toolbar?.classList.remove('hidden');
-    restartHideTimer();
-  }
-
-  function restartHideTimer() {
-    if (hideTimer) clearTimeout(hideTimer);
-    if (!isMobile()) return;
-    hideTimer = setTimeout(() => {
-      // Don't hide if zoomed — user may need controls
-      if (scale > 1) return;
-      toolbar?.classList.add('hidden');
-    }, 3000);
-  }
-
   const navEl = document.querySelector('.nav') as HTMLElement | null;
 
   function open(index: number) {
@@ -175,7 +156,6 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "hidden";
     if (navEl) navEl.style.display = 'none';
     if (catBar) catBar.style.display = 'none';
-    showToolbar();
     showGestureHint();
   }
 
@@ -185,7 +165,6 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "";
     if (navEl) navEl.style.display = '';
     if (catBar) catBar.style.display = '';
-    if (hideTimer) clearTimeout(hideTimer);
     resetTransform();
   }
 
@@ -207,7 +186,6 @@ document.addEventListener('astro:page-load', () => {
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
-    showToolbar();
   }
 
   function prev() {
@@ -215,7 +193,6 @@ document.addEventListener('astro:page-load', () => {
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
-    showToolbar();
   }
 
   items.forEach((item, i) => {
@@ -226,16 +203,10 @@ document.addEventListener('astro:page-load', () => {
   lightbox.querySelector(".lightbox__prev")!.addEventListener("click", prev);
   lightbox.querySelector(".lightbox__next")!.addEventListener("click", next);
 
-  // Tap on image area (not toolbar) — toggle toolbar on mobile, close on desktop
+  // Tap on dark area to close
   lightbox.querySelector('.lightbox__image-wrap')!.addEventListener("click", (e) => {
     if (e.target === lbImg || (e.target as Element).classList.contains("lightbox__image-wrap")) {
-      if (isMobile()) {
-        // Toggle toolbar visibility
-        toolbar?.classList.toggle('hidden');
-        if (!toolbar?.classList.contains('hidden')) restartHideTimer();
-      } else {
-        close();
-      }
+      close();
     }
   });
 
@@ -377,7 +348,6 @@ document.addEventListener('astro:page-load', () => {
         lbImg.style.transition = 'transform 0.3s ease';
         lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
       }
-      showToolbar();
     }
     lastTap = now;
   });
