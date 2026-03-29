@@ -36,34 +36,8 @@ images.forEach((src, i) => {
 >
   <section class="gallery-hero">
     <div class="container">
-      <a href={`${base}/`} class="gallery-back">
-        <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 17L7 7M7 7H17M7 7V17"/>
-        </svg>
-        <span>Close</span>
-      </a>
-
       <h1 transition:name="gallery-title">{category.name}</h1>
       <p class="gallery-hero__desc" transition:name="gallery-desc">{category.description}</p>
-
-      <!-- Mobile-only category pagination -->
-      <nav class="cat-pagination" aria-label="Browse categories">
-        {prevCategory
-          ? <a href={`${base}/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              <span>{prevCategory.name}</span>
-            </a>
-          : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
-        }
-        <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
-        {nextCategory
-          ? <a href={`${base}/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
-              <span>{nextCategory.name}</span>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-          : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
-        }
-      </nav>
     </div>
   </section>
 
@@ -145,7 +119,12 @@ images.forEach((src, i) => {
         </a>
       : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
     }
-    <span class="cat-pagination__pos">{categoryIndex + 1} / {categories.length}</span>
+    <a href={`${base}/`} class="gallery-back">
+      <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 17L7 7M7 7H17M7 7V17"/>
+      </svg>
+      <span>Close</span>
+    </a>
     {nextCategory
       ? <a href={`${base}/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
           <span>{nextCategory.name}</span>
@@ -186,14 +165,6 @@ images.forEach((src, i) => {
   .gallery-hero {
     padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
     text-align: center;
-  }
-
-  /* ── Category pagination ── */
-  .cat-pagination {
-    display: inline-flex;
-    align-items: center;
-    gap: 2rem;
-    margin-top: 1.5rem;
   }
 
   @media (max-width: 600px) {
@@ -240,48 +211,47 @@ images.forEach((src, i) => {
     color: var(--color-text);
   }
 
-  .cat-pagination__pos {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--color-text-muted);
-  }
-
   .gallery-back {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     font-family: var(--font-body);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     color: var(--color-text-muted);
     text-decoration: none;
-    margin-bottom: var(--space-md);
-    opacity: 0.55;
-    transition: opacity 0.25s ease, gap 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 100px;
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
   }
 
   .gallery-back__arrow {
     flex-shrink: 0;
+    width: 14px;
+    height: 14px;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Benne has its cap-height centre ~0.2em above the em-square centre;
-     nudge the text span down to optically align with SVG icons */
-  .gallery-back span,
   .cat-pagination__arrow span {
     translate: 0 0.2em;
   }
 
+  .gallery-back span {
+    translate: 0 0.15em;
+  }
+
   .gallery-back:hover {
-    opacity: 1;
-    gap: 0.85rem;
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: var(--color-text);
   }
 
   .gallery-back:hover .gallery-back__arrow {
-    transform: translate(-3px, -3px);
+    transform: translate(-2px, -2px);
   }
 
   .gallery-hero h1 {
