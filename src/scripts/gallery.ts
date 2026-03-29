@@ -6,7 +6,11 @@
 document.addEventListener('astro:page-load', () => {
   // ===== Per-image fade-in on load =====
   document.querySelectorAll<HTMLImageElement>('.column__item-img').forEach(img => {
-    const show = () => img.classList.add('loaded');
+    const show = () => {
+      img.classList.add('loaded');
+      const wrap = img.closest('.column__item-imgwrap');
+      if (wrap) wrap.classList.add('revealed');
+    };
     if (img.complete && img.naturalWidth > 0) {
       show();
     } else {
@@ -54,11 +58,19 @@ document.addEventListener('astro:page-load', () => {
     }
   });
 
-  // Back to top
+  // Back to top — hide when page isn't scrollable
   const backToTop = document.getElementById('back-to-top');
   backToTop?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  function updateTopVisibility() {
+    if (!backToTop) return;
+    const isScrollable = document.documentElement.scrollHeight > window.innerHeight + 100;
+    backToTop.style.visibility = isScrollable ? '' : 'hidden';
+  }
+  updateTopVisibility();
+  window.addEventListener('resize', updateTopVisibility, { passive: true });
 
   // ===== On-scroll column animation (Codrops style) =====
   const columnEls = Array.from(document.querySelectorAll('.column')) as HTMLElement[];
@@ -107,6 +119,8 @@ document.addEventListener('astro:page-load', () => {
 
   const lbImg = lightbox.querySelector(".lightbox__img") as HTMLImageElement;
   const lbCounter = lightbox.querySelector(".lightbox__counter")!;
+  const lbHint = lightbox.querySelector(".lightbox__hint") as HTMLElement | null;
+  const toolbar = document.getElementById("lb-toolbar");
   const items = document.querySelectorAll<HTMLElement>(".column__item");
   const sources: string[] = [];
   let currentIndex = 0;
@@ -115,18 +129,40 @@ document.addEventListener('astro:page-load', () => {
     sources.push(item.dataset.src || "");
   });
 
-  // Swipe hint — show once per session on mobile
-  const swipeHint = lightbox.querySelector('.lightbox__swipe-hint') as HTMLElement | null;
-  let hintShown = sessionStorage.getItem('lb-swipe-hint') === '1';
+  // ── Gesture hint — show once per session on mobile, crossfades with counter ──
+  let hintShown = sessionStorage.getItem('lb-hint') === '1';
 
-  function showSwipeHint() {
-    if (hintShown || !swipeHint || window.innerWidth > 600) return;
+  function showGestureHint() {
+    if (hintShown || !lbHint || window.innerWidth > 600) return;
     hintShown = true;
-    sessionStorage.setItem('lb-swipe-hint', '1');
+    sessionStorage.setItem('lb-hint', '1');
     setTimeout(() => {
-      swipeHint.classList.add('visible');
-      setTimeout(() => swipeHint.classList.remove('visible'), 2500);
-    }, 400);
+      lbHint.classList.add('visible');
+      lbCounter.classList.add('hint-hidden');
+      setTimeout(() => {
+        lbHint.classList.remove('visible');
+        lbCounter.classList.remove('hint-hidden');
+      }, 2500);
+    }, 300);
+  }
+
+  // ── Toolbar auto-hide on mobile ──
+  let hideTimer: ReturnType<typeof setTimeout> | null = null;
+  const isMobile = () => window.innerWidth <= 600;
+
+  function showToolbar() {
+    toolbar?.classList.remove('hidden');
+    restartHideTimer();
+  }
+
+  function restartHideTimer() {
+    if (hideTimer) clearTimeout(hideTimer);
+    if (!isMobile()) return;
+    hideTimer = setTimeout(() => {
+      // Don't hide if zoomed — user may need controls
+      if (scale > 1) return;
+      toolbar?.classList.add('hidden');
+    }, 3000);
   }
 
   const navEl = document.querySelector('.nav') as HTMLElement | null;
@@ -139,7 +175,8 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "hidden";
     if (navEl) navEl.style.display = 'none';
     if (catBar) catBar.style.display = 'none';
-    showSwipeHint();
+    showToolbar();
+    showGestureHint();
   }
 
   function close() {
@@ -148,6 +185,7 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "";
     if (navEl) navEl.style.display = '';
     if (catBar) catBar.style.display = '';
+    if (hideTimer) clearTimeout(hideTimer);
     resetTransform();
   }
 
@@ -155,6 +193,7 @@ document.addEventListener('astro:page-load', () => {
     lbImg.src = sources[currentIndex];
     lbImg.alt = `Photo ${currentIndex + 1} of ${sources.length}`;
     lbCounter.textContent = `${currentIndex + 1} / ${sources.length}`;
+    // Preload adjacent
     [currentIndex - 1, currentIndex + 1].forEach((i) => {
       if (i >= 0 && i < sources.length) {
         const img = new Image();
@@ -168,6 +207,7 @@ document.addEventListener('astro:page-load', () => {
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
+    showToolbar();
   }
 
   function prev() {
@@ -175,6 +215,7 @@ document.addEventListener('astro:page-load', () => {
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
+    showToolbar();
   }
 
   items.forEach((item, i) => {
@@ -185,9 +226,16 @@ document.addEventListener('astro:page-load', () => {
   lightbox.querySelector(".lightbox__prev")!.addEventListener("click", prev);
   lightbox.querySelector(".lightbox__next")!.addEventListener("click", next);
 
-  lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox || (e.target as Element).classList.contains("lightbox__image-wrap")) {
-      close();
+  // Tap on image area (not toolbar) — toggle toolbar on mobile, close on desktop
+  lightbox.querySelector('.lightbox__image-wrap')!.addEventListener("click", (e) => {
+    if (e.target === lbImg || (e.target as Element).classList.contains("lightbox__image-wrap")) {
+      if (isMobile()) {
+        // Toggle toolbar visibility
+        toolbar?.classList.toggle('hidden');
+        if (!toolbar?.classList.contains('hidden')) restartHideTimer();
+      } else {
+        close();
+      }
     }
   });
 
@@ -329,6 +377,7 @@ document.addEventListener('astro:page-load', () => {
         lbImg.style.transition = 'transform 0.3s ease';
         lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
       }
+      showToolbar();
     }
     lastTap = now;
   });
