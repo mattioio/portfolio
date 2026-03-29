@@ -1,13 +1,12 @@
 ---
 import ServicePanel from "./ServicePanel.astro";
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentPath = Astro.url.pathname;
-const isHome = currentPath === "/" || currentPath === `${base}/` || currentPath === base;
+const isHome = currentPath === "/";
 ---
 
 <header class:list={["nav", { "nav--light": isHome }]}>
   <div class="nav__inner">
-    <a href={`${base}/`} class="nav__logo">Gavin Batty</a>
+    <a href="/" class="nav__logo">Gavin Batty</a>
     <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
       <span></span>
       <span></span>
@@ -122,8 +121,7 @@ const isHome = currentPath === "/" || currentPath === `${base}/` || currentPath 
     if (!nav || !panel) return;
 
     // ── Reset nav state for the current page ──────────────────────────────
-    const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-    const isHome = window.location.pathname === basePath + '/' || window.location.pathname === basePath;
+    const isHome = window.location.pathname === '/';
     nav.classList.remove("scrolled", "lb-hidden");
     nav.classList.toggle("nav--light", isHome);
 

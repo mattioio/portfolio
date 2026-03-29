@@ -5,7 +5,6 @@ import lqipData from "../../data/lqip.json";
 import imageManifest from "../../data/image-manifest.json";
 import type { GetStaticPaths } from "astro";
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 export const getStaticPaths: GetStaticPaths = () => {
   return categories.map((cat) => ({
@@ -52,7 +51,7 @@ images.forEach((src, i) => {
               <button
                 class="column__item"
                 data-index={globalIndex}
-                data-src={`${base}${src}`}
+                data-src={src}
                 aria-label={`View ${category.name} photo ${globalIndex + 1}`}
               >
                 <div
@@ -65,12 +64,12 @@ images.forEach((src, i) => {
                   <picture>
                     {imageManifest[src as keyof typeof imageManifest]?.webp && (
                       <source
-                        srcset={`${base}${imageManifest[src as keyof typeof imageManifest].webp}`}
+                        srcset={imageManifest[src as keyof typeof imageManifest].webp}
                         type="image/webp"
                       />
                     )}
                     <img
-                      src={`${base}${src}`}
+                      src={src}
                       alt={`${category.name} photo ${globalIndex + 1}`}
                       width={imageManifest[src as keyof typeof imageManifest]?.width}
                       height={imageManifest[src as keyof typeof imageManifest]?.height}
@@ -92,14 +91,14 @@ images.forEach((src, i) => {
   <nav class="cat-bar" id="cat-bar" aria-label="Gallery navigation">
     <div class="cat-bar__inner">
       {prevCategory
-        ? <a href={`${base}/gallery/${prevCategory.slug}`} class="cat-bar__arrow" aria-label={`Previous: ${prevCategory.name}`}>
+        ? <a href={`/gallery/${prevCategory.slug}`} class="cat-bar__arrow" aria-label={`Previous: ${prevCategory.name}`}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </a>
         : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
       }
       <span class="cat-bar__title">{category.name}</span>
       {nextCategory
-        ? <a href={`${base}/gallery/${nextCategory.slug}`} class="cat-bar__arrow" aria-label={`Next: ${nextCategory.name}`}>
+        ? <a href={`/gallery/${nextCategory.slug}`} class="cat-bar__arrow" aria-label={`Next: ${nextCategory.name}`}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
@@ -113,20 +112,20 @@ images.forEach((src, i) => {
   <!-- Bottom category pagination -->
   <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
     {prevCategory
-      ? <a href={`${base}/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+      ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           <span>{prevCategory.name}</span>
         </a>
       : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
     }
-    <a href={`${base}/`} class="gallery-back">
+    <a href="/" class="gallery-back">
       <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 17L7 7M7 7H17M7 7V17"/>
       </svg>
       <span>Close</span>
     </a>
     {nextCategory
-      ? <a href={`${base}/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+      ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
           <span>{nextCategory.name}</span>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
