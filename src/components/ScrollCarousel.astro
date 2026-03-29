@@ -203,6 +203,8 @@ const count = slides.length;
   /* Cursor dot — morphs to nav arrows at edges */
   .hero__dot {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -211,7 +213,7 @@ const count = slides.length;
     z-index: 20;
     transform: translate(-50%, -50%) scale(0);
     opacity: 0;
-    will-change: translate;
+    will-change: transform;
     mix-blend-mode: difference;
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 height 0.3s cubic-bezier(0.16, 1, 0.3, 1),

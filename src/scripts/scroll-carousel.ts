@@ -5,6 +5,7 @@
  * Extracted from ScrollCarousel.astro for maintainability.
  * Expects the carousel DOM to be present on the page.
  */
+import { createSmoothCursor } from './smooth-cursor';
 
 // Module-level controller — persists across page navigations.
 // Aborted in astro:before-preparation so the old scroll/wheel/etc listeners
@@ -313,10 +314,11 @@ document.addEventListener('astro:page-load', () => {
   });
 
   // ===== CURSOR DOT =====
-  let cursorX = 0, cursorY = 0;
-  let targetX = 0, targetY = 0;
-  let cursorVisible = false;
-  let cursorRaf: number;
+  const cursor = createSmoothCursor({
+    el: dotEl,
+    container: stickyEl,
+    extraClasses: ['show-label', 'arrow-left', 'arrow-right', 'eye-mode'],
+  });
 
   // Hide the custom cursor entirely when touch input is used;
   // restore it as soon as a real mouse move is detected (handles hybrids).
@@ -325,16 +327,12 @@ document.addEventListener('astro:page-load', () => {
   function enterTouchMode() {
     if (isTouchInput) return;
     isTouchInput = true;
-    cursorVisible = false;
-    dotEl.classList.remove('visible', 'show-label', 'arrow-left', 'arrow-right', 'eye-mode');
-    stickyEl.classList.remove('cursor-active');
-    cancelAnimationFrame(cursorRaf);
+    cursor.hide();
   }
 
   function enterMouseMode() {
     if (!isTouchInput) return;
     isTouchInput = false;
-    // mouseenter will re-show the dot once the pointer enters the carousel
   }
 
   window.addEventListener('touchstart', enterTouchMode, { passive: true, signal });
@@ -357,22 +355,16 @@ document.addEventListener('astro:page-load', () => {
     }
   }
 
-  stickyEl.addEventListener('mouseenter', () => {
+  stickyEl.addEventListener('mouseenter', (e) => {
     if (isTouchInput) return;
-    cursorVisible = true;
-    lastCursorTime = 0; // reset so first frame doesn't get a stale dt
-    dotEl.classList.add('visible');
-    stickyEl.classList.add('cursor-active');
-    requestAnimationFrame(animateCursor);
+    cursor.show(e.clientX, e.clientY);
     updateDotLabel();
   });
 
   stickyEl.addEventListener('mouseleave', () => {
     if (isTouchInput) return;
-    cursorVisible = false;
-    dotEl.classList.remove('visible', 'on-active', 'show-label');
-    stickyEl.classList.remove('cursor-active');
-    cancelAnimationFrame(cursorRaf);
+    cursor.hide();
+    dotEl.classList.remove('on-active');
   });
 
   let dotMode: 'dot' | 'arrow-left' | 'arrow-right' = 'dot';
@@ -394,8 +386,7 @@ document.addEventListener('astro:page-load', () => {
 
   stickyEl.addEventListener('mousemove', (e) => {
     if (isTouchInput) return;
-    targetX = e.clientX;
-    targetY = e.clientY;
+    cursor.moveTo(e.clientX, e.clientY);
 
     const isOverPagination = pointInRect(e.clientX, e.clientY, paginationRect, 10);
     const isOverText = pointInRect(e.clientX, e.clientY, textRect, 15);
@@ -461,25 +452,10 @@ document.addEventListener('astro:page-load', () => {
     heroTextEl.addEventListener('click', navigateToGallery);
   }
 
-  let lastCursorTime = 0;
-  function animateCursor(now: number) {
-    if (!lastCursorTime) lastCursorTime = now;
-    const dt = (now - lastCursorTime) / 1000;
-    lastCursorTime = now;
-    // Exponential smoothing — frame-rate independent, consistent feel at 60/120/240 Hz
-    const speed = 14; // higher = snappier, lower = more trailing
-    const factor = 1 - Math.exp(-speed * dt);
-    cursorX += (targetX - cursorX) * factor;
-    cursorY += (targetY - cursorY) * factor;
-    // CSS `translate` property composes with `transform` independently — GPU only, no layout
-    dotEl.style.translate = `${cursorX}px ${cursorY}px`;
-    if (cursorVisible) cursorRaf = requestAnimationFrame(animateCursor);
-  }
-
   function updateDotLabel() {
     const isSettled = Math.abs(lastT) < 0.05 || (currentSlide === slideCount - 1 && lastT > 0.95);
     const isArrow = dotMode !== 'dot';
-    dotEl.classList.toggle('show-label', isSettled && cursorVisible && !isArrow);
+    dotEl.classList.toggle('show-label', isSettled && cursor.visible && !isArrow);
   }
 
   // ===== SCROLL SNAP =====

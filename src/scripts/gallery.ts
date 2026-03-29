@@ -2,6 +2,7 @@
  * Gallery page script — image loading, sticky bar, scroll animation, lightbox.
  * Extracted from [category].astro for maintainability.
  */
+import { createSmoothCursor } from './smooth-cursor';
 
 document.addEventListener('astro:page-load', () => {
   // ===== Per-image fade-in on load =====
@@ -114,78 +115,36 @@ document.addEventListener('astro:page-load', () => {
   updateScrollAnimation();
 
   // ===== Gallery Eye Cursor (desktop) =====
-  const galCursor = document.getElementById('gallery-cursor');
+  const galCursorEl = document.getElementById('gallery-cursor');
   const columnsWrap = document.querySelector('.columns-wrap') as HTMLElement | null;
   const columnsEl = document.querySelector('[data-columns]') as HTMLElement | null;
 
-  let _hideGalCursorFn: (() => void) | null = null;
+  let galCursor: import('./smooth-cursor').SmoothCursor | null = null;
 
-  if (galCursor && columnsWrap && columnsEl && window.matchMedia('(min-width: 769px)').matches) {
-    let gcx = 0, gcy = 0, gtx = 0, gty = 0;
-    let gcVis = false;
-    let gcRaf = 0;
-    let gcLastTime = 0;
+  if (galCursorEl && columnsWrap && columnsEl && window.matchMedia('(min-width: 769px)').matches) {
+    galCursor = createSmoothCursor({ el: galCursorEl, container: columnsWrap });
+
     let overImage = false;
 
-    function animateGalCursor(now: number) {
-      if (!gcLastTime) gcLastTime = now;
-      const dt = (now - gcLastTime) / 1000;
-      gcLastTime = now;
-      const factor = 1 - Math.exp(-14 * dt);
-      gcx += (gtx - gcx) * factor;
-      gcy += (gty - gcy) * factor;
-      galCursor!.style.left = `${gcx}px`;
-      galCursor!.style.top = `${gcy}px`;
-      if (gcVis) gcRaf = requestAnimationFrame(animateGalCursor);
-    }
-
-    function showGalCursor(e: MouseEvent) {
-      if (gcVis) return;
-      gcx = e.clientX; gcy = e.clientY;
-      gtx = e.clientX; gty = e.clientY;
-      galCursor!.style.left = `${gcx}px`;
-      galCursor!.style.top = `${gcy}px`;
-      gcVis = true;
-      gcLastTime = 0;
-      galCursor!.classList.add('visible');
-      columnsWrap!.classList.add('cursor-active');
-      requestAnimationFrame(animateGalCursor);
-    }
-
-    function hideGalCursor() {
-      gcVis = false;
-      overImage = false;
-      galCursor!.classList.remove('visible');
-      columnsWrap!.classList.remove('cursor-active');
-      cancelAnimationFrame(gcRaf);
-    }
-
-    // Expose so lightbox open/close can call it
-    _hideGalCursorFn = hideGalCursor;
-
-    // Track mouse over the columns area
     columnsEl.addEventListener('mousemove', (e) => {
-      gtx = e.clientX;
-      gty = e.clientY;
+      galCursor!.moveTo(e.clientX, e.clientY);
 
-      // Check if over an image item
       const target = (e.target as Element).closest('.column__item');
       if (target) {
         if (!overImage) {
           overImage = true;
-          showGalCursor(e);
+          galCursor!.show(e.clientX, e.clientY);
         }
-      } else {
-        if (overImage) {
-          hideGalCursor();
-        }
+      } else if (overImage) {
+        overImage = false;
+        galCursor!.hide();
       }
     });
 
-    columnsEl.addEventListener('mouseleave', hideGalCursor);
-
-    // Hide on touch
-    window.addEventListener('touchstart', hideGalCursor, { passive: true });
+    columnsEl.addEventListener('mouseleave', () => {
+      overImage = false;
+      galCursor!.hide();
+    });
   }
 
   // ===== Lightbox =====
@@ -234,7 +193,7 @@ document.addEventListener('astro:page-load', () => {
     if (navEl) navEl.style.display = 'none';
     if (catBar) catBar.style.display = 'none';
     // Hide gallery eye cursor when lightbox opens
-    _hideGalCursorFn?.();
+    galCursor?.hide();
     showGestureHint();
   }
 
@@ -245,7 +204,7 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "";
     if (navEl) navEl.style.display = '';
     if (catBar) catBar.style.display = '';
-    if (lbCursor) lbCursor.classList.remove('visible', 'arrow-left', 'arrow-right');
+    document.getElementById('lb-cursor')?.classList.remove('visible', 'arrow-left', 'arrow-right');
     resetTransform();
     resetStaging();
   }
@@ -718,85 +677,46 @@ document.addEventListener('astro:page-load', () => {
   });
 
   // ===== Desktop custom cursor (dot + arrows) =====
-  const lbCursor = document.getElementById('lb-cursor');
-  if (lbCursor && window.matchMedia('(min-width: 601px)').matches) {
-    let cx = 0, cy = 0, tx = 0, ty = 0;
-    let cursorVis = false;
-    let cursorRaf = 0;
-    let lastCurTime = 0;
-    const edgeZone = 0.2;
+  const lbCursorEl = document.getElementById('lb-cursor');
+  if (lbCursorEl && window.matchMedia('(min-width: 601px)').matches) {
+    const lbCursor = createSmoothCursor({
+      el: lbCursorEl,
+      container: lightbox,
+      extraClasses: ['arrow-left', 'arrow-right'],
+    });
 
-    function animateLbCursor(now: number) {
-      if (!lastCurTime) lastCurTime = now;
-      const dt = (now - lastCurTime) / 1000;
-      lastCurTime = now;
-      const factor = 1 - Math.exp(-14 * dt);
-      cx += (tx - cx) * factor;
-      cy += (ty - cy) * factor;
-      lbCursor!.style.left = `${cx}px`;
-      lbCursor!.style.top = `${cy}px`;
-      if (cursorVis) cursorRaf = requestAnimationFrame(animateLbCursor);
-    }
+    const edgeZone = 0.2;
 
     function updateCursorMode(x: number) {
       const pct = x / window.innerWidth;
       if (pct < edgeZone && canGoPrev()) {
-        lbCursor!.classList.add('arrow-left');
-        lbCursor!.classList.remove('arrow-right');
+        lbCursorEl.classList.add('arrow-left');
+        lbCursorEl.classList.remove('arrow-right');
       } else if (pct > (1 - edgeZone) && canGoNext()) {
-        lbCursor!.classList.remove('arrow-left');
-        lbCursor!.classList.add('arrow-right');
+        lbCursorEl.classList.remove('arrow-left');
+        lbCursorEl.classList.add('arrow-right');
       } else {
-        lbCursor!.classList.remove('arrow-left', 'arrow-right');
+        lbCursorEl.classList.remove('arrow-left', 'arrow-right');
       }
     }
 
     imageWrap.addEventListener('mouseenter', (e) => {
-      // Snap cursor to mouse position immediately on enter (no fly-in from 0,0)
-      cx = e.clientX; cy = e.clientY;
-      tx = e.clientX; ty = e.clientY;
-      lbCursor!.style.left = `${cx}px`;
-      lbCursor!.style.top = `${cy}px`;
-      cursorVis = true;
-      lastCurTime = 0;
-      lbCursor!.classList.add('visible');
-      lightbox.classList.add('cursor-active');
+      lbCursor.show(e.clientX, e.clientY);
       updateCursorMode(e.clientX);
-      requestAnimationFrame(animateLbCursor);
     });
 
-    imageWrap.addEventListener('mouseleave', () => {
-      cursorVis = false;
-      lbCursor!.classList.remove('visible', 'arrow-left', 'arrow-right');
-      lightbox.classList.remove('cursor-active');
-      cancelAnimationFrame(cursorRaf);
-    });
+    imageWrap.addEventListener('mouseleave', () => lbCursor.hide());
 
     imageWrap.addEventListener('mousemove', (e) => {
-      tx = e.clientX;
-      ty = e.clientY;
+      lbCursor.moveTo(e.clientX, e.clientY);
       updateCursorMode(e.clientX);
     });
 
-    toolbar?.addEventListener('mouseenter', () => {
-      cursorVis = false;
-      lbCursor!.classList.remove('visible', 'arrow-left', 'arrow-right');
-      lightbox.classList.remove('cursor-active');
-      cancelAnimationFrame(cursorRaf);
-    });
+    toolbar?.addEventListener('mouseenter', () => lbCursor.hide());
     toolbar?.addEventListener('mouseleave', (e) => {
       if (lightbox.classList.contains('active')) {
-        // Snap to current mouse position and restart tracking
-        cx = e.clientX; cy = e.clientY;
-        tx = e.clientX; ty = e.clientY;
-        lbCursor!.style.left = `${cx}px`;
-        lbCursor!.style.top = `${cy}px`;
-        cursorVis = true;
-        lastCurTime = 0;
-        lbCursor!.classList.add('visible');
-        lightbox.classList.add('cursor-active');
+        lbCursor.show(e.clientX, e.clientY);
         updateCursorMode(e.clientX);
-        requestAnimationFrame(animateLbCursor);
       }
     });
   }
