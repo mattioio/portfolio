@@ -307,7 +307,13 @@ document.addEventListener('astro:page-load', () => {
           const progress = Math.min(1, dy / (window.innerHeight * 0.4));
           lbImg.style.transition = 'none';
           lbImg.style.transform = `translateY(${dy}px) scale(${1 - progress * 0.08})`;
-          lightbox.style.backgroundColor = `rgba(0, 0, 0, ${1 - progress * 0.5})`;
+          lightbox.style.backgroundColor = `rgba(0, 0, 0, ${1 - progress * 0.6})`;
+          // Slide toolbar down with drag
+          if (toolbar) {
+            toolbar.style.transition = 'none';
+            toolbar.style.transform = `translateY(${progress * 100}%)`;
+            toolbar.style.opacity = String(1 - progress);
+          }
         }
       }
     }
@@ -340,30 +346,60 @@ document.addEventListener('astro:page-load', () => {
         // Swipe down release
         isDraggingDown = false;
         swipeDir = null;
+        const spring = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
         if (dy > 120) {
-          // Dismiss — animate out with spring
+          // Dismiss — animate out
           swipeLocked = true;
-          lbImg.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1)';
+          // Restore page elements early so they're visible behind the fading lightbox
+          document.body.style.overflow = "";
+          if (navEl) navEl.style.display = '';
+          if (catBar) catBar.style.display = '';
+
+          lbImg.style.transition = `transform 0.35s ${spring}`;
           lbImg.style.transform = `translateY(${window.innerHeight}px) scale(0.85)`;
-          lightbox.style.transition = 'background-color 0.35s ease';
+          lightbox.style.transition = 'opacity 0.3s ease, background-color 0.3s ease';
           lightbox.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+          lightbox.style.opacity = '0';
+          if (toolbar) {
+            toolbar.style.transition = `transform 0.3s ${spring}, opacity 0.3s ease`;
+            toolbar.style.transform = 'translateY(100%)';
+            toolbar.style.opacity = '0';
+          }
           setTimeout(() => {
-            close();
+            // Full reset without re-triggering close animations
+            lightbox.classList.remove("active");
+            lightbox.setAttribute("aria-hidden", "true");
+            resetTransform();
             lbImg.style.transition = '';
             lbImg.style.transform = '';
             lightbox.style.transition = '';
             lightbox.style.backgroundColor = '';
+            lightbox.style.opacity = '';
+            if (toolbar) {
+              toolbar.style.transition = '';
+              toolbar.style.transform = '';
+              toolbar.style.opacity = '';
+            }
             swipeLocked = false;
           }, 350);
         } else {
           // Bounce back
-          lbImg.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          const bounce = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+          lbImg.style.transition = `transform 0.4s ${bounce}`;
           lbImg.style.transform = '';
           lightbox.style.transition = 'background-color 0.3s ease';
           lightbox.style.backgroundColor = '';
+          if (toolbar) {
+            toolbar.style.transition = `transform 0.4s ${bounce}, opacity 0.3s ease`;
+            toolbar.style.transform = '';
+            toolbar.style.opacity = '';
+          }
           setTimeout(() => {
             lbImg.style.transition = '';
             lightbox.style.transition = '';
+            if (toolbar) {
+              toolbar.style.transition = '';
+            }
           }, 400);
         }
         return;
