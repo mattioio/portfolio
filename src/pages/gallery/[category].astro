@@ -35,6 +35,12 @@ images.forEach((src, i) => {
 >
   <section class="gallery-hero">
     <div class="container">
+      <a href="/" class="gallery-hero__close">
+        <svg class="gallery-hero__close-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 17L7 7M7 7H17M7 7V17"/>
+        </svg>
+        <span>Close</span>
+      </a>
       <h1 transition:name="gallery-title">{category.name}</h1>
       <p class="gallery-hero__desc" transition:name="gallery-desc">{category.description}</p>
     </div>
@@ -87,8 +93,30 @@ images.forEach((src, i) => {
     </div>
   </section>
 
-  <!-- Sticky category bar — appears on scroll -->
+  <!-- Bottom navigation bar — slides up on scroll -->
   <nav class="cat-bar" id="cat-bar" aria-label="Gallery navigation">
+    <!-- Category menu drawer -->
+    <div class="cat-bar__menu" id="cat-menu">
+      <ul class="cat-bar__menu-list">
+        {categories.map((cat) => (
+          <li>
+            <a
+              href={`/gallery/${cat.slug}`}
+              class:list={["cat-bar__menu-link", { "cat-bar__menu-link--active": cat.slug === category.slug }]}
+            >
+              {cat.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a href="/" class="cat-bar__menu-close">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 17L7 7M7 7H17M7 7V17"/>
+        </svg>
+        Close
+      </a>
+    </div>
+    <!-- Main bar -->
     <div class="cat-bar__inner">
       {prevCategory
         ? <a href={`/gallery/${prevCategory.slug}`} class="cat-bar__arrow" aria-label={`Previous: ${prevCategory.name}`}>
@@ -96,41 +124,48 @@ images.forEach((src, i) => {
           </a>
         : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
       }
-      <span class="cat-bar__title">{category.name}</span>
+      <button class="cat-bar__title" id="cat-menu-toggle" aria-label="Browse all categories" aria-expanded="false">
+        <span>{category.name}</span>
+        <svg class="cat-bar__burger" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="8" x2="20" y2="8"/>
+          <line x1="4" y1="16" x2="20" y2="16"/>
+        </svg>
+      </button>
       {nextCategory
         ? <a href={`/gallery/${nextCategory.slug}`} class="cat-bar__arrow" aria-label={`Next: ${nextCategory.name}`}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         : <span class="cat-bar__arrow cat-bar__arrow--disabled"></span>
       }
-      <button class="cat-bar__top" id="back-to-top" aria-label="Back to top">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-      </button>
     </div>
   </nav>
 
   <!-- Bottom category pagination -->
   <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
-    {prevCategory
-      ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          <span>{prevCategory.name}</span>
-        </a>
-      : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
-    }
-    <a href="/" class="gallery-back">
-      <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 17L7 7M7 7H17M7 7V17"/>
-      </svg>
-      <span>Close</span>
-    </a>
-    {nextCategory
-      ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
-          <span>{nextCategory.name}</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
-      : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
-    }
+    <div class="cat-pagination__row">
+      {prevCategory
+        ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>{prevCategory.name}</span>
+          </a>
+        : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
+      }
+      {nextCategory
+        ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
+            <span>{nextCategory.name}</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
+      }
+    </div>
+    <div class="cat-pagination__row cat-pagination__row--close">
+      <a href="/" class="gallery-back">
+        <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 17L7 7M7 7H17M7 7V17"/>
+        </svg>
+        <span>Close</span>
+      </a>
+    </div>
   </nav>
 
   <!-- Lightbox -->
@@ -166,6 +201,40 @@ images.forEach((src, i) => {
     text-align: center;
   }
 
+  .gallery-hero__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+  }
+
+  .gallery-hero__close:hover {
+    color: var(--color-text);
+  }
+
+  .gallery-hero__close:hover .gallery-hero__close-icon {
+    transform: translate(-2px, -2px);
+  }
+
+  .gallery-hero__close-icon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .gallery-hero__close span {
+    translate: 0 0.15em;
+  }
+
   @media (max-width: 600px) {
     .gallery-hero {
       padding-top: calc(var(--nav-height, 70px) + 1rem);
@@ -175,12 +244,24 @@ images.forEach((src, i) => {
   /* Bottom pagination: always visible */
   .cat-pagination--bottom {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 2rem var(--space-md);
+    gap: 2rem;
+    padding: 3rem var(--space-md);
+    padding-bottom: calc(3rem + 60px); /* clear the fixed bottom bar */
     max-width: var(--max-width);
     margin: 0 auto;
-    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .cat-pagination__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .cat-pagination__row--close {
+    justify-content: center;
   }
 
   .cat-pagination__arrow {
@@ -221,11 +302,7 @@ images.forEach((src, i) => {
     letter-spacing: 0.18em;
     color: var(--color-text-muted);
     text-decoration: none;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 100px;
-    padding: 0.5rem 1rem 0.5rem 0.75rem;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    transition: color 0.2s;
   }
 
   .gallery-back__arrow {
@@ -244,8 +321,6 @@ images.forEach((src, i) => {
   }
 
   .gallery-back:hover {
-    background: rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.15);
     color: var(--color-text);
   }
 
@@ -270,15 +345,15 @@ images.forEach((src, i) => {
     text-align: center;
   }
 
-  /* ── Sticky category bar ── */
+  /* ── Bottom category bar ── */
   .cat-bar {
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
     z-index: 202;
-    transform: translateY(-100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
   }
 
@@ -292,19 +367,48 @@ images.forEach((src, i) => {
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    padding: 0.6rem var(--space-md);
-    background: rgba(245, 244, 240, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 0.7rem var(--space-md);
+    padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(245, 244, 240, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .cat-bar__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: var(--font-heading);
     font-size: 0.85rem;
     letter-spacing: 0.05em;
     min-width: 6rem;
-    text-align: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+  }
+
+  .cat-bar__title:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .cat-bar__burger {
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cat-bar__title:hover .cat-bar__burger {
+    opacity: 0.8;
+  }
+
+  .cat-bar.menu-open .cat-bar__burger {
+    transform: rotate(90deg);
+    opacity: 0.8;
   }
 
   .cat-bar__arrow {
@@ -329,28 +433,75 @@ images.forEach((src, i) => {
     width: 32px;
   }
 
-  .cat-bar__top {
-    position: absolute;
-    right: var(--space-md);
+  /* ── Category menu drawer ── */
+  .cat-bar__menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(245, 244, 240, 0.98);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .cat-bar.menu-open .cat-bar__menu {
+    max-height: 400px;
+  }
+
+  .cat-bar__menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 1.2rem var(--space-md) 0.6rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .cat-bar__menu-link {
+    display: block;
+    padding: 0.6rem 0.8rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    letter-spacing: 0.02em;
     color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: 6px;
     transition: color 0.2s, background-color 0.2s;
   }
 
-  .cat-bar__top:hover {
+  .cat-bar__menu-link:hover {
     color: var(--color-text);
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .cat-bar__menu-link--active {
+    color: var(--color-text);
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .cat-bar__menu-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    padding: 0.5rem 0.8rem 1rem;
+    margin: 0 var(--space-md);
+    transition: color 0.2s;
+  }
+
+  .cat-bar__menu-close:hover {
+    color: var(--color-text);
   }
 
   /* ===== Columns with scroll animation ===== */
   .columns-wrap {
     overflow: hidden;
-    padding-bottom: var(--space-xl);
+    padding-bottom: calc(var(--space-xl) + 60px); /* extra space for bottom bar */
   }
 
   .columns {
@@ -445,7 +596,7 @@ images.forEach((src, i) => {
   .lightbox {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    z-index: 300;
     background: rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
