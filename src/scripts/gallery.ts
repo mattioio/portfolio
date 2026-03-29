@@ -113,6 +113,81 @@ document.addEventListener('astro:page-load', () => {
 
   updateScrollAnimation();
 
+  // ===== Gallery Eye Cursor (desktop) =====
+  const galCursor = document.getElementById('gallery-cursor');
+  const columnsWrap = document.querySelector('.columns-wrap') as HTMLElement | null;
+  const columnsEl = document.querySelector('[data-columns]') as HTMLElement | null;
+
+  let _hideGalCursorFn: (() => void) | null = null;
+
+  if (galCursor && columnsWrap && columnsEl && window.matchMedia('(min-width: 769px)').matches) {
+    let gcx = 0, gcy = 0, gtx = 0, gty = 0;
+    let gcVis = false;
+    let gcRaf = 0;
+    let gcLastTime = 0;
+    let overImage = false;
+
+    function animateGalCursor(now: number) {
+      if (!gcLastTime) gcLastTime = now;
+      const dt = (now - gcLastTime) / 1000;
+      gcLastTime = now;
+      const factor = 1 - Math.exp(-14 * dt);
+      gcx += (gtx - gcx) * factor;
+      gcy += (gty - gcy) * factor;
+      galCursor!.style.translate = `${gcx}px ${gcy}px`;
+      if (gcVis) gcRaf = requestAnimationFrame(animateGalCursor);
+    }
+
+    function showGalCursor(e: MouseEvent) {
+      if (gcVis) return;
+      gcx = e.clientX; gcy = e.clientY;
+      gtx = e.clientX; gty = e.clientY;
+      galCursor!.style.translate = `${gcx}px ${gcy}px`;
+      gcVis = true;
+      gcLastTime = 0;
+      galCursor!.classList.add('visible');
+      columnsWrap!.classList.add('cursor-active');
+      requestAnimationFrame(animateGalCursor);
+    }
+
+    function hideGalCursor() {
+      gcVis = false;
+      overImage = false;
+      galCursor!.classList.remove('visible');
+      columnsWrap!.classList.remove('cursor-active');
+      cancelAnimationFrame(gcRaf);
+    }
+
+    // Expose so lightbox open/close can call it
+    _hideGalCursorFn = hideGalCursor;
+
+    // Track mouse over the columns area
+    columnsEl.addEventListener('mousemove', (e) => {
+      gtx = e.clientX;
+      gty = e.clientY;
+
+      // Check if over an image item
+      const target = (e.target as Element).closest('.column__item');
+      if (target) {
+        if (!overImage) {
+          overImage = true;
+          showGalCursor(e);
+        }
+      } else {
+        if (overImage) {
+          overImage = false;
+          galCursor!.classList.remove('visible');
+          columnsWrap!.classList.remove('cursor-active');
+        }
+      }
+    });
+
+    columnsEl.addEventListener('mouseleave', hideGalCursor);
+
+    // Hide on touch
+    window.addEventListener('touchstart', hideGalCursor, { passive: true });
+  }
+
   // ===== Lightbox =====
   const lightbox = document.getElementById("lightbox");
   if (!lightbox) return;
@@ -158,6 +233,8 @@ document.addEventListener('astro:page-load', () => {
     document.body.style.overflow = "hidden";
     if (navEl) navEl.style.display = 'none';
     if (catBar) catBar.style.display = 'none';
+    // Hide gallery eye cursor when lightbox opens
+    _hideGalCursorFn?.();
     showGestureHint();
   }
 
