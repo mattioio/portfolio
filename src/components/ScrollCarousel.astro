@@ -1,6 +1,5 @@
 ---
 import { categories } from "../data/categories";
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const slides = categories;
 const count = slides.length;
 ---
@@ -16,7 +15,7 @@ const count = slides.length;
           data-slug={cat.slug}
         >
           <img
-            src={`${base}${cat.cover}`}
+            src={cat.cover}
             alt={cat.name}
             loading={i < 2 ? "eager" : "lazy"}
             decoding={i === 0 ? "sync" : "async"}
@@ -54,7 +53,7 @@ const count = slides.length;
           <span class="hero__heading-accent"></span>
         </h2>
         <p class="hero__desc"></p>
-        <a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/`} class="hero__enter" id="hero-enter">
+        <a href="/" class="hero__enter" id="hero-enter">
           <span class="hero__enter-label">Explore</span>
           <span class="hero__enter-cat" id="hero-enter-cat"></span>
           <svg class="hero__enter-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
