@@ -1,29 +1,39 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { categories, getImagesForCategory } from "../../data/categories";
-import lqipData from "../../data/lqip.json";
-import imageManifest from "../../data/image-manifest.json";
+import { getCategories } from "../../lib/content";
+import type { ContentCategory, ContentPhoto } from "../../lib/content";
 import type { GetStaticPaths } from "astro";
 
+// Static data fallback (only used when Sanity LQIP/dimensions aren't available)
+let lqipData: Record<string, string> = {};
+let imageManifest: Record<string, { width: number; height: number; webp?: string }> = {};
+try {
+  lqipData = (await import("../../data/lqip.json")).default;
+  imageManifest = (await import("../../data/image-manifest.json")).default;
+} catch { /* Sanity provides this data inline */ }
 
-export const getStaticPaths: GetStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  const categories = await getCategories();
   return categories.map((cat) => ({
     params: { category: cat.slug },
     props: { category: cat },
   }));
 };
 
-const { category } = Astro.props;
-const images = getImagesForCategory(category);
+const { category: catProp } = Astro.props as { category: ContentCategory };
+const categories = await getCategories();
+// In dev mode, props from getStaticPaths may lose nested data — re-fetch full category
+const category = categories.find(c => c.slug === catProp.slug) ?? catProp;
+const photos = category.photos ?? [];
 
 const categoryIndex = categories.findIndex(c => c.slug === category.slug);
 const prevCategory = categories[categoryIndex - 1] ?? null;
 const nextCategory = categories[categoryIndex + 1] ?? null;
 
-// Distribute images across 3 columns for the scroll effect
-const columns: string[][] = [[], [], []];
-images.forEach((src, i) => {
-  columns[i % 3].push(src);
+// Distribute photos across 3 columns for the scroll effect
+const columns: ContentPhoto[][] = [[], [], []];
+photos.forEach((photo, i) => {
+  columns[i % 3].push(photo);
 });
 ---
 
@@ -52,35 +62,38 @@ images.forEach((src, i) => {
     <div class="columns" data-columns>
       {columns.map((col, colIndex) => (
         <div class="column" data-col={colIndex}>
-          {col.map((src, imgIndex) => {
+          {col.map((photo, imgIndex) => {
             const globalIndex = imgIndex * 3 + colIndex;
             const isAboveFold = globalIndex < 6;
+            // Prefer Sanity metadata, fall back to static manifests
+            const lqip = photo.lqip || lqipData[photo.src as keyof typeof lqipData];
+            const w = photo.width || imageManifest[photo.src as keyof typeof imageManifest]?.width;
+            const h = photo.height || imageManifest[photo.src as keyof typeof imageManifest]?.height;
+            const webp = imageManifest[photo.src as keyof typeof imageManifest]?.webp;
+            const alt = photo.alt || `${category.name} photo ${globalIndex + 1}`;
             return (
               <button
                 class="column__item"
                 data-index={globalIndex}
-                data-src={src}
+                data-src={photo.src}
                 aria-label={`View ${category.name} photo ${globalIndex + 1}`}
               >
                 <div
                   class="column__item-imgwrap"
                   style={[
-                    lqipData[src as keyof typeof lqipData] ? `background-image:url(${lqipData[src as keyof typeof lqipData]})` : '',
-                    imageManifest[src as keyof typeof imageManifest] ? `aspect-ratio:${imageManifest[src as keyof typeof imageManifest].width}/${imageManifest[src as keyof typeof imageManifest].height}` : '',
+                    lqip ? `background-image:url(${lqip})` : '',
+                    w && h ? `aspect-ratio:${w}/${h}` : '',
                   ].filter(Boolean).join(';') || undefined}
                 >
                   <picture>
-                    {imageManifest[src as keyof typeof imageManifest]?.webp && (
-                      <source
-                        srcset={imageManifest[src as keyof typeof imageManifest].webp}
-                        type="image/webp"
-                      />
+                    {webp && (
+                      <source srcset={webp} type="image/webp" />
                     )}
                     <img
-                      src={src}
-                      alt={`${category.name} photo ${globalIndex + 1}`}
-                      width={imageManifest[src as keyof typeof imageManifest]?.width}
-                      height={imageManifest[src as keyof typeof imageManifest]?.height}
+                      src={photo.src}
+                      alt={alt}
+                      width={w}
+                      height={h}
                       loading={isAboveFold ? "eager" : "lazy"}
                       decoding="async"
                       class="column__item-img"
@@ -148,7 +161,12 @@ images.forEach((src, i) => {
   </nav>
 
   <!-- Lightbox -->
-  <script is:inline define:vars={{ lqipData }}>
+  <script is:inline define:vars={{ lqipData: Object.assign(
+    {},
+    lqipData,
+    // Merge Sanity LQIP data (photo.src → photo.lqip)
+    ...photos.filter(p => p.lqip).map(p => ({ [p.src]: p.lqip }))
+  ) }}>
     window.__lqip = lqipData;
   </script>
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image viewer">

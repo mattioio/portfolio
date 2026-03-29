@@ -6,6 +6,6 @@ export default defineConfig({
   site: 'https://mattioio.github.io',
   integrations: [sitemap()],
   image: {
-    domains: [],
+    domains: ["cdn.sanity.io"],
   },
 });
