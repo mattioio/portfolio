@@ -43,13 +43,23 @@ const ogImageURL = new URL(ogImage, Astro.site ?? "https://gavinbatty.com");
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL.href} />
 
+    <meta property="og:site_name" content="Gavin Batty Photography" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Alice&family=Averia+Serif+Libre:ital,wght@0,400;0,700;1,400&family=Benne&family=Caudex:ital,wght@0,400;0,700;1,400&family=Domine:wght@400;500;600;700&family=Gilda+Display&family=Inter:wght@300;400;500&family=Kavoon&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,700;1,7..72,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Prata&family=Solway:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Viaoda+Libre&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Benne&family=Caudex:ital,wght@0,400;0,700;1,400&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Benne&family=Caudex:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <ClientRouter />
   </head>
   <body class:list={[{ "page-home": isHome }]}>

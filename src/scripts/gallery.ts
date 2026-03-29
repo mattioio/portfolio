@@ -14,23 +14,25 @@ document.addEventListener('astro:page-load', () => {
     }
   });
 
-  // ===== Sticky category bar + back-to-top =====
+  // ===== Bottom category bar =====
   const catBar = document.getElementById('cat-bar');
   const galleryHero = document.querySelector('.gallery-hero') as HTMLElement;
-  const backToTop = document.getElementById('back-to-top');
+  const menuToggle = document.getElementById('cat-menu-toggle');
 
   if (catBar && galleryHero) {
     const showThreshold = () => galleryHero.offsetHeight + galleryHero.offsetTop;
     let barVisible = false;
-
-    const navEl2 = document.querySelector('.nav') as HTMLElement | null;
 
     function updateCatBar() {
       const shouldShow = window.scrollY > showThreshold();
       if (shouldShow !== barVisible) {
         barVisible = shouldShow;
         catBar!.classList.toggle('visible', shouldShow);
-        if (navEl2) navEl2.style.transform = shouldShow ? 'translateY(-100%)' : '';
+        // Close menu when bar hides
+        if (!shouldShow) {
+          catBar!.classList.remove('menu-open');
+          menuToggle?.setAttribute('aria-expanded', 'false');
+        }
       }
     }
 
@@ -38,8 +40,18 @@ document.addEventListener('astro:page-load', () => {
     updateCatBar();
   }
 
-  backToTop?.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Menu toggle
+  menuToggle?.addEventListener('click', () => {
+    const isOpen = catBar!.classList.toggle('menu-open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (catBar?.classList.contains('menu-open') && !catBar.contains(e.target as Node)) {
+      catBar.classList.remove('menu-open');
+      menuToggle?.setAttribute('aria-expanded', 'false');
+    }
   });
 
   // ===== On-scroll column animation (Codrops style) =====
@@ -120,6 +132,7 @@ document.addEventListener('astro:page-load', () => {
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     if (navEl) navEl.style.display = 'none';
+    if (catBar) catBar.style.display = 'none';
     showSwipeHint();
   }
 
@@ -128,6 +141,7 @@ document.addEventListener('astro:page-load', () => {
     lightbox.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     if (navEl) navEl.style.display = '';
+    if (catBar) catBar.style.display = '';
     resetTransform();
   }
 
