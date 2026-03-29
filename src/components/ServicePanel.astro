@@ -1,9 +1,18 @@
 ---
-import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
-import { categories, getImagesForCategory } from "../data/categories";
+import { getCategories, getRates, getShootTypes, getSiteSettings } from "../lib/content";
+
+const [categories, rates, shootTypes, settings] = await Promise.all([
+  getCategories(),
+  getRates(),
+  getShootTypes(),
+  getSiteSettings(),
+]);
+
+const CONTACT_EMAIL = settings.contactEmail;
+const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;
 
 // Collect all images for random hero background
-const allImages = categories.flatMap(cat => getImagesForCategory(cat));
+const allImages = categories.flatMap(cat => cat.photos.map(p => p.src));
 const heroImages = allImages.sort(() => 0.5 - Math.random()).slice(0, 6);
 ---
 
@@ -24,65 +33,28 @@ const heroImages = allImages.sort(() => 0.5 - Math.random()).slice(0, 6);
 
       <h3 class="panel__section-title">Rates</h3>
       <div class="panel__rates">
-        <div class="panel__rate-row">
-          <span class="panel__rate-label">Half Day</span>
-          <span class="panel__rate-duration">up to 4 hrs</span>
-          <span class="panel__rate-price">From £350</span>
-        </div>
-        <div class="panel__rate-row">
-          <span class="panel__rate-label">Full Day</span>
-          <span class="panel__rate-duration">up to 10 hrs</span>
-          <span class="panel__rate-price">From £600</span>
-        </div>
-        <div class="panel__rate-row">
-          <span class="panel__rate-label">Multi-Day</span>
-          <span class="panel__rate-duration">2+ days</span>
-          <span class="panel__rate-price">From £500 / day</span>
-        </div>
+        {rates.map((rate) => (
+          <div class="panel__rate-row">
+            <span class="panel__rate-label">{rate.label}</span>
+            <span class="panel__rate-duration">{rate.duration}</span>
+            <span class="panel__rate-price">{rate.price}</span>
+          </div>
+        ))}
       </div>
 
       <h3 class="panel__section-title">Types of Shoots</h3>
       <div class="panel__cards">
-        <div class="panel__card">
-          <h4>Wedding</h4>
-          <p class="panel__note">Intimate elopements to grand celebrations</p>
-          <ul>
-            <li>Full day coverage (up to 10 hours)</li>
-            <li>Second shooter available</li>
-            <li>400+ edited images</li>
-            <li>Highlight slideshow</li>
-          </ul>
-        </div>
-        <div class="panel__card">
-          <h4>Music & Events</h4>
-          <p class="panel__note">Gigs, festivals, and everything in between</p>
-          <ul>
-            <li>Live performance coverage</li>
-            <li>Backstage & candid shots</li>
-            <li>Artist portraits</li>
-            <li>Fast turnaround for press</li>
-          </ul>
-        </div>
-        <div class="panel__card">
-          <h4>Food & Hospitality</h4>
-          <p class="panel__note">Restaurants, bars, hotels, and brands</p>
-          <ul>
-            <li>Menu & dish photography</li>
-            <li>Interior & ambiance shots</li>
-            <li>Social media ready crops</li>
-            <li>Seasonal refresh packages</li>
-          </ul>
-        </div>
-        <div class="panel__card">
-          <h4>Sport</h4>
-          <p class="panel__note">Grassroots to professional level</p>
-          <ul>
-            <li>Match & event coverage</li>
-            <li>Athlete portraits</li>
-            <li>Training & behind-the-scenes</li>
-            <li>Season-long packages</li>
-          </ul>
-        </div>
+        {shootTypes.map((st) => (
+          <div class="panel__card">
+            <h4>{st.title}</h4>
+            {st.subtitle && <p class="panel__note">{st.subtitle}</p>}
+            {st.features && st.features.length > 0 && (
+              <ul>
+                {st.features.map((f) => <li>{f}</li>)}
+              </ul>
+            )}
+          </div>
+        ))}
       </div>
 
       <h3 class="panel__section-title">What You Get</h3>

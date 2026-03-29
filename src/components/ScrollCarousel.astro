@@ -1,6 +1,6 @@
 ---
-import { categories } from "../data/categories";
-const slides = categories;
+import { getCategories } from "../lib/content";
+const slides = await getCategories();
 const count = slides.length;
 ---
 
