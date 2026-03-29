@@ -134,7 +134,8 @@ document.addEventListener('astro:page-load', () => {
       const factor = 1 - Math.exp(-14 * dt);
       gcx += (gtx - gcx) * factor;
       gcy += (gty - gcy) * factor;
-      galCursor!.style.translate = `${gcx}px ${gcy}px`;
+      galCursor!.style.left = `${gcx}px`;
+      galCursor!.style.top = `${gcy}px`;
       if (gcVis) gcRaf = requestAnimationFrame(animateGalCursor);
     }
 
@@ -142,7 +143,8 @@ document.addEventListener('astro:page-load', () => {
       if (gcVis) return;
       gcx = e.clientX; gcy = e.clientY;
       gtx = e.clientX; gty = e.clientY;
-      galCursor!.style.translate = `${gcx}px ${gcy}px`;
+      galCursor!.style.left = `${gcx}px`;
+      galCursor!.style.top = `${gcy}px`;
       gcVis = true;
       gcLastTime = 0;
       galCursor!.classList.add('visible');
@@ -733,7 +735,8 @@ document.addEventListener('astro:page-load', () => {
       const factor = 1 - Math.exp(-14 * dt);
       cx += (tx - cx) * factor;
       cy += (ty - cy) * factor;
-      lbCursor!.style.translate = `${cx}px ${cy}px`;
+      lbCursor!.style.left = `${cx}px`;
+      lbCursor!.style.top = `${cy}px`;
       if (cursorVis) cursorRaf = requestAnimationFrame(animateLbCursor);
     }
 
@@ -754,7 +757,8 @@ document.addEventListener('astro:page-load', () => {
       // Snap cursor to mouse position immediately on enter (no fly-in from 0,0)
       cx = e.clientX; cy = e.clientY;
       tx = e.clientX; ty = e.clientY;
-      lbCursor!.style.translate = `${cx}px ${cy}px`;
+      lbCursor!.style.left = `${cx}px`;
+      lbCursor!.style.top = `${cy}px`;
       cursorVis = true;
       lastCurTime = 0;
       lbCursor!.classList.add('visible');
@@ -777,13 +781,24 @@ document.addEventListener('astro:page-load', () => {
     });
 
     toolbar?.addEventListener('mouseenter', () => {
+      cursorVis = false;
       lbCursor!.classList.remove('visible', 'arrow-left', 'arrow-right');
       lightbox.classList.remove('cursor-active');
+      cancelAnimationFrame(cursorRaf);
     });
-    toolbar?.addEventListener('mouseleave', () => {
+    toolbar?.addEventListener('mouseleave', (e) => {
       if (lightbox.classList.contains('active')) {
+        // Snap to current mouse position and restart tracking
+        cx = e.clientX; cy = e.clientY;
+        tx = e.clientX; ty = e.clientY;
+        lbCursor!.style.left = `${cx}px`;
+        lbCursor!.style.top = `${cy}px`;
+        cursorVis = true;
+        lastCurTime = 0;
         lbCursor!.classList.add('visible');
         lightbox.classList.add('cursor-active');
+        updateCursorMode(e.clientX);
+        requestAnimationFrame(animateLbCursor);
       }
     });
   }

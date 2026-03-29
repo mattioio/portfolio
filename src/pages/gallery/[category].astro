@@ -83,14 +83,15 @@ images.forEach((src, i) => {
       ))}
     </div>
 
-    <!-- Gallery eye cursor — appears on desktop over images -->
-    <div class="gallery-cursor" id="gallery-cursor">
-      <svg class="gallery-cursor__eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-    </div>
   </section>
+
+  <!-- Gallery eye cursor — appears on desktop over images (outside columns-wrap to avoid overflow clip) -->
+  <div class="gallery-cursor" id="gallery-cursor">
+    <svg class="gallery-cursor__eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </div>
 
   <!-- Bottom navigation bar — slides up on scroll -->
   <nav class="cat-bar" id="cat-bar" aria-label="Gallery navigation">
@@ -499,6 +500,8 @@ images.forEach((src, i) => {
       align-items: center;
       justify-content: center;
       position: fixed;
+      top: 0;
+      left: 0;
       width: 44px;
       height: 44px;
       border-radius: 50%;
@@ -507,7 +510,7 @@ images.forEach((src, i) => {
       z-index: 50;
       transform: translate(-50%, -50%) scale(0);
       opacity: 0;
-      will-change: translate;
+      will-change: transform;
       mix-blend-mode: difference;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                   opacity 0.15s ease;
@@ -530,7 +533,8 @@ images.forEach((src, i) => {
       cursor: none;
     }
 
-    .columns-wrap.cursor-active .column__item {
+    .columns-wrap.cursor-active .column__item,
+    .columns-wrap.cursor-active .column__item * {
       cursor: none;
     }
   }
@@ -650,6 +654,8 @@ images.forEach((src, i) => {
       align-items: center;
       justify-content: center;
       position: fixed;
+      top: 0;
+      left: 0;
       width: 10px;
       height: 10px;
       border-radius: 50%;
@@ -658,7 +664,7 @@ images.forEach((src, i) => {
       z-index: 320;
       transform: translate(-50%, -50%) scale(0);
       opacity: 0;
-      will-change: translate;
+      will-change: transform;
       mix-blend-mode: difference;
       transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                   height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
