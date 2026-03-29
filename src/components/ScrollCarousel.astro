@@ -235,6 +235,7 @@ const count = slides.length;
     width: 18px;
     height: 18px;
     opacity: 0;
+    transform: rotate(45deg);
     transition: opacity 0.2s ease, transform 0.2s ease;
     flex-shrink: 0;
   }
@@ -248,12 +249,13 @@ const count = slides.length;
     /* pointer-events stays none — clicks handled by stickyEl below */
   }
 
-  .hero__dot.arrow-left .hero__dot-arrow,
-  .hero__dot.arrow-right .hero__dot-arrow {
+  .hero__dot.arrow-left .hero__dot-arrow {
     opacity: 1;
+    transform: rotate(0deg);
   }
 
   .hero__dot.arrow-right .hero__dot-arrow {
+    opacity: 1;
     transform: rotate(180deg);
   }
 

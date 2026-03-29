@@ -682,6 +682,7 @@ images.forEach((src, i) => {
       width: 18px;
       height: 18px;
       opacity: 0;
+      transform: rotate(45deg);
       transition: opacity 0.2s ease, transform 0.2s ease;
       flex-shrink: 0;
     }
@@ -692,12 +693,13 @@ images.forEach((src, i) => {
       height: 44px;
     }
 
-    .lb-cursor.arrow-left .lb-cursor__arrow,
-    .lb-cursor.arrow-right .lb-cursor__arrow {
+    .lb-cursor.arrow-left .lb-cursor__arrow {
       opacity: 1;
+      transform: rotate(0deg);
     }
 
     .lb-cursor.arrow-right .lb-cursor__arrow {
+      opacity: 1;
       transform: rotate(180deg);
     }
 
