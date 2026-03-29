@@ -203,9 +203,9 @@ document.addEventListener('astro:page-load', () => {
   lightbox.querySelector(".lightbox__prev")!.addEventListener("click", prev);
   lightbox.querySelector(".lightbox__next")!.addEventListener("click", next);
 
-  // Tap on dark area to close
+  // Click dark area (not the image) to close
   lightbox.querySelector('.lightbox__image-wrap')!.addEventListener("click", (e) => {
-    if (e.target === lbImg || (e.target as Element).classList.contains("lightbox__image-wrap")) {
+    if ((e.target as Element).classList.contains("lightbox__image-wrap")) {
       close();
     }
   });
@@ -265,6 +265,8 @@ document.addEventListener('astro:page-load', () => {
       startPanX = panX;
       startPanY = panY;
       isPanning = scale > 1;
+      swipeDir = null;
+      isDraggingDown = false;
     }
   }, { passive: false });
 
@@ -287,13 +289,33 @@ document.addEventListener('astro:page-load', () => {
       const dy = e.touches[0].clientY - touchStartY;
 
       if (scale > 1) {
+        // Panning while zoomed
         e.preventDefault();
         panX = startPanX + dx;
         panY = startPanY + dy;
         applyTransform();
+      } else if (!swipeLocked) {
+        // Determine swipe direction once past a small threshold
+        if (!swipeDir && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+          swipeDir = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        }
+
+        if (swipeDir === 'y' && dy > 0) {
+          // Swipe down — 1:1 drag to dismiss
+          e.preventDefault();
+          isDraggingDown = true;
+          const progress = Math.min(1, dy / (window.innerHeight * 0.4));
+          lbImg.style.transition = 'none';
+          lbImg.style.transform = `translateY(${dy}px) scale(${1 - progress * 0.08})`;
+          lightbox.style.backgroundColor = `rgba(0, 0, 0, ${1 - progress * 0.5})`;
+        }
       }
     }
   }, { passive: false });
+
+  let swipeDir: 'x' | 'y' | null = null;
+  let isDraggingDown = false;
+  let swipeLocked = false;
 
   imageWrap.addEventListener('touchend', (e) => {
     if (isPinching) {
@@ -305,22 +327,58 @@ document.addEventListener('astro:page-load', () => {
         lbImg.style.transition = 'transform 0.2s ease';
         lbImg.style.transform = '';
       }
+      swipeDir = null;
+      isDraggingDown = false;
       return;
     }
 
-    // Single touch end — handle swipe if not zoomed
     if (scale <= 1 && e.changedTouches.length === 1) {
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
 
+      if (isDraggingDown) {
+        // Swipe down release
+        isDraggingDown = false;
+        swipeDir = null;
+        if (dy > 120) {
+          // Dismiss — animate out with spring
+          swipeLocked = true;
+          lbImg.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1)';
+          lbImg.style.transform = `translateY(${window.innerHeight}px) scale(0.85)`;
+          lightbox.style.transition = 'background-color 0.35s ease';
+          lightbox.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+          setTimeout(() => {
+            close();
+            lbImg.style.transition = '';
+            lbImg.style.transform = '';
+            lightbox.style.transition = '';
+            lightbox.style.backgroundColor = '';
+            swipeLocked = false;
+          }, 350);
+        } else {
+          // Bounce back
+          lbImg.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          lbImg.style.transform = '';
+          lightbox.style.transition = 'background-color 0.3s ease';
+          lightbox.style.backgroundColor = '';
+          setTimeout(() => {
+            lbImg.style.transition = '';
+            lightbox.style.transition = '';
+          }, 400);
+        }
+        return;
+      }
+
+      // Horizontal swipe to navigate
+      swipeDir = null;
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
         resetTransform();
         dx > 0 ? prev() : next();
-      } else if (Math.abs(dy) > 80 && Math.abs(dy) > Math.abs(dx)) {
-        close();
-        resetTransform();
       }
     }
+
+    swipeDir = null;
+    isDraggingDown = false;
   });
 
   // Double-tap to zoom on mobile
