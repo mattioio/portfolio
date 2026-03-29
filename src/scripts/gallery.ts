@@ -19,6 +19,36 @@ document.addEventListener('astro:page-load', () => {
     }
   });
 
+  // ===== Scroll-triggered entrance — staggered per-item reveal =====
+  const gridItems = document.querySelectorAll<HTMLElement>('.column__item');
+  if (gridItems.length) {
+    // Track how many items have been revealed in each "batch" for stagger timing
+    let revealCount = 0;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          // Stagger: each item gets a small delay based on reveal order
+          const delay = Math.min(revealCount * 80, 400); // cap at 400ms
+          el.style.transitionDelay = `${delay}ms`;
+          el.classList.add('in-view');
+          revealCount++;
+          observer.unobserve(el);
+
+          // Reset stagger counter after a batch settles
+          clearTimeout((observer as any).__resetTimer);
+          (observer as any).__resetTimer = setTimeout(() => { revealCount = 0; }, 600);
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -40px 0px',
+    });
+
+    gridItems.forEach(item => observer.observe(item));
+  }
+
   // ===== Bottom category bar =====
   const catBar = document.getElementById('cat-bar');
   const galleryHero = document.querySelector('.gallery-hero') as HTMLElement;
@@ -113,6 +143,35 @@ document.addEventListener('astro:page-load', () => {
   }, { passive: true });
 
   updateScrollAnimation();
+
+  // ===== Hover tilt on gallery cards (desktop) =====
+  if (window.matchMedia('(min-width: 769px)').matches) {
+    const galleryItems = document.querySelectorAll<HTMLElement>('.column__item');
+    galleryItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        // Remove transition so tilt tracks mouse instantly
+        item.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+      });
+
+      item.addEventListener('mousemove', (e) => {
+        const rect = item.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const tiltX = (y - 0.5) * -6;
+        const tiltY = (x - 0.5) * 6;
+
+        if (item.classList.contains('in-view')) {
+          item.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        // Restore transition for smooth snap-back
+        item.style.transition = '';
+        item.style.transform = '';
+      });
+    });
+  }
 
   // ===== Gallery Eye Cursor (desktop) =====
   const galCursorEl = document.getElementById('gallery-cursor');
