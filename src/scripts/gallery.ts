@@ -177,9 +177,7 @@ document.addEventListener('astro:page-load', () => {
         }
       } else {
         if (overImage) {
-          overImage = false;
-          galCursor!.classList.remove('visible');
-          columnsWrap!.classList.remove('cursor-active');
+          hideGalCursor();
         }
       }
     });
