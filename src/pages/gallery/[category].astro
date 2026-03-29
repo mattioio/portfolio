@@ -33,14 +33,11 @@ images.forEach((src, i) => {
   ogImage={category.cover}
   showFooter={false}
 >
-  <section class="gallery-hero">
-    <div class="container">
+  <section class="columns-wrap">
+    <header class="gallery-hero">
       <h1 transition:name="gallery-title">{category.name}</h1>
       <p class="gallery-hero__desc" transition:name="gallery-desc">{category.description}</p>
-    </div>
-  </section>
-
-  <section class="columns-wrap">
+    </header>
     <div class="columns" data-columns>
       {columns.map((col, colIndex) => (
         <div class="column" data-col={colIndex}>
@@ -121,38 +118,30 @@ images.forEach((src, i) => {
   </nav>
 
   <!-- Bottom category pagination -->
-  <nav class="cat-pagination cat-pagination--bottom" aria-label="Browse categories">
-    <div class="cat-pagination__row">
-      {prevCategory
-        ? <a href={`/gallery/${prevCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--prev" aria-label={`Previous: ${prevCategory.name}`}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <span>{prevCategory.name}</span>
-          </a>
-        : <span class="cat-pagination__arrow cat-pagination__arrow--prev cat-pagination__arrow--disabled"></span>
-      }
-      {nextCategory
-        ? <a href={`/gallery/${nextCategory.slug}`} class="cat-pagination__arrow cat-pagination__arrow--next" aria-label={`Next: ${nextCategory.name}`}>
-            <span>{nextCategory.name}</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </a>
-        : <span class="cat-pagination__arrow cat-pagination__arrow--next cat-pagination__arrow--disabled"></span>
-      }
-    </div>
-    <div class="cat-pagination__row cat-pagination__row--close">
-      <a href="/" class="gallery-back">
-        <svg class="gallery-back__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 17L7 7M7 7H17M7 7V17"/>
-        </svg>
-        <span>Close</span>
-      </a>
-    </div>
+  <nav class="gallery-end" aria-label="End of gallery">
+    <a href="/" class="gallery-end__home">
+      <svg class="gallery-end__icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 17L7 7M7 7H17M7 7V17"/>
+      </svg>
+      <span>Home</span>
+    </a>
   </nav>
 
   <!-- Lightbox -->
+  <script is:inline define:vars={{ lqipData }}>
+    window.__lqip = lqipData;
+  </script>
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image viewer">
     <div class="lightbox__image-wrap">
       <img class="lightbox__img" src="" alt="" />
       <img class="lightbox__img lightbox__img--staging" src="" alt="" aria-hidden="true" />
+      <button class="lightbox__zone lightbox__zone--prev" aria-label="Previous image"></button>
+      <button class="lightbox__zone lightbox__zone--next" aria-label="Next image"></button>
+      <div class="lb-cursor" id="lb-cursor">
+        <svg class="lb-cursor__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M5 12L12 19M5 12L12 5"/>
+        </svg>
+      </div>
     </div>
     <div class="lightbox__toolbar" id="lb-toolbar">
       <div class="lightbox__toolbar-inner">
@@ -178,10 +167,12 @@ images.forEach((src, i) => {
 
 <style>
 
-  /* Hero */
+  /* Hero — inside columns-wrap, flows into grid */
   .gallery-hero {
-    padding: calc(var(--nav-height, 80px) + var(--space-xl)) 0 var(--space-lg);
+    padding: calc(var(--nav-height, 80px) + var(--space-xl)) var(--space-md) var(--space-lg);
     text-align: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
   }
 
   @media (max-width: 600px) {
@@ -190,91 +181,58 @@ images.forEach((src, i) => {
     }
   }
 
-  /* Bottom pagination: always visible */
-  .cat-pagination--bottom {
+  /* End of gallery — bold Home link */
+  .gallery-end {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem var(--space-md);
-    padding-bottom: calc(2rem + 56px); /* clear the fixed bottom bar */
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
-
-  .cat-pagination__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .cat-pagination__row--close {
     justify-content: center;
+    padding: 3rem var(--space-md);
+    padding-bottom: calc(3rem + 56px); /* clear the fixed bottom bar */
   }
 
-  .cat-pagination__arrow {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.7rem;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    min-width: 5rem;
-    transition: color 0.2s;
-  }
-
-  .cat-pagination__arrow--next {
-    justify-content: flex-end;
-  }
-
-  .cat-pagination__arrow--disabled {
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  .cat-pagination__arrow:not(.cat-pagination__arrow--disabled):hover {
-    color: var(--color-text);
-  }
-
-  .gallery-back {
+  .gallery-end__home {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    font-family: var(--font-body);
-    font-size: 0.65rem;
-    line-height: 1;
+    gap: 0.6rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--color-text-muted);
+    color: var(--color-text);
     text-decoration: none;
-    transition: color 0.2s;
+    padding: 0.8rem 1.6rem;
+    border: 1px solid var(--color-text);
+    border-radius: 100px;
+    transition: background-color 0.25s, color 0.25s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .gallery-back__arrow {
+  .gallery-end__home:hover {
+    background-color: var(--color-text);
+    color: var(--color-text-light);
+  }
+
+  .gallery-end__home:hover .gallery-end__icon {
+    transform: translate(-2px, -2px);
+  }
+
+  .gallery-end__icon {
     flex-shrink: 0;
-    width: 14px;
-    height: 14px;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .cat-pagination__arrow span {
-    translate: 0 0.2em;
+  .gallery-end__home span {
+    translate: 0 0.08em;
   }
 
-  .gallery-back span {
-    translate: 0 0.15em;
-  }
-
-  .gallery-back:hover {
-    color: var(--color-text);
-  }
-
-  .gallery-back:hover .gallery-back__arrow {
-    transform: translate(-2px, -2px);
+  /* Entrance animation */
+  @keyframes fadeSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .gallery-hero h1 {
@@ -283,6 +241,8 @@ images.forEach((src, i) => {
     font-weight: 400;
     margin-bottom: var(--space-xs);
     letter-spacing: -0.03em;
+    opacity: 0;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
   }
 
   .gallery-hero__desc {
@@ -292,7 +252,10 @@ images.forEach((src, i) => {
     font-size: 1.15rem;
     margin: 0 auto;
     text-align: center;
+    opacity: 0;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
   }
+
 
   /* ── Bottom category bar ── */
   .cat-bar {
@@ -445,6 +408,8 @@ images.forEach((src, i) => {
     max-width: var(--max-width);
     margin: 0 auto;
     will-change: transform;
+    opacity: 0;
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
   }
 
   .column {
@@ -588,6 +553,103 @@ images.forEach((src, i) => {
     transform: translate(-50%, -50%);
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* Desktop click zones — invisible prev/next areas on left/right 20% */
+  .lightbox__zone {
+    display: none;
+  }
+
+  @media (min-width: 601px) {
+    .lightbox__zone {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 20%;
+      z-index: 5;
+      background: none;
+      border: none;
+      padding: 0;
+      opacity: 0;
+      cursor: none;
+    }
+
+    .lightbox__zone--prev {
+      left: 0;
+    }
+
+    .lightbox__zone--next {
+      right: 0;
+    }
+  }
+
+  /* Lightbox custom cursor — reuses carousel dot style */
+  .lb-cursor {
+    display: none;
+  }
+
+  @media (min-width: 601px) {
+    .lb-cursor {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      pointer-events: none;
+      z-index: 320;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      will-change: translate;
+      mix-blend-mode: difference;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.15s ease;
+      overflow: hidden;
+      color: #000;
+    }
+
+    .lb-cursor.visible {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .lb-cursor__arrow {
+      width: 18px;
+      height: 18px;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .lb-cursor.arrow-left,
+    .lb-cursor.arrow-right {
+      width: 44px;
+      height: 44px;
+    }
+
+    .lb-cursor.arrow-left .lb-cursor__arrow,
+    .lb-cursor.arrow-right .lb-cursor__arrow {
+      opacity: 1;
+    }
+
+    .lb-cursor.arrow-right .lb-cursor__arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Hide default cursor over lightbox when custom cursor active */
+    .lightbox.cursor-active {
+      cursor: none;
+    }
+
+    .lightbox.cursor-active .lightbox__image-wrap,
+    .lightbox.cursor-active .lightbox__img,
+    .lightbox.cursor-active .lightbox__toolbar {
+      cursor: none;
+    }
   }
 
   /* ── Toolbar ── */

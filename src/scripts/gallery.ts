@@ -125,6 +125,7 @@ document.addEventListener('astro:page-load', () => {
   const items = document.querySelectorAll<HTMLElement>(".column__item");
   const sources: string[] = [];
   let currentIndex = 0;
+  const lqip: Record<string, string> = (window as any).__lqip || {};
 
   items.forEach((item) => {
     sources.push(item.dataset.src || "");
@@ -163,15 +164,27 @@ document.addEventListener('astro:page-load', () => {
   function close() {
     lightbox.classList.remove("active");
     lightbox.setAttribute("aria-hidden", "true");
+    lightbox.classList.remove('cursor-active');
     document.body.style.overflow = "";
     if (navEl) navEl.style.display = '';
     if (catBar) catBar.style.display = '';
+    if (lbCursor) lbCursor.classList.remove('visible', 'arrow-left', 'arrow-right');
     resetTransform();
     resetStaging();
   }
 
   function show() {
-    lbImg.src = sources[currentIndex];
+    const src = sources[currentIndex];
+    // Show LQIP blur placeholder while full image loads
+    const placeholder = lqip[src];
+    if (placeholder) {
+      lbImg.style.backgroundImage = `url(${placeholder})`;
+      lbImg.style.backgroundSize = 'cover';
+      lbImg.style.backgroundPosition = 'center';
+    } else {
+      lbImg.style.backgroundImage = '';
+    }
+    lbImg.src = src;
     lbImg.alt = `Photo ${currentIndex + 1} of ${sources.length}`;
     lbCounter.textContent = `${currentIndex + 1} / ${sources.length}`;
     preloadAdjacent();
@@ -186,18 +199,82 @@ document.addEventListener('astro:page-load', () => {
     });
   }
 
+  function canGoNext() { return currentIndex < sources.length - 1; }
+  function canGoPrev() { return currentIndex > 0; }
+
   function next() {
-    if (currentIndex >= sources.length - 1) { currentIndex = 0; } else { currentIndex++; }
+    if (!canGoNext()) return;
+    currentIndex++;
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
   }
 
   function prev() {
-    if (currentIndex <= 0) { currentIndex = sources.length - 1; } else { currentIndex--; }
+    if (!canGoPrev()) return;
+    currentIndex--;
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
+  }
+
+  // Animated slide transition for desktop (arrow keys + click zones)
+  // Shared slide animation config
+  const SLIDE_DUR = '0.45s';
+  const SLIDE_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+
+  function prepareSlideStaging(idx: number, fromLeft: boolean) {
+    const w = window.innerWidth;
+    stagingImg.src = sources[idx];
+    const placeholder = lqip[sources[idx]];
+    if (placeholder) {
+      stagingImg.style.backgroundImage = `url(${placeholder})`;
+      stagingImg.style.backgroundSize = 'cover';
+      stagingImg.style.backgroundPosition = 'center';
+    }
+    stagingImg.style.opacity = '1';
+    stagingImg.style.transition = 'none';
+    const offset = fromLeft ? -(w + GAP) : (w + GAP);
+    stagingImg.style.transform = `translate(calc(-50% + ${offset}px), -50%)`;
+    stagingImg.offsetHeight; // force reflow
+  }
+
+  function slideToNext() {
+    if (!canGoNext() || swipeLocked) return;
+    swipeLocked = true;
+    const w = window.innerWidth;
+    prepareSlideStaging(currentIndex + 1, false);
+    lbImg.style.transition = `transform ${SLIDE_DUR} ${SLIDE_EASE}`;
+    lbImg.style.transform = `translateX(${-(w + GAP)}px)`;
+    stagingImg.style.transition = `transform ${SLIDE_DUR} ${SLIDE_EASE}`;
+    stagingImg.style.transform = 'translate(-50%, -50%)';
+    setTimeout(() => {
+      currentIndex++;
+      show();
+      lbImg.style.transition = '';
+      lbImg.style.transform = '';
+      resetStaging();
+      swipeLocked = false;
+    }, 450);
+  }
+
+  function slideToPrev() {
+    if (!canGoPrev() || swipeLocked) return;
+    swipeLocked = true;
+    const w = window.innerWidth;
+    prepareSlideStaging(currentIndex - 1, true);
+    lbImg.style.transition = `transform ${SLIDE_DUR} ${SLIDE_EASE}`;
+    lbImg.style.transform = `translateX(${w + GAP}px)`;
+    stagingImg.style.transition = `transform ${SLIDE_DUR} ${SLIDE_EASE}`;
+    stagingImg.style.transform = 'translate(-50%, -50%)';
+    setTimeout(() => {
+      currentIndex--;
+      show();
+      lbImg.style.transition = '';
+      lbImg.style.transform = '';
+      resetStaging();
+      swipeLocked = false;
+    }, 450);
   }
 
   // Reset staging image to hidden
@@ -205,6 +282,7 @@ document.addEventListener('astro:page-load', () => {
     stagingImg.style.opacity = '0';
     stagingImg.style.transform = '';
     stagingImg.style.transition = '';
+    stagingImg.style.backgroundImage = '';
     stagingImg.src = '';
   }
 
@@ -213,10 +291,16 @@ document.addEventListener('astro:page-load', () => {
   });
 
   lightbox.querySelector(".lightbox__close")!.addEventListener("click", close);
-  lightbox.querySelector(".lightbox__prev")!.addEventListener("click", prev);
-  lightbox.querySelector(".lightbox__next")!.addEventListener("click", next);
+  lightbox.querySelector(".lightbox__prev")!.addEventListener("click", slideToPrev);
+  lightbox.querySelector(".lightbox__next")!.addEventListener("click", slideToNext);
 
-  // Click dark area (not the image) to close
+  // Desktop click zones
+  const zonePrev = lightbox.querySelector('.lightbox__zone--prev');
+  const zoneNext = lightbox.querySelector('.lightbox__zone--next');
+  zonePrev?.addEventListener("click", slideToPrev);
+  zoneNext?.addEventListener("click", slideToNext);
+
+  // Click dark area (not the image or zones) to close
   lightbox.querySelector('.lightbox__image-wrap')!.addEventListener("click", (e) => {
     if ((e.target as Element).classList.contains("lightbox__image-wrap")) {
       close();
@@ -226,8 +310,8 @@ document.addEventListener('astro:page-load', () => {
   document.addEventListener("keydown", (e) => {
     if (!lightbox.classList.contains("active")) return;
     if (e.key === "Escape") close();
-    if (e.key === "ArrowRight") next();
-    if (e.key === "ArrowLeft") prev();
+    if (e.key === "ArrowRight") slideToNext();
+    if (e.key === "ArrowLeft") slideToPrev();
   });
 
   // ===== Touch: pinch-to-zoom, pan, 1:1 swipe nav, swipe-down dismiss =====
@@ -271,16 +355,25 @@ document.addEventListener('astro:page-load', () => {
   const vw = () => window.innerWidth;
   const GAP = 40; // px gap between images during swipe
 
-  // Prepare staging image for a swipe direction
-  function prepareStaging(dir: 'left' | 'right') {
-    const nextIdx = dir === 'left'
-      ? (currentIndex + 1) % sources.length
-      : (currentIndex - 1 + sources.length) % sources.length;
+  // Prepare staging image for a swipe direction (returns false if at edge)
+  function prepareStaging(dir: 'left' | 'right'): boolean {
+    const nextIdx = dir === 'left' ? currentIndex + 1 : currentIndex - 1;
+    if (nextIdx < 0 || nextIdx >= sources.length) {
+      stagingDirection = dir;
+      return false; // at edge
+    }
     stagingImg.src = sources[nextIdx];
     stagingImg.alt = `Photo ${nextIdx + 1} of ${sources.length}`;
+    const placeholder = lqip[sources[nextIdx]];
+    if (placeholder) {
+      stagingImg.style.backgroundImage = `url(${placeholder})`;
+      stagingImg.style.backgroundSize = 'cover';
+      stagingImg.style.backgroundPosition = 'center';
+    }
     stagingImg.style.opacity = '1';
     stagingImg.style.transition = 'none';
     stagingDirection = dir;
+    return true;
   }
 
   // Position staging image based on current drag dx
@@ -349,19 +442,23 @@ document.addEventListener('astro:page-load', () => {
           isDraggingX = true;
 
           // Prepare staging image on first move
-          if (!stagingDirection) {
-            prepareStaging(dx < 0 ? 'left' : 'right');
+          const wantDir = dx < 0 ? 'left' : 'right';
+          if (!stagingDirection || stagingDirection !== wantDir) {
+            resetStaging();
+            const hasNext = prepareStaging(wantDir);
+            // Track if we're at edge for rubber-band
+            (imageWrap as any).__atEdge = !hasNext;
           }
-          // If user reverses direction, re-prepare
-          if ((dx < 0 && stagingDirection === 'right') || (dx > 0 && stagingDirection === 'left')) {
-            prepareStaging(dx < 0 ? 'left' : 'right');
-          }
+
+          // Rubber-band at edges: 30% resistance
+          const atEdge = (imageWrap as any).__atEdge;
+          const effectiveDx = atEdge ? dx * 0.3 : dx;
 
           // Move current image
           lbImg.style.transition = 'none';
-          lbImg.style.transform = `translateX(${dx}px)`;
-          // Move staging image
-          positionStaging(dx);
+          lbImg.style.transform = `translateX(${effectiveDx}px)`;
+          // Move staging image (only if not at edge)
+          if (!atEdge) positionStaging(dx);
 
         } else if (swipeDir === 'y' && dy > 0) {
           // ── Vertical: swipe down to dismiss ──
@@ -458,10 +555,12 @@ document.addEventListener('astro:page-load', () => {
       if (isDraggingX) {
         isDraggingX = false;
         swipeDir = null;
+        const atEdge = (imageWrap as any).__atEdge;
         const threshold = vw() * 0.25;
-        const shouldComplete = Math.abs(dx) > threshold || velocity > 0.5;
+        const shouldComplete = !atEdge && (Math.abs(dx) > threshold || velocity > 0.5);
         const dur = '0.3s';
         const ease = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
+        (imageWrap as any).__atEdge = false;
 
         if (shouldComplete && Math.abs(dx) > 15) {
           // Complete transition — slide current off, staging in
@@ -476,11 +575,10 @@ document.addEventListener('astro:page-load', () => {
 
           swipeLocked = true;
           setTimeout(() => {
-            // Update index and swap
             if (goingLeft) {
-              currentIndex = (currentIndex + 1) % sources.length;
+              currentIndex++;
             } else {
-              currentIndex = (currentIndex - 1 + sources.length) % sources.length;
+              currentIndex--;
             }
             show();
             lbImg.style.transition = '';
@@ -489,11 +587,12 @@ document.addEventListener('astro:page-load', () => {
             swipeLocked = false;
           }, 300);
         } else {
-          // Snap back — rubber-band both images to original positions
-          lbImg.style.transition = `transform ${dur} ${ease}`;
+          // Snap back (includes edge rubber-band bounce)
+          const snapEase = atEdge ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : ease;
+          lbImg.style.transition = `transform ${dur} ${snapEase}`;
           lbImg.style.transform = '';
 
-          if (stagingDirection) {
+          if (stagingDirection && !atEdge) {
             const returnX = stagingDirection === 'left' ? vw() + GAP : -(vw() + GAP);
             stagingImg.style.transition = `transform ${dur} ${ease}, opacity ${dur} ease`;
             stagingImg.style.transform = `translate(calc(-50% + ${returnX}px), -50%)`;
@@ -540,5 +639,76 @@ document.addEventListener('astro:page-load', () => {
     }
     lastTap = now;
   });
+
+  // ===== Desktop custom cursor (dot + arrows) =====
+  const lbCursor = document.getElementById('lb-cursor');
+  if (lbCursor && window.matchMedia('(min-width: 601px)').matches) {
+    let cx = 0, cy = 0, tx = 0, ty = 0;
+    let cursorVis = false;
+    let cursorRaf = 0;
+    let lastCurTime = 0;
+    const edgeZone = 0.2;
+
+    function animateLbCursor(now: number) {
+      if (!lastCurTime) lastCurTime = now;
+      const dt = (now - lastCurTime) / 1000;
+      lastCurTime = now;
+      const factor = 1 - Math.exp(-14 * dt);
+      cx += (tx - cx) * factor;
+      cy += (ty - cy) * factor;
+      lbCursor!.style.translate = `${cx}px ${cy}px`;
+      if (cursorVis) cursorRaf = requestAnimationFrame(animateLbCursor);
+    }
+
+    function updateCursorMode(x: number) {
+      const pct = x / window.innerWidth;
+      if (pct < edgeZone && canGoPrev()) {
+        lbCursor!.classList.add('arrow-left');
+        lbCursor!.classList.remove('arrow-right');
+      } else if (pct > (1 - edgeZone) && canGoNext()) {
+        lbCursor!.classList.remove('arrow-left');
+        lbCursor!.classList.add('arrow-right');
+      } else {
+        lbCursor!.classList.remove('arrow-left', 'arrow-right');
+      }
+    }
+
+    imageWrap.addEventListener('mouseenter', (e) => {
+      // Snap cursor to mouse position immediately on enter (no fly-in from 0,0)
+      cx = e.clientX; cy = e.clientY;
+      tx = e.clientX; ty = e.clientY;
+      lbCursor!.style.translate = `${cx}px ${cy}px`;
+      cursorVis = true;
+      lastCurTime = 0;
+      lbCursor!.classList.add('visible');
+      lightbox.classList.add('cursor-active');
+      updateCursorMode(e.clientX);
+      requestAnimationFrame(animateLbCursor);
+    });
+
+    imageWrap.addEventListener('mouseleave', () => {
+      cursorVis = false;
+      lbCursor!.classList.remove('visible', 'arrow-left', 'arrow-right');
+      lightbox.classList.remove('cursor-active');
+      cancelAnimationFrame(cursorRaf);
+    });
+
+    imageWrap.addEventListener('mousemove', (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      updateCursorMode(e.clientX);
+    });
+
+    toolbar?.addEventListener('mouseenter', () => {
+      lbCursor!.classList.remove('visible', 'arrow-left', 'arrow-right');
+      lightbox.classList.remove('cursor-active');
+    });
+    toolbar?.addEventListener('mouseleave', () => {
+      if (lightbox.classList.contains('active')) {
+        lbCursor!.classList.add('visible');
+        lightbox.classList.add('cursor-active');
+      }
+    });
+  }
 
 }); // end astro:page-load
