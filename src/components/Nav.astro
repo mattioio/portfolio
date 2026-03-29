@@ -162,12 +162,6 @@ const isHome = currentPath === "/";
       const drawer = panel.querySelector(".panel__drawer") as HTMLElement | null;
       if (drawer) drawer.scrollTop = 0;
 
-      // Reset hero content animation state
-      const hContent = panel.querySelector('.panel__hero-content') as HTMLElement | null;
-      const hBg = panel.querySelector('.panel__hero-bg') as HTMLElement | null;
-      if (hContent) { hContent.style.opacity = '1'; hContent.style.transform = ''; }
-      if (hBg) hBg.style.transform = '';
-
       // Set random hero background image
       const heroEl = panel.querySelector('.panel__hero') as HTMLElement | null;
       const bgEl = panel.querySelector('.panel__hero-bg') as HTMLElement | null;
@@ -206,28 +200,6 @@ const isHome = currentPath === "/";
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
     }, { signal });
-
-    // ── Panel hero scroll animation ─────────────────────────────────────
-    const panelDrawer = panel.querySelector(".panel__drawer") as HTMLElement | null;
-    const heroContent = panel.querySelector(".panel__hero-content") as HTMLElement | null;
-    const heroBg = panel.querySelector(".panel__hero-bg") as HTMLElement | null;
-
-    if (panelDrawer && heroContent) {
-      panelDrawer.addEventListener("scroll", () => {
-        const scrollTop = panelDrawer.scrollTop;
-        const fadeZone = 200;
-        const progress = Math.min(1, scrollTop / fadeZone);
-
-        // Content: fade out + drift up
-        heroContent.style.opacity = String(1 - progress);
-        heroContent.style.transform = `translateY(${-progress * 30}px) scale(${1 - progress * 0.04})`;
-
-        // Background: subtle parallax (scrolls slower)
-        if (heroBg) {
-          heroBg.style.transform = `translateY(${scrollTop * 0.3}px) scale(${1 + scrollTop * 0.0004})`;
-        }
-      }, { signal, passive: true });
-    }
 
     // ── Scroll behaviour ──────────────────────────────────────────────────
     const hero = document.querySelector(".hero") as HTMLElement;
