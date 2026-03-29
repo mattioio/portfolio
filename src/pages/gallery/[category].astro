@@ -155,16 +155,18 @@ images.forEach((src, i) => {
     </div>
     <div class="lightbox__toolbar" id="lb-toolbar">
       <div class="lightbox__toolbar-inner">
-        <button class="lightbox__tb-btn lightbox__prev" aria-label="Previous image">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <div class="lightbox__tb-center">
-          <span class="lightbox__counter"></span>
-          <span class="lightbox__hint">Swipe · Double-tap to zoom</span>
+        <div class="lightbox__tb-nav">
+          <button class="lightbox__tb-btn lightbox__prev" aria-label="Previous image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="lightbox__tb-center">
+            <span class="lightbox__counter"></span>
+            <span class="lightbox__hint">Swipe · Double-tap to zoom</span>
+          </div>
+          <button class="lightbox__tb-btn lightbox__next" aria-label="Next image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
-        <button class="lightbox__tb-btn lightbox__next" aria-label="Next image">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
         <button class="lightbox__tb-btn lightbox__close" aria-label="Close lightbox">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -547,8 +549,6 @@ images.forEach((src, i) => {
     inset: 0;
     z-index: 300;
     background: #000;
-    display: flex;
-    flex-direction: column;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -562,19 +562,18 @@ images.forEach((src, i) => {
   }
 
   .lightbox__image-wrap {
-    flex: 1 1 0%;
-    min-height: 0;
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     touch-action: none;
-    padding: 1rem;
   }
 
   .lightbox__img {
     max-width: 92vw;
-    max-height: 100%;
+    max-height: 85vh;
     object-fit: contain;
     transition: opacity 0.2s;
     transform-origin: center center;
@@ -583,7 +582,11 @@ images.forEach((src, i) => {
 
   /* ── Toolbar ── */
   .lightbox__toolbar {
-    flex-shrink: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
@@ -592,10 +595,18 @@ images.forEach((src, i) => {
   .lightbox__toolbar-inner {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .lightbox__tb-nav {
+    display: flex;
+    align-items: center;
     gap: 0.25rem;
-    padding: 0.75rem 1.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .lightbox__tb-btn {
@@ -615,9 +626,6 @@ images.forEach((src, i) => {
     background-color: rgba(255, 255, 255, 0.1);
   }
 
-  .lightbox__close {
-    margin-left: 0.75rem;
-  }
 
   .lightbox__tb-center {
     position: relative;
