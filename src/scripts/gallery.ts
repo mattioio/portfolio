@@ -117,7 +117,8 @@ document.addEventListener('astro:page-load', () => {
   const lightbox = document.getElementById("lightbox");
   if (!lightbox) return;
 
-  const lbImg = lightbox.querySelector(".lightbox__img") as HTMLImageElement;
+  const lbImg = lightbox.querySelector(".lightbox__img:not(.lightbox__img--staging)") as HTMLImageElement;
+  const stagingImg = lightbox.querySelector(".lightbox__img--staging") as HTMLImageElement;
   const lbCounter = lightbox.querySelector(".lightbox__counter")!;
   const lbHint = lightbox.querySelector(".lightbox__hint") as HTMLElement | null;
   const toolbar = document.getElementById("lb-toolbar");
@@ -166,13 +167,17 @@ document.addEventListener('astro:page-load', () => {
     if (navEl) navEl.style.display = '';
     if (catBar) catBar.style.display = '';
     resetTransform();
+    resetStaging();
   }
 
   function show() {
     lbImg.src = sources[currentIndex];
     lbImg.alt = `Photo ${currentIndex + 1} of ${sources.length}`;
     lbCounter.textContent = `${currentIndex + 1} / ${sources.length}`;
-    // Preload adjacent
+    preloadAdjacent();
+  }
+
+  function preloadAdjacent() {
     [currentIndex - 1, currentIndex + 1].forEach((i) => {
       if (i >= 0 && i < sources.length) {
         const img = new Image();
@@ -182,17 +187,25 @@ document.addEventListener('astro:page-load', () => {
   }
 
   function next() {
-    currentIndex = (currentIndex + 1) % sources.length;
+    if (currentIndex >= sources.length - 1) { currentIndex = 0; } else { currentIndex++; }
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
   }
 
   function prev() {
-    currentIndex = (currentIndex - 1 + sources.length) % sources.length;
+    if (currentIndex <= 0) { currentIndex = sources.length - 1; } else { currentIndex--; }
     scale = 1; panX = 0; panY = 0;
     lbImg.style.transform = '';
     show();
+  }
+
+  // Reset staging image to hidden
+  function resetStaging() {
+    stagingImg.style.opacity = '0';
+    stagingImg.style.transform = '';
+    stagingImg.style.transition = '';
+    stagingImg.src = '';
   }
 
   items.forEach((item, i) => {
@@ -217,7 +230,7 @@ document.addEventListener('astro:page-load', () => {
     if (e.key === "ArrowLeft") prev();
   });
 
-  // ===== Mobile: pinch-to-zoom, pan, and swipe =====
+  // ===== Touch: pinch-to-zoom, pan, 1:1 swipe nav, swipe-down dismiss =====
   let scale = 1;
   let panX = 0;
   let panY = 0;
@@ -229,7 +242,14 @@ document.addEventListener('astro:page-load', () => {
   let startMidY = 0;
   let touchStartX = 0;
   let touchStartY = 0;
+  let touchStartTime = 0;
   let isPinching = false;
+  let isPanning = false;
+  let swipeDir: 'x' | 'y' | null = null;
+  let isDraggingDown = false;
+  let isDraggingX = false;
+  let swipeLocked = false;
+  let stagingDirection: 'left' | 'right' | null = null;
 
   function resetTransform() {
     scale = 1;
@@ -248,6 +268,29 @@ document.addEventListener('astro:page-load', () => {
   }
 
   const imageWrap = lightbox.querySelector('.lightbox__image-wrap') as HTMLElement;
+  const vw = () => window.innerWidth;
+  const GAP = 40; // px gap between images during swipe
+
+  // Prepare staging image for a swipe direction
+  function prepareStaging(dir: 'left' | 'right') {
+    const nextIdx = dir === 'left'
+      ? (currentIndex + 1) % sources.length
+      : (currentIndex - 1 + sources.length) % sources.length;
+    stagingImg.src = sources[nextIdx];
+    stagingImg.alt = `Photo ${nextIdx + 1} of ${sources.length}`;
+    stagingImg.style.opacity = '1';
+    stagingImg.style.transition = 'none';
+    stagingDirection = dir;
+  }
+
+  // Position staging image based on current drag dx
+  function positionStaging(dx: number) {
+    if (!stagingDirection) return;
+    const offset = stagingDirection === 'left'
+      ? vw() + GAP + dx   // starts at +vw, moves left
+      : -(vw() + GAP) + dx; // starts at -vw, moves right
+    stagingImg.style.transform = `translate(calc(-50% + ${offset}px), -50%)`;
+  }
 
   imageWrap.addEventListener('touchstart', (e) => {
     if (e.touches.length === 2) {
@@ -262,22 +305,22 @@ document.addEventListener('astro:page-load', () => {
     } else if (e.touches.length === 1) {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
       startPanX = panX;
       startPanY = panY;
       isPanning = scale > 1;
       swipeDir = null;
       isDraggingDown = false;
+      isDraggingX = false;
+      stagingDirection = null;
     }
   }, { passive: false });
-
-  let isPanning = false;
 
   imageWrap.addEventListener('touchmove', (e) => {
     if (e.touches.length === 2 && isPinching) {
       e.preventDefault();
       const curDist = dist(e.touches[0], e.touches[1]);
       const newScale = Math.max(1, Math.min(5, startScale * (curDist / startDist)));
-
       const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
       const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       panX = startPanX + (midX - startMidX);
@@ -295,20 +338,39 @@ document.addEventListener('astro:page-load', () => {
         panY = startPanY + dy;
         applyTransform();
       } else if (!swipeLocked) {
-        // Determine swipe direction once past a small threshold
+        // Lock swipe direction once past threshold
         if (!swipeDir && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
           swipeDir = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         }
 
-        if (swipeDir === 'y' && dy > 0) {
-          // Swipe down — 1:1 drag to dismiss
+        if (swipeDir === 'x') {
+          // ── Horizontal: 1:1 carousel swipe ──
+          e.preventDefault();
+          isDraggingX = true;
+
+          // Prepare staging image on first move
+          if (!stagingDirection) {
+            prepareStaging(dx < 0 ? 'left' : 'right');
+          }
+          // If user reverses direction, re-prepare
+          if ((dx < 0 && stagingDirection === 'right') || (dx > 0 && stagingDirection === 'left')) {
+            prepareStaging(dx < 0 ? 'left' : 'right');
+          }
+
+          // Move current image
+          lbImg.style.transition = 'none';
+          lbImg.style.transform = `translateX(${dx}px)`;
+          // Move staging image
+          positionStaging(dx);
+
+        } else if (swipeDir === 'y' && dy > 0) {
+          // ── Vertical: swipe down to dismiss ──
           e.preventDefault();
           isDraggingDown = true;
           const progress = Math.min(1, dy / (window.innerHeight * 0.4));
           lbImg.style.transition = 'none';
           lbImg.style.transform = `translateY(${dy}px) scale(${1 - progress * 0.08})`;
           lightbox.style.backgroundColor = `rgba(0, 0, 0, ${1 - progress * 0.6})`;
-          // Slide toolbar down with drag
           if (toolbar) {
             toolbar.style.transition = 'none';
             toolbar.style.transform = `translateY(${progress * 100}%)`;
@@ -319,42 +381,37 @@ document.addEventListener('astro:page-load', () => {
     }
   }, { passive: false });
 
-  let swipeDir: 'x' | 'y' | null = null;
-  let isDraggingDown = false;
-  let swipeLocked = false;
-
   imageWrap.addEventListener('touchend', (e) => {
     if (isPinching) {
       isPinching = false;
       if (scale <= 1.1) {
-        scale = 1;
-        panX = 0;
-        panY = 0;
+        scale = 1; panX = 0; panY = 0;
         lbImg.style.transition = 'transform 0.2s ease';
         lbImg.style.transform = '';
       }
       swipeDir = null;
       isDraggingDown = false;
+      isDraggingX = false;
+      resetStaging();
       return;
     }
 
     if (scale <= 1 && e.changedTouches.length === 1) {
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
+      const elapsed = Date.now() - touchStartTime;
+      const velocity = Math.abs(dx) / Math.max(elapsed, 1); // px/ms
 
+      // ── Swipe down dismiss ──
       if (isDraggingDown) {
-        // Swipe down release
         isDraggingDown = false;
         swipeDir = null;
         const spring = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
         if (dy > 120) {
-          // Dismiss — animate out
           swipeLocked = true;
-          // Restore page elements early so they're visible behind the fading lightbox
           document.body.style.overflow = "";
           if (navEl) navEl.style.display = '';
           if (catBar) catBar.style.display = '';
-
           lbImg.style.transition = `transform 0.35s ${spring}`;
           lbImg.style.transform = `translateY(${window.innerHeight}px) scale(0.85)`;
           lightbox.style.transition = 'opacity 0.3s ease, background-color 0.3s ease';
@@ -366,7 +423,6 @@ document.addEventListener('astro:page-load', () => {
             toolbar.style.opacity = '0';
           }
           setTimeout(() => {
-            // Full reset without re-triggering close animations
             lightbox.classList.remove("active");
             lightbox.setAttribute("aria-hidden", "true");
             resetTransform();
@@ -375,15 +431,10 @@ document.addEventListener('astro:page-load', () => {
             lightbox.style.transition = '';
             lightbox.style.backgroundColor = '';
             lightbox.style.opacity = '';
-            if (toolbar) {
-              toolbar.style.transition = '';
-              toolbar.style.transform = '';
-              toolbar.style.opacity = '';
-            }
+            if (toolbar) { toolbar.style.transition = ''; toolbar.style.transform = ''; toolbar.style.opacity = ''; }
             swipeLocked = false;
           }, 350);
         } else {
-          // Bounce back
           const bounce = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
           lbImg.style.transition = `transform 0.4s ${bounce}`;
           lbImg.style.transform = '';
@@ -397,37 +448,81 @@ document.addEventListener('astro:page-load', () => {
           setTimeout(() => {
             lbImg.style.transition = '';
             lightbox.style.transition = '';
-            if (toolbar) {
-              toolbar.style.transition = '';
-            }
+            if (toolbar) toolbar.style.transition = '';
           }, 400);
         }
         return;
       }
 
-      // Horizontal swipe to navigate
-      swipeDir = null;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        resetTransform();
-        dx > 0 ? prev() : next();
+      // ── Horizontal carousel release ──
+      if (isDraggingX) {
+        isDraggingX = false;
+        swipeDir = null;
+        const threshold = vw() * 0.25;
+        const shouldComplete = Math.abs(dx) > threshold || velocity > 0.5;
+        const dur = '0.3s';
+        const ease = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
+
+        if (shouldComplete && Math.abs(dx) > 15) {
+          // Complete transition — slide current off, staging in
+          const goingLeft = dx < 0;
+          const slideOutX = goingLeft ? -vw() - GAP : vw() + GAP;
+
+          lbImg.style.transition = `transform ${dur} ${ease}`;
+          lbImg.style.transform = `translateX(${slideOutX}px)`;
+
+          stagingImg.style.transition = `transform ${dur} ${ease}`;
+          stagingImg.style.transform = 'translate(-50%, -50%)'; // center
+
+          swipeLocked = true;
+          setTimeout(() => {
+            // Update index and swap
+            if (goingLeft) {
+              currentIndex = (currentIndex + 1) % sources.length;
+            } else {
+              currentIndex = (currentIndex - 1 + sources.length) % sources.length;
+            }
+            show();
+            lbImg.style.transition = '';
+            lbImg.style.transform = '';
+            resetStaging();
+            swipeLocked = false;
+          }, 300);
+        } else {
+          // Snap back — rubber-band both images to original positions
+          lbImg.style.transition = `transform ${dur} ${ease}`;
+          lbImg.style.transform = '';
+
+          if (stagingDirection) {
+            const returnX = stagingDirection === 'left' ? vw() + GAP : -(vw() + GAP);
+            stagingImg.style.transition = `transform ${dur} ${ease}, opacity ${dur} ease`;
+            stagingImg.style.transform = `translate(calc(-50% + ${returnX}px), -50%)`;
+            stagingImg.style.opacity = '0';
+          }
+
+          setTimeout(() => {
+            lbImg.style.transition = '';
+            resetStaging();
+          }, 300);
+        }
+        return;
       }
     }
 
     swipeDir = null;
     isDraggingDown = false;
+    isDraggingX = false;
   });
 
   // Double-tap to zoom on mobile
   let lastTap = 0;
   imageWrap.addEventListener('touchend', (e) => {
-    if (e.changedTouches.length !== 1 || isPinching) return;
+    if (e.changedTouches.length !== 1 || isPinching || isDraggingX || isDraggingDown) return;
     const now = Date.now();
     if (now - lastTap < 300) {
       e.preventDefault();
       if (scale > 1) {
-        scale = 1;
-        panX = 0;
-        panY = 0;
+        scale = 1; panX = 0; panY = 0;
         lbImg.style.transition = 'transform 0.3s ease';
         lbImg.style.transform = '';
       } else {

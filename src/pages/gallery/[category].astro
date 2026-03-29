@@ -152,6 +152,7 @@ images.forEach((src, i) => {
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image viewer">
     <div class="lightbox__image-wrap">
       <img class="lightbox__img" src="" alt="" />
+      <img class="lightbox__img lightbox__img--staging" src="" alt="" aria-hidden="true" />
     </div>
     <div class="lightbox__toolbar" id="lb-toolbar">
       <div class="lightbox__toolbar-inner">
@@ -575,9 +576,18 @@ images.forEach((src, i) => {
     max-width: 92vw;
     max-height: 85vh;
     object-fit: contain;
-    transition: opacity 0.2s;
     transform-origin: center center;
     will-change: transform;
+    flex-shrink: 0;
+  }
+
+  .lightbox__img--staging {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* ── Toolbar ── */
