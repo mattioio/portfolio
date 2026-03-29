@@ -33,6 +33,17 @@ images.forEach((src, i) => {
   ogImage={category.cover}
   showFooter={false}
 >
+  <!-- Cinematic backdrop — morphs from carousel hero, then pulls back & dissolves -->
+  <div class="cinema-backdrop" id="cinema-backdrop" transition:name="hero-cover">
+    <img
+      src={category.cover}
+      alt=""
+      class="cinema-backdrop__img"
+      fetchpriority="high"
+    />
+    <div class="cinema-backdrop__darken"></div>
+  </div>
+
   <section class="columns-wrap">
     <header class="gallery-hero">
       <h1 transition:name="gallery-title">{category.name}</h1>
@@ -175,6 +186,38 @@ images.forEach((src, i) => {
 </BaseLayout>
 
 <style>
+
+  /* Cinematic backdrop — full-viewport cover image that pulls back & dissolves */
+  .cinema-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .cinema-backdrop__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Dark gradient overlay for text legibility during pull-back */
+  .cinema-backdrop__darken {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.2) 40%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+  }
+
+  /* After pull-back animation completes, hide entirely */
+  .cinema-backdrop.done {
+    display: none;
+  }
 
   /* Hero — inside columns-wrap, flows into grid */
   .gallery-hero {
