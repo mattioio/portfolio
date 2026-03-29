@@ -14,9 +14,24 @@ import { createSmoothCursor } from './smooth-cursor';
 // and animates the carousel through every intermediate slide.
 let carouselAC: AbortController | null = null;
 
-document.addEventListener('astro:before-preparation', () => {
+document.addEventListener('astro:before-preparation', (e: any) => {
   carouselAC?.abort();
   carouselAC = null;
+
+  // Stamp the active slide with a view-transition-name so the browser
+  // morphs it into the gallery's cinema-backdrop during navigation.
+  const dest = e.to?.pathname || '';
+  if (dest.startsWith('/gallery/')) {
+    const slides = document.querySelectorAll('.hero__slide');
+    // Find the currently visible slide (opacity > 0)
+    slides.forEach(slide => {
+      const img = slide.querySelector('img');
+      if (img && (slide as HTMLElement).style.opacity !== '0' &&
+          getComputedStyle(slide).opacity !== '0') {
+        (slide as HTMLElement).style.viewTransitionName = 'hero-cover';
+      }
+    });
+  }
 });
 
 document.addEventListener('astro:page-load', () => {
