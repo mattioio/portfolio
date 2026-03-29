@@ -54,6 +54,12 @@ document.addEventListener('astro:page-load', () => {
     }
   });
 
+  // Back to top
+  const backToTop = document.getElementById('back-to-top');
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
   // ===== On-scroll column animation (Codrops style) =====
   const columnEls = Array.from(document.querySelectorAll('.column')) as HTMLElement[];
   const allImgWraps = Array.from(document.querySelectorAll('.column__item-imgwrap')) as HTMLElement[];
