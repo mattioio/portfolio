@@ -201,6 +201,51 @@ const isHome = currentPath === "/";
       if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
     }, { signal });
 
+    // ── Panel swipe-to-close (1:1 touch tracking) ───────────────────────
+    const drawer = panel.querySelector(".panel__drawer") as HTMLElement | null;
+    if (drawer) {
+      let touchStartX = 0;
+      let touchDeltaX = 0;
+      let isSwiping = false;
+
+      drawer.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchDeltaX = 0;
+        isSwiping = false;
+        drawer.style.transition = "none";
+      }, { signal, passive: true });
+
+      drawer.addEventListener("touchmove", (e) => {
+        touchDeltaX = e.touches[0].clientX - touchStartX;
+        if (touchDeltaX < 10) return; // only swipe right
+        isSwiping = true;
+        drawer.style.transform = `translateX(${touchDeltaX}px)`;
+        // Fade backdrop proportionally
+        const progress = Math.min(1, touchDeltaX / drawer.offsetWidth);
+        const backdrop = panel.querySelector(".panel__backdrop") as HTMLElement;
+        if (backdrop) backdrop.style.opacity = String(1 - progress);
+      }, { signal, passive: true });
+
+      drawer.addEventListener("touchend", () => {
+        drawer.style.transition = "";
+        const threshold = drawer.offsetWidth * 0.3;
+        if (isSwiping && touchDeltaX > threshold) {
+          drawer.style.transform = `translateX(100%)`;
+          setTimeout(() => {
+            closePanel();
+            drawer.style.transform = "";
+            const backdrop = panel.querySelector(".panel__backdrop") as HTMLElement;
+            if (backdrop) backdrop.style.opacity = "";
+          }, 300);
+        } else {
+          drawer.style.transform = "";
+          const backdrop = panel.querySelector(".panel__backdrop") as HTMLElement;
+          if (backdrop) backdrop.style.opacity = "";
+        }
+        isSwiping = false;
+      }, { signal });
+    }
+
     // ── Scroll behaviour ──────────────────────────────────────────────────
     const hero = document.querySelector(".hero") as HTMLElement;
     const revealSection = document.querySelector(".reveal-section") as HTMLElement;

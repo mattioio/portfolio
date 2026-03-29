@@ -98,7 +98,7 @@ document.addEventListener('astro:page-load', () => {
         // Next slide — peek strip expanding to full screen
         const shrink = -delta; // 1 (peek) → 0 (full)
         const top = (15 * shrink) | 0 ? 15 * shrink : 0;
-        const left = (93 * shrink) | 0 ? 93 * shrink : 0;
+        const left = (85 * shrink) | 0 ? 85 * shrink : 0;
         const r = 10 * shrink;
         state = `next${(shrink * 1000) | 0}`;
         // Only add round when radius is visible (> 0.5px)
@@ -111,7 +111,7 @@ document.addEventListener('astro:page-load', () => {
         // Two ahead — growing into peek position
         const growT = (delta + 1.4) / 0.4;
         const eased = growT * growT * (3 - 2 * growT);
-        const previewLeft = 100 - 7 * eased;
+        const previewLeft = 100 - 15 * eased;
         const previewTop = 50 - 35 * eased;
         const r = 10 * eased;
         state = `peek${(eased * 1000) | 0}`;

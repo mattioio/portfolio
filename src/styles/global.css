@@ -161,17 +161,19 @@ main {
 /* Dark-on-light variant */
 .btn--dark {
   color: var(--color-text);
-  border-color: rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.02) 100%);
+  border-color: var(--color-text);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .btn--dark::before {
-  background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.04) 50%, transparent 100%);
 }
 
 .btn--dark:hover {
-  border-color: rgba(0, 0, 0, 0.25);
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.03) 100%);
+  background: var(--color-text);
+  color: var(--color-text-light);
+  border-color: var(--color-text);
 }
 
 /* ===== Focus ===== */
