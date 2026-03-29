@@ -43,9 +43,10 @@ import profilePic from "../assets/profile-pic.jpg";
   }
 
   .reveal-section__sticky {
+    --card-margin: var(--space-sm);
+    --card-radius: 20px;
     background: var(--color-bg);
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12);
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
     overflow: hidden;
     pointer-events: auto;
     padding: 4vh 0 2vh;
@@ -53,6 +54,8 @@ import profilePic from "../assets/profile-pic.jpg";
     align-items: center;
     justify-content: center;
     margin-top: 8vh;
+    margin-left: var(--card-margin);
+    margin-right: var(--card-margin);
     margin-bottom: 0;
   }
 

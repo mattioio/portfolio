@@ -332,10 +332,11 @@ images.forEach((src, i) => {
     justify-content: space-between;
     padding: 0.7rem var(--space-md);
     padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
-    background: rgba(245, 244, 240, 0.95);
+    background: rgba(20, 20, 20, 0.75);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
   }
 
   .cat-bar__title {
@@ -350,14 +351,15 @@ images.forEach((src, i) => {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-text);
+    color: rgba(255, 255, 255, 0.85);
     padding: 0.3rem 0.6rem;
     border-radius: 6px;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s;
   }
 
   .cat-bar__title:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
   }
 
   .cat-bar__burger {
@@ -384,7 +386,7 @@ images.forEach((src, i) => {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: var(--color-text-muted);
+    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     padding: 0.3rem 0.5rem;
     border-radius: 6px;
@@ -396,8 +398,8 @@ images.forEach((src, i) => {
   }
 
   .cat-bar__top:hover {
-    color: var(--color-text);
-    background-color: rgba(0, 0, 0, 0.05);
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   /* ── Category menu drawer ── */
@@ -405,7 +407,7 @@ images.forEach((src, i) => {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    background: rgba(245, 244, 240, 0.98);
+    background: rgba(20, 20, 20, 0.85);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
@@ -429,21 +431,21 @@ images.forEach((src, i) => {
     font-family: var(--font-heading);
     font-size: 1rem;
     letter-spacing: 0.02em;
-    color: var(--color-text-muted);
+    color: rgba(255, 255, 255, 0.55);
     text-decoration: none;
     border-radius: 6px;
     transition: color 0.2s, background-color 0.2s;
   }
 
   .cat-bar__menu-link:hover {
-    color: var(--color-text);
-    background-color: rgba(0, 0, 0, 0.04);
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
   }
 
   .cat-bar__menu-link--active {
-    color: var(--color-text);
+    color: #fff;
     font-weight: 500;
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(255, 255, 255, 0.08);
   }
 
 
@@ -460,8 +462,6 @@ images.forEach((src, i) => {
     max-width: var(--max-width);
     margin: 0 auto;
     will-change: transform;
-    opacity: 0;
-    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
   }
 
   .column {
@@ -484,6 +484,19 @@ images.forEach((src, i) => {
     border-radius: 6px;
     cursor: pointer;
     position: relative;
+    /* Scroll-triggered entrance */
+    opacity: 0;
+    transform: translateY(60px) scale(0.97);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .column__item.in-view {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    /* After entrance, allow faster tilt transitions for hover */
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .column__item-imgwrap {
@@ -520,8 +533,10 @@ images.forEach((src, i) => {
     position: relative;
     z-index: 1;
     opacity: 0;
-    transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
+    /* transform is set by JS (scroll parallax). scale is separate for hover. */
+    scale: 1;
+    transition: opacity 0.35s ease, scale 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, scale;
   }
 
   .column__item-img.loaded {
@@ -529,7 +544,28 @@ images.forEach((src, i) => {
   }
 
   .column__item:hover .column__item-img {
-    transform: scale(1.05);
+    scale: 1.06;
+  }
+
+  /* Hover overlay gradient — reveals at bottom for depth */
+  .column__item-imgwrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.25) 0%,
+      rgba(0, 0, 0, 0) 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    border-radius: 6px;
+  }
+
+  .column__item:hover .column__item-imgwrap::before {
+    opacity: 1;
   }
 
   /* Gallery eye cursor — desktop only */

@@ -22,6 +22,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Create stacking context so footer (z-index:-1) is behind main
+     but still within the body — allowing pointer events to reach it */
+  isolation: isolate;
 }
 
 img {
@@ -91,6 +94,7 @@ p {
 /* ===== Main content — solid bg so footer can reveal behind it ===== */
 main {
   position: relative;
+  z-index: 1;
   background-color: var(--color-bg);
 }
 

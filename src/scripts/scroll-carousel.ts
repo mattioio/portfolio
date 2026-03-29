@@ -13,25 +13,9 @@ import { createSmoothCursor } from './smooth-cursor';
 // Without this, the old scroll listener fires during Astro's scroll-reset
 // and animates the carousel through every intermediate slide.
 let carouselAC: AbortController | null = null;
-
-document.addEventListener('astro:before-preparation', (e: any) => {
+document.addEventListener('astro:before-preparation', () => {
   carouselAC?.abort();
   carouselAC = null;
-
-  // Stamp the active slide with a view-transition-name so the browser
-  // morphs it into the gallery's cinema-backdrop during navigation.
-  const dest = e.to?.pathname || '';
-  if (dest.startsWith('/gallery/')) {
-    const slides = document.querySelectorAll('.hero__slide');
-    // Find the currently visible slide (opacity > 0)
-    slides.forEach(slide => {
-      const img = slide.querySelector('img');
-      if (img && (slide as HTMLElement).style.opacity !== '0' &&
-          getComputedStyle(slide).opacity !== '0') {
-        (slide as HTMLElement).style.viewTransitionName = 'hero-cover';
-      }
-    });
-  }
 });
 
 document.addEventListener('astro:page-load', () => {
@@ -258,19 +242,28 @@ document.addEventListener('astro:page-load', () => {
       }
     }
 
+    // Disable ALL interaction on the fixed hero once we've scrolled past the
+    // last slide, so it doesn't intercept clicks on the reveal section / footer.
+    // Using `inert` ensures no child (even those with pointer-events:all) can
+    // receive focus or clicks.
+    const pastCarousel = scrolled > carouselHeight;
+    if (pastCarousel) {
+      stickyEl.setAttribute('inert', '');
+    } else {
+      stickyEl.removeAttribute('inert');
+    }
+
     // Fade out the fixed hero backdrop as we approach the footer reveal zone
     if (wasFixed) {
       const footer = document.querySelector('.footer') as HTMLElement;
       const footerH = footer ? footer.offsetHeight : 0;
       const distFromBottom = document.body.scrollHeight - scrolled - vh;
-      const fadeZone = footerH + 50;
+      const fadeZone = footerH + vh * 0.5;
       if (distFromBottom < fadeZone) {
         const opacity = Math.max(0, distFromBottom / fadeZone);
         stickyEl.style.opacity = String(opacity);
-        stickyEl.style.pointerEvents = opacity < 0.01 ? 'none' : '';
       } else {
         stickyEl.style.opacity = '1';
-        stickyEl.style.pointerEvents = '';
       }
     }
 
@@ -316,6 +309,17 @@ document.addEventListener('astro:page-load', () => {
       scrollToSlide(i);
     });
   });
+
+  // Info button — scroll past carousel to the "Capturing moments" section
+  const infoBtn = document.getElementById('hero-info-btn');
+  if (infoBtn) {
+    infoBtn.addEventListener('click', () => {
+      const revealSection = document.querySelector('.reveal-section') as HTMLElement;
+      if (revealSection) {
+        revealSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, { signal });
+  }
 
   // Slide click — same lock behaviour as pagination
   slideEls.forEach((slide, i) => {
@@ -557,11 +561,151 @@ document.addEventListener('astro:page-load', () => {
     }
   }, { signal });
 
-  // Init — snap everything directly to the actual scroll position
+  // Init — snap slides directly, then orchestrate a cinematic entrance sequence
+  pageFill.style.height = '0%';
+
+  // Set text content immediately (invisible) so layout is correct
   headingMain.textContent = content[0].main;
   headingAccent.textContent = content[0].accent;
   desc.textContent = content[0].desc;
-  pageFill.style.height = '0%';
-  update(); // isInitialRender=true → snaps slides, text, and bubble directly
+
+  // Hide everything for the entrance sequence
+  headingMain.style.opacity = '0';
+  headingMain.style.transform = 'translateY(30px)';
+  headingAccent.style.opacity = '0';
+  headingAccent.style.transform = 'translateY(30px)';
+  desc.style.opacity = '0';
+  desc.style.transform = 'translateY(12px)';
+  bottomEl.style.opacity = '0';
+
+  // Pagination — hide for stagger entrance
+  const paginationLine = hero.querySelector('.hero__page-line') as HTMLElement;
+  const pagBubble = hero.querySelector('.hero__page-bubble') as HTMLElement;
+  if (paginationLine) { paginationLine.style.opacity = '0'; paginationLine.style.transform = 'scaleY(0)'; }
+  if (pagBubble) pagBubble.style.opacity = '0';
+  pageNums.forEach(n => { n.style.opacity = '0'; n.style.transform = 'translateY(8px)'; });
+  const infoBtnEl = document.getElementById('hero-info-btn');
+  if (infoBtnEl) { infoBtnEl.style.opacity = '0'; infoBtnEl.style.transform = 'translateY(8px)'; }
+
+  update(); // isInitialRender=true → snaps slides and bubble position
   isInitialRender = false;
+
+  // ── Orchestrated entrance sequence ──
+  // Only play on fresh load (not back-navigation with scroll restore)
+  const isAtTop = window.scrollY < 50;
+
+  if (isAtTop) {
+    // 1. Bottom content container fades in
+    setTimeout(() => {
+      bottomEl.style.transition = 'opacity 0.6s ease';
+      bottomEl.style.opacity = '1';
+    }, 100);
+
+    // 2. Heading main — slides up with char-level stagger
+    setTimeout(() => {
+      headingMain.style.transition = 'none';
+      headingMain.style.opacity = '1';
+      headingMain.style.transform = 'translateY(0)';
+
+      // Split into chars for stagger reveal
+      const text = headingMain.textContent || '';
+      const frag = document.createDocumentFragment();
+      for (const ch of text) {
+        if (ch === ' ') {
+          frag.appendChild(document.createTextNode(' '));
+        } else {
+          const s = document.createElement('span');
+          s.style.display = 'inline-block';
+          s.textContent = ch;
+          frag.appendChild(s);
+        }
+      }
+      headingMain.textContent = '';
+      headingMain.appendChild(frag);
+
+      headingMain.querySelectorAll('span').forEach((c, i) => {
+        (c as HTMLElement).animate([
+          { opacity: 0, transform: 'translateY(100%) rotateX(40deg)' },
+          { opacity: 1, transform: 'translateY(0) rotateX(0)' }
+        ], {
+          duration: 900,
+          delay: i * 35,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'both'
+        });
+      });
+    }, 250);
+
+    // 3. Accent text slides up
+    setTimeout(() => {
+      headingAccent.style.transition = 'opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
+      headingAccent.style.opacity = '0.8';
+      headingAccent.style.transform = 'translateY(0)';
+    }, 550);
+
+    // 4. Description fades in
+    setTimeout(() => {
+      desc.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+      desc.style.opacity = '1';
+      desc.style.transform = 'translateY(0)';
+    }, 700);
+
+    // 5. Pagination line grows + numbers stagger in
+    setTimeout(() => {
+      if (paginationLine) {
+        paginationLine.style.transition = 'opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+        paginationLine.style.opacity = '1';
+        paginationLine.style.transform = 'scaleY(1)';
+      }
+      pageNums.forEach((n, i) => {
+        setTimeout(() => {
+          n.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          n.style.opacity = '';
+          n.style.transform = '';
+        }, i * 50);
+      });
+      setTimeout(() => {
+        if (pagBubble) {
+          pagBubble.style.transition = 'opacity 0.4s ease';
+          pagBubble.style.opacity = '1';
+        }
+        if (infoBtnEl) {
+          infoBtnEl.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          infoBtnEl.style.opacity = '';
+          infoBtnEl.style.transform = '';
+        }
+      }, pageNums.length * 50);
+    }, 600);
+
+    // 6. CTA — already handled by updateEnterCTA, just needs settled state
+    // (it will show once the scroll settles, which it already has)
+
+    // Clean up inline transitions after entrance completes
+    setTimeout(() => {
+      headingMain.style.transition = 'opacity 0.3s, transform 0.4s';
+      headingAccent.style.transition = 'opacity 0.3s, transform 0.4s';
+      desc.style.transition = 'opacity 0.3s';
+      desc.style.transform = '';
+      bottomEl.style.transition = '';
+      if (paginationLine) { paginationLine.style.transition = ''; paginationLine.style.transform = ''; }
+      if (pagBubble) pagBubble.style.transition = '';
+      pageNums.forEach(n => { n.style.transition = ''; n.style.transform = ''; });
+      if (infoBtnEl) { infoBtnEl.style.transition = ''; infoBtnEl.style.transform = ''; }
+      // Flatten char spans back to plain text for slide change logic
+      headingMain.textContent = content[currentSlide].main;
+    }, 2000);
+  } else {
+    // Back-navigation or mid-page — snap everything instantly
+    headingMain.style.opacity = '1';
+    headingMain.style.transform = 'translateY(0)';
+    headingAccent.style.opacity = '0.8';
+    headingAccent.style.transform = 'translateY(0)';
+    desc.style.opacity = '1';
+    desc.style.transform = '';
+    bottomEl.style.opacity = '1';
+    if (paginationLine) { paginationLine.style.opacity = '1'; paginationLine.style.transform = ''; }
+    if (pagBubble) pagBubble.style.opacity = '1';
+    pageNums.forEach(n => { n.style.opacity = ''; n.style.transform = ''; });
+    if (infoBtnEl) { infoBtnEl.style.opacity = ''; infoBtnEl.style.transform = ''; }
+  }
 }); // end astro:page-load

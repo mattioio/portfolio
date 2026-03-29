@@ -42,6 +42,9 @@ const count = slides.length;
               {String(i + 1).padStart(2, "0")}
             </button>
           ))}
+          <button class="hero__page-info" id="hero-info-btn" aria-label="About">
+            i
+          </button>
         </div>
       </div>
 
@@ -332,15 +335,6 @@ const count = slides.length;
     pointer-events: all;
   }
 
-  .hero__enter-label {
-    font-family: var(--font-body);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.7);
-    transition: color 0.3s;
-  }
-
   .hero__enter-cat {
     font-family: var(--font-heading);
     font-size: 1.5rem;
@@ -351,7 +345,7 @@ const count = slides.length;
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
   }
 
-  /* Underline always visible — clearly a link */
+  /* Underline — subtle by default, expands + brightens on hover */
   .hero__enter-cat::after {
     content: "";
     position: absolute;
@@ -359,16 +353,28 @@ const count = slides.length;
     left: 0;
     width: 100%;
     height: 1px;
-    background: rgba(255, 255, 255, 0.4);
-    transition: background 0.3s ease;
+    background: rgba(255, 255, 255, 0.35);
+    transform-origin: left;
+    transition: background 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hero__enter:hover .hero__enter-cat::after {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    transform: scaleX(1.05);
   }
 
   .hero__enter:hover .hero__enter-label {
     color: #fff;
+    letter-spacing: 0.3em;
+  }
+
+  .hero__enter-label {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s, letter-spacing 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hero__enter-arrow {
@@ -472,6 +478,48 @@ const count = slides.length;
     font-weight: 500;
   }
 
+  /* Info button — at bottom of pagination */
+  .hero__page-info {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.05em;
+    cursor: none;
+    transition: color 0.3s;
+    padding: 0.6rem 0.85rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+    background: transparent;
+    border: none;
+  }
+
+  .hero__page-info:hover {
+    color: #fff;
+  }
+
+  /* Hover ring — matches page-num style */
+  .hero__page-info::before {
+    content: '';
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.65);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .hero__page-info:hover::before {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
   /* Vertical progress bar — at the top of pagination */
   .hero__page-line {
     width: 2px;
@@ -515,6 +563,10 @@ const count = slides.length;
 
     .hero__page-line {
       display: none;
+    }
+
+    .hero__page-info {
+      margin-top: 0;
     }
 
     .hero__page-bubble {
