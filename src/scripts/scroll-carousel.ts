@@ -328,7 +328,8 @@ document.addEventListener('astro:page-load', () => {
     const isSettled = Math.abs(lastT) < 0.05 || (currentSlide === slideCount - 1 && lastT > 0.95);
     if (isSettled && enterEl) {
       const slug = slideEls[currentSlide]?.dataset.slug;
-      if (slug) enterEl.href = `/gallery/${slug}`;
+      const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+      if (slug) enterEl.href = `${basePath}/gallery/${slug}`;
       if (enterCatEl) enterCatEl.textContent = content[currentSlide]?.main.replace(' &', '') || '';
       enterEl.classList.add('visible');
       // Scroll has settled — release bubble lock and snap to current slide
