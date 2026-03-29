@@ -168,26 +168,18 @@ const heroImages = allImages.sort(() => 0.5 - Math.random()).slice(0, 6);
   }
 
   .panel__body {
-    position: relative;
-    z-index: 1;
-    background: var(--color-bg);
-    border-radius: 20px 20px 0 0;
     padding: 1.5rem 2rem 3rem;
     flex: 1;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   }
 
   /* ── Hero banner (full-width, image bg) ── */
   .panel__hero {
-    position: sticky;
-    top: 0;
-    z-index: 0;
+    position: relative;
     color: #fff;
-    padding: 5rem 2rem 3.5rem;
+    padding: 5rem 2rem 2.5rem;
     text-align: center;
     flex-shrink: 0;
     overflow: hidden;
-    min-height: 320px;
   }
 
   .panel__hero-bg {
@@ -212,7 +204,6 @@ const heroImages = allImages.sort(() => 0.5 - Math.random()).slice(0, 6);
   .panel__hero-content {
     position: relative;
     z-index: 1;
-    will-change: transform, opacity;
   }
 
   .panel__hero h3 {
