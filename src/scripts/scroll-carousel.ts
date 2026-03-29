@@ -242,6 +242,22 @@ document.addEventListener('astro:page-load', () => {
       }
     }
 
+    // Fade out the fixed hero backdrop as we approach the footer reveal zone
+    if (wasFixed) {
+      const footer = document.querySelector('.footer') as HTMLElement;
+      const footerH = footer ? footer.offsetHeight : 0;
+      const distFromBottom = document.body.scrollHeight - scrolled - vh;
+      const fadeZone = footerH + 50;
+      if (distFromBottom < fadeZone) {
+        const opacity = Math.max(0, distFromBottom / fadeZone);
+        stickyEl.style.opacity = String(opacity);
+        stickyEl.style.pointerEvents = opacity < 0.01 ? 'none' : '';
+      } else {
+        stickyEl.style.opacity = '1';
+        stickyEl.style.pointerEvents = '';
+      }
+    }
+
     // Update CTA + dot label
     updateEnterCTA();
     updateDotLabel();
@@ -360,7 +376,7 @@ document.addEventListener('astro:page-load', () => {
   });
 
   let dotMode: 'dot' | 'arrow-left' | 'arrow-right' = 'dot';
-  const edgeZone = 180;
+  const edgeZonePct = 0.30; // 30% of viewport width
 
   let textRect: DOMRect | null = null;
   let paginationRect: DOMRect | null = null;
@@ -408,6 +424,7 @@ document.addEventListener('astro:page-load', () => {
     dotEl.classList.remove('eye-mode');
 
     const vw = window.innerWidth;
+    const edgeZone = vw * edgeZonePct;
     const overPag = pointInRect(e.clientX, e.clientY, paginationRect, 20);
 
     const newMode: typeof dotMode =

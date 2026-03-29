@@ -8,8 +8,11 @@ const isHome = currentPath === "/";
   <div class="nav__inner">
     <a href="/" class="nav__logo">Gavin Batty</a>
     <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
-      <span></span>
-      <span></span>
+      <span class="nav__toggle-label">Hire me</span>
+      <span class="nav__toggle-lines">
+        <span></span>
+        <span></span>
+      </span>
     </button>
   </div>
 </header>
@@ -40,9 +43,9 @@ const isHome = currentPath === "/";
     transition: opacity 0.2s;
   }
 
-  /* Force toggle dark — it now floats over the light panel drawer */
+  /* Toggle white over the dark hero image */
   .nav.panel-open .nav__toggle {
-    color: var(--color-text);
+    color: #fff;
   }
 
   .nav--light {
@@ -73,28 +76,57 @@ const isHome = currentPath === "/";
 
   .nav__toggle {
     display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 4px;
+    z-index: 1;
+    color: inherit;
+    position: relative;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+
+  .nav__toggle-label {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    translate: 0 0.15em;
+  }
+
+  .nav__toggle:hover .nav__toggle-label {
+    opacity: 1;
+  }
+
+  .nav__toggle-lines {
+    display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 4px;
-    z-index: 1; /* nav itself is now 201, no need for extra stacking */
-    color: inherit;
     position: relative;
   }
 
-  .nav__toggle span {
+  .nav__toggle-lines span {
     display: block;
     width: 24px;
     height: 1.5px;
     background: currentColor;
-    transition: transform 0.3s, opacity 0.3s;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
   }
 
-  .nav__toggle[aria-expanded="true"] span:first-child {
+  .nav__toggle[aria-expanded="true"] .nav__toggle-lines span:first-child {
     transform: translateY(3.75px) rotate(45deg);
   }
 
-  .nav__toggle[aria-expanded="true"] span:last-child {
+  .nav__toggle[aria-expanded="true"] .nav__toggle-lines span:last-child {
     transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-label {
+    opacity: 0;
+    pointer-events: none;
   }
 
   @media (max-width: 768px) {
@@ -129,6 +161,26 @@ const isHome = currentPath === "/";
     function openPanel() {
       const drawer = panel.querySelector(".panel__drawer") as HTMLElement | null;
       if (drawer) drawer.scrollTop = 0;
+
+      // Reset hero content animation state
+      const hContent = panel.querySelector('.panel__hero-content') as HTMLElement | null;
+      const hBg = panel.querySelector('.panel__hero-bg') as HTMLElement | null;
+      if (hContent) { hContent.style.opacity = '1'; hContent.style.transform = ''; }
+      if (hBg) hBg.style.transform = '';
+
+      // Set random hero background image
+      const heroEl = panel.querySelector('.panel__hero') as HTMLElement | null;
+      const bgEl = panel.querySelector('.panel__hero-bg') as HTMLElement | null;
+      if (heroEl && bgEl) {
+        try {
+          const images = JSON.parse(heroEl.dataset.heroImages || '[]');
+          if (images.length) {
+            const img = images[Math.floor(Math.random() * images.length)];
+            bgEl.style.backgroundImage = `url(${img})`;
+          }
+        } catch {}
+      }
+
       panel.classList.add("active");
       panel.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -154,6 +206,28 @@ const isHome = currentPath === "/";
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && panel.classList.contains("active")) closePanel();
     }, { signal });
+
+    // ── Panel hero scroll animation ─────────────────────────────────────
+    const panelDrawer = panel.querySelector(".panel__drawer") as HTMLElement | null;
+    const heroContent = panel.querySelector(".panel__hero-content") as HTMLElement | null;
+    const heroBg = panel.querySelector(".panel__hero-bg") as HTMLElement | null;
+
+    if (panelDrawer && heroContent) {
+      panelDrawer.addEventListener("scroll", () => {
+        const scrollTop = panelDrawer.scrollTop;
+        const fadeZone = 200;
+        const progress = Math.min(1, scrollTop / fadeZone);
+
+        // Content: fade out + drift up
+        heroContent.style.opacity = String(1 - progress);
+        heroContent.style.transform = `translateY(${-progress * 30}px) scale(${1 - progress * 0.04})`;
+
+        // Background: subtle parallax (scrolls slower)
+        if (heroBg) {
+          heroBg.style.transform = `translateY(${scrollTop * 0.3}px) scale(${1 + scrollTop * 0.0004})`;
+        }
+      }, { signal, passive: true });
+    }
 
     // ── Scroll behaviour ──────────────────────────────────────────────────
     const hero = document.querySelector(".hero") as HTMLElement;

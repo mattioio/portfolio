@@ -9,7 +9,7 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
     <div class="footer__cta">
       <h2 class="footer__headline">Let's work together</h2>
       <p class="footer__pitch">Have a project in mind? I'd love to hear about it. Every collaboration starts with a conversation.</p>
-      <a href={CONTACT_MAILTO} class="footer__cta-btn">
+      <a href={CONTACT_MAILTO} class="btn footer__cta-btn">
         Get in Touch
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M7 17L17 7M17 7H7M17 7V17" />
@@ -46,13 +46,13 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
 
 <style>
   .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
     background-color: var(--color-bg-dark);
     color: var(--color-text-light);
-  }
-
-  :global(.page-home) .footer {
-    position: relative;
-    z-index: 4;
   }
 
   .footer__inner {
@@ -85,26 +85,14 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
   }
 
   .footer__cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
     font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
     padding: 0.85rem 2.5rem 0.85rem calc(2.5rem + 0.15em);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    color: var(--color-text-light);
-    transition: background-color 0.3s, border-color 0.3s;
+    border-color: rgba(255, 255, 255, 0.35);
   }
 
   .footer__cta-btn svg {
     flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .footer__cta-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.6);
   }
 
   .footer__cta-btn:hover svg {
@@ -193,3 +181,14 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "../data/contact";
     }
   }
 </style>
+
+<script>
+  function syncFooterSpace() {
+    const footer = document.querySelector('.footer') as HTMLElement;
+    if (!footer) return;
+    document.body.style.paddingBottom = footer.offsetHeight + 'px';
+  }
+
+  document.addEventListener('astro:page-load', syncFooterSpace);
+  window.addEventListener('resize', syncFooterSpace);
+</script>

@@ -121,6 +121,7 @@ images.forEach((src, i) => {
       </button>
       <button class="cat-bar__top" id="back-to-top" aria-label="Back to top">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+        <span>Top</span>
       </button>
     </div>
   </nav>
@@ -232,8 +233,8 @@ images.forEach((src, i) => {
     flex-direction: column;
     align-items: center;
     gap: 2rem;
-    padding: 3rem var(--space-md);
-    padding-bottom: calc(3rem + 60px); /* clear the fixed bottom bar */
+    padding: 2rem var(--space-md);
+    padding-bottom: calc(2rem + 56px); /* clear the fixed bottom bar */
     max-width: var(--max-width);
     margin: 0 auto;
   }
@@ -350,8 +351,7 @@ images.forEach((src, i) => {
   .cat-bar__inner {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    justify-content: space-between;
     padding: 0.7rem var(--space-md);
     padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
     background: rgba(245, 244, 240, 0.95);
@@ -399,15 +399,22 @@ images.forEach((src, i) => {
   .cat-bar__top {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    gap: 0.35rem;
     background: none;
     border: none;
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
     color: var(--color-text-muted);
     cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
     transition: color 0.2s, background-color 0.2s;
+  }
+
+  .cat-bar__top span {
+    translate: 0 0.1em;
   }
 
   .cat-bar__top:hover {
@@ -465,7 +472,7 @@ images.forEach((src, i) => {
   /* ===== Columns with scroll animation ===== */
   .columns-wrap {
     overflow: hidden;
-    padding-bottom: calc(var(--space-xl) + 60px); /* extra space for bottom bar */
+    padding-bottom: var(--space-lg);
   }
 
   .columns {
