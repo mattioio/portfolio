@@ -244,7 +244,8 @@ export function Canvas() {
         const cmdMap: Record<string, () => void> = {
           z: () => e.shiftKey ? usePortfolioStore.getState().redo() : usePortfolioStore.getState().undo(),
           c: handleCopy,
-          v: handlePaste,
+          // Paste (Cmd/Ctrl+V) handled by the 'paste' event below so it can read
+          // images from the OS clipboard as well as internal copied layers.
           d: handleDuplicate,
           g: () => handleGroup(e),
         }
@@ -312,6 +313,42 @@ export function Canvas() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [appMode, selectedSlide, slides.length, goToPrev, goToNext, duplicateSlide, removeSlide, toggleSlideDarkMode, setSlideStyleVariant, setAppMode, zoomIn, zoomOut, zoomFit, toggleFullscreen, handleCopy, handlePaste, handleDuplicate, handleDelete, handleGroup, handleTab, handleEscape, handleNudge, handleShapeToggle])
+
+  // Cmd/Ctrl+V in draw mode: paste an image from the OS clipboard as an image
+  // layer; otherwise fall back to the internal copied-layer clipboard.
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      if (appMode !== 'draw' || !selectedSlide) return
+      const target = e.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
+
+      const items = e.clipboardData?.items
+      const imageItem = items ? Array.from(items).find((it) => it.type.startsWith('image/')) : undefined
+      if (imageItem) {
+        const file = imageItem.getAsFile()
+        if (file) {
+          e.preventDefault()
+          const reader = new FileReader()
+          reader.onload = () => {
+            const src = reader.result as string
+            const img = new Image()
+            img.onload = () => usePortfolioStore.getState().addImageLayer(selectedSlide.id, src, img.naturalWidth, img.naturalHeight)
+            img.onerror = () => usePortfolioStore.getState().addImageLayer(selectedSlide.id, src, 800, 600)
+            img.src = src
+          }
+          reader.readAsDataURL(file)
+          return
+        }
+      }
+      // No image on the clipboard — paste internal copied layers instead
+      if (_drawClipboard) {
+        e.preventDefault()
+        handlePaste()
+      }
+    }
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [appMode, selectedSlide, handlePaste])
 
   if (!selectedSlide) {
     return (
