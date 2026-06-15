@@ -99,9 +99,10 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         <div className="absolute left-[60px] top-[80px] z-10" style={{ maxWidth: '900px' }}>
           {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.03em' })}
         </div>
-        {/* Text — left column, vertically centered */}
+        {/* Text — left column, vertically centered. Wide so copy runs long and
+            fills the space up to the image (which starts at x≈1060). */}
         <div className="absolute left-[60px] top-0 bottom-0 flex flex-col justify-center" style={{ width: '960px', paddingTop: '240px' }}>
-          <div className="flex flex-col gap-6" style={{ maxWidth: '560px' }}>
+          <div className="flex flex-col gap-6" style={{ maxWidth: '880px' }}>
             {paragraphEls(stepType('lg', bodySizeStep))}
           </div>
         </div>
