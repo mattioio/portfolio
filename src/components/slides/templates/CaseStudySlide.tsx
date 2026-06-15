@@ -56,10 +56,10 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
   const hasLink = !editable && content.linkUrl
 
   const linkInner = (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" style={{ whiteSpace: 'nowrap' }}>
       <EditableText value={content.linkText} onChange={(v) => update(slideId, { linkText: v } as any)} as="span" editable={editable}
         style={{ fontFamily: 'var(--font-body)', fontSize: stepType('base', bodySizeStep), fontWeight: 500, color: 'var(--color-accent)' }} />
-      <ArrowRight size={14} style={{ color: 'var(--color-accent)' }} />
+      <ArrowRight size={14} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
     </div>
   )
 
@@ -155,18 +155,18 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
           <EditableText value={content.description} onChange={(v) => update(slideId, { description: v } as any)} as="p" editable={editable} multiline
             className="mb-6" style={{ fontFamily: 'var(--font-body)', fontSize: stepType('body', bodySizeStep), lineHeight: 1.6, color: 'var(--color-text)', opacity: 0.7 }} />
           {hasLink ? (
-            <a href={content.linkUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <a href={content.linkUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
               <div className="flex items-center gap-2">
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: stepType('sm', bodySizeStep), fontWeight: 500, color: 'var(--color-accent)' }}
                   dangerouslySetInnerHTML={{ __html: content.linkText }} />
-                <ArrowRight size={14} style={{ color: 'var(--color-accent)' }} />
+                <ArrowRight size={14} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
               </div>
             </a>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" style={{ whiteSpace: 'nowrap' }}>
               <EditableText value={content.linkText} onChange={(v) => update(slideId, { linkText: v } as any)} as="span" editable={editable}
                 style={{ fontFamily: 'var(--font-body)', fontSize: stepType('sm', bodySizeStep), fontWeight: 500, color: 'var(--color-accent)' }} />
-              <ArrowRight size={14} style={{ color: 'var(--color-accent)' }} />
+              <ArrowRight size={14} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
             </div>
           )}
         </div>

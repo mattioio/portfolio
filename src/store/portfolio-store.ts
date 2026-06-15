@@ -21,7 +21,7 @@ async function saveToRepo(state: Record<string, unknown>): Promise<boolean> {
 // ── Seed from repo: on first load with empty IDB, hydrate from portfolio-data.json ──
 async function loadSeedData(): Promise<Record<string, unknown> | null> {
   try {
-    const res = await fetch('/portfolio-data.json')
+    const res = await fetch('/data/portfolio-data.json')
     if (!res.ok) return null
     const data = await res.json()
     return data?.state ?? data ?? null

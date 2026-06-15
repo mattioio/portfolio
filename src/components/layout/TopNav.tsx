@@ -61,11 +61,15 @@ function SaveButton() {
     <button
       onClick={handleSave}
       disabled={status === 'saving'}
-      className="flex items-center gap-1.5 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-sm text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200 disabled:opacity-40"
+      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm transition-all disabled:opacity-40 ${
+        status === 'saved'
+          ? 'border-emerald-800 text-emerald-400'
+          : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+      }`}
       title="Save to repo"
     >
       <Save size={14} />
-      {status === 'saving' ? 'Saving...' : status === 'saved' ? 'Saved ✓' : 'Save'}
+      {status === 'saving' ? 'Saving...' : status === 'saved' ? 'Saved' : 'Save'}
     </button>
   )
 }

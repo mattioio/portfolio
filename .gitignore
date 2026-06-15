@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Astro cache (repo also hosts an Astro project on other branches)
+.astro/

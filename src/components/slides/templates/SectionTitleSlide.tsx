@@ -2,7 +2,6 @@ import type { SectionTitleContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { ImageDropZone } from '../../shared/ImageDropZone'
-import { ArrowRight } from 'lucide-react'
 import { TYPE, stepType } from '../../../constants/typography'
 
 interface Props {
@@ -45,14 +44,17 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
   ) : null
 
   const showCta = content.showCta ?? false
-  const ctaEl = showCta ? (
+  const ctaUrl = content.ctaUrl?.trim() || ''
+  const ctaInner = (
     <EditableText
       value={content.ctaLabel ?? 'Learn more'}
       onChange={(v) => update(slideId, { ctaLabel: v } as any)}
       as="span"
       editable={editable}
       style={{
-        display: 'inline-block',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '10px',
         fontFamily: 'var(--font-body)',
         fontSize: stepType('base', bodySizeStep),
         fontWeight: 600,
@@ -61,8 +63,16 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         padding: '14px 36px',
         borderRadius: '8px',
         lineHeight: 1.2,
+        whiteSpace: 'nowrap',
       }}
     />
+  )
+  const ctaEl = showCta ? (
+    ctaUrl && !editable ? (
+      <a href={ctaUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+        {ctaInner}
+      </a>
+    ) : ctaInner
   ) : null
 
   // A: Bottom-left, bold heading + arrow + accent bar
@@ -74,7 +84,9 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
           <div className="flex items-center gap-8">
             <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
               style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.08, maxWidth: '900px' }} />
-            <ArrowRight size={48} style={{ color: 'var(--color-accent)', flexShrink: 0 }} strokeWidth={2} />
+            <svg width="48" height="48" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" style={{ flexShrink: 0 }}>
+              <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
+            </svg>
           </div>
           {blurbEl && <div className="mt-6" style={{ maxWidth: '700px' }}>{blurbEl}</div>}
           {ctaEl && <div className="mt-8">{ctaEl}</div>}
@@ -106,7 +118,9 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         <div className="relative z-10 flex h-full w-full flex-col items-end justify-start px-20 pt-28">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
             style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', headingSizeStep), fontWeight: 400, fontStyle: 'italic', color: 'var(--color-text)', lineHeight: 1.15, maxWidth: '800px', textAlign: 'right' }} />
-          <div className="mt-8" style={{ width: '72px', height: '3px', background: 'var(--color-accent)' }} />
+          <svg width="48" height="48" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" className="mt-8" style={{ flexShrink: 0 }}>
+            <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
+          </svg>
           {blurbEl && <div className="mt-6" style={{ textAlign: 'right', maxWidth: '600px' }}>{blurbEl}</div>}
           {ctaEl && <div className="mt-8">{ctaEl}</div>}
         </div>
@@ -122,7 +136,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         <div className="flex items-center gap-16">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
             style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['7xl'], fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
-          <svg width="100" height="100" viewBox="0 0 306.465 310.545" fill="var(--color-text)" style={{ flexShrink: 0 }}>
+          <svg width="100" height="100" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" style={{ flexShrink: 0 }}>
             <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
           </svg>
         </div>
