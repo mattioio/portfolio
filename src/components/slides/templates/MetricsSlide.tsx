@@ -25,8 +25,17 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
     update(slideId, { stats: copy } as any)
   }
 
-  const eyebrow = (
-    <p
+  // Editable eyebrow label. Always editable in the editor (so it can be changed
+  // or cleared and retyped); hidden in the exported deck when empty.
+  const eyebrowValue = content.eyebrow ?? 'Results'
+  const eyebrowShown = editable || eyebrowValue.replace(/<[^>]*>/g, '').replace(/&nbsp;| /g, ' ').trim() !== ''
+  const eyebrow = (className: string) => eyebrowShown ? (
+    <EditableText
+      value={eyebrowValue}
+      onChange={(v) => update(slideId, { eyebrow: v } as any)}
+      as="p"
+      editable={editable}
+      className={className}
       style={{
         fontFamily: 'var(--font-body)',
         fontSize: stepType('xs', bodySizeStep),
@@ -35,10 +44,8 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         color: 'var(--color-accent)',
         textTransform: 'uppercase',
       }}
-    >
-      Results
-    </p>
-  )
+    />
+  ) : null
 
   const heading = (size: string, maxWidth?: string, align?: 'left' | 'center') => (
     <EditableText
@@ -102,7 +109,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-40">
-          <div className="mb-4">{eyebrow}</div>
+          {eyebrow('mb-4')}
           {heading(stepType('5xl', titleSizeStep), '1100px')}
           <div className="mt-auto flex items-end justify-between gap-16">
             {stats.map((_, i) => (
@@ -123,7 +130,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-32">
-          <div className="mb-4">{eyebrow}</div>
+          {eyebrow('mb-4')}
           {heading(stepType('4xl', titleSizeStep), '1200px')}
           <div className="mt-16 grid flex-1 grid-cols-2 gap-x-24 gap-y-14">
             {stats.map((_, i) => (
@@ -152,7 +159,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full items-stretch gap-24 px-32 pt-32 pb-32">
           <div className="flex w-[680px] flex-shrink-0 flex-col justify-center">
-            <div className="mb-5">{eyebrow}</div>
+            {eyebrow('mb-5')}
             {heading(stepType('4xl', titleSizeStep), '620px')}
           </div>
           <div className="flex flex-1 flex-col justify-center">
@@ -179,7 +186,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
     <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
       <SlideBackdrop image={content.backgroundImage} />
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-24 pb-20">
-        <div className="mb-5 text-center">{eyebrow}</div>
+        {eyebrow('mb-5 text-center')}
         {heading(stepType('5xl', titleSizeStep), '1300px', 'center')}
         <div className="mt-20 flex w-full items-start justify-center gap-0">
           {stats.map((_, i) => (

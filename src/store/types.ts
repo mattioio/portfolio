@@ -110,6 +110,7 @@ export interface SignOffContent {
 
 export interface CoverContent {
   type: 'cover'
+  eyebrow: string
   projectName: string
   client: string
   role: string
@@ -160,6 +161,7 @@ export interface MetricStat {
 
 export interface MetricsContent {
   type: 'metrics'
+  eyebrow: string
   heading: string
   stats: MetricStat[]
   backgroundImage: string

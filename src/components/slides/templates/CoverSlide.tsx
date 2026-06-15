@@ -26,6 +26,29 @@ const placeholderBlock = (
 export function CoverSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
+  // Editable eyebrow label (shown above the project name in the split layout).
+  // Always editable in the editor (so it can be changed or cleared and retyped);
+  // hidden in the exported deck when empty.
+  const eyebrowValue = content.eyebrow ?? 'Case Study'
+  const eyebrowShown = editable || eyebrowValue.replace(/<[^>]*>/g, '').replace(/&nbsp;| /g, ' ').trim() !== ''
+  const eyebrow = (className: string) => eyebrowShown ? (
+    <EditableText
+      value={eyebrowValue}
+      onChange={(v) => update(slideId, { eyebrow: v } as any)}
+      as="p"
+      editable={editable}
+      className={className}
+      style={{
+        fontFamily: 'var(--font-body)',
+        fontSize: stepType('xs', bodySizeStep),
+        fontWeight: 700,
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        color: 'var(--color-accent)',
+      }}
+    />
+  ) : null
+
   const hasImage = !!content.backgroundImage
 
   // Reusable editable image dropzone for the full-bleed / column / band variants
@@ -125,19 +148,7 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
     return (
       <div className="relative flex h-[1080px] w-[1920px]" style={{ background: 'var(--color-surface)' }}>
         <div className="flex w-[960px] flex-shrink-0 flex-col justify-center px-24 pb-24">
-          <p
-            className="mb-8"
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: stepType('xs', bodySizeStep),
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--color-accent)',
-            }}
-          >
-            Case Study
-          </p>
+          {eyebrow('mb-8')}
           <EditableText
             value={content.projectName}
             onChange={(v) => update(slideId, { projectName: v } as any)}

@@ -219,6 +219,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
     case 'cover':
       return {
         type: 'cover',
+        eyebrow: 'Case Study',
         projectName: 'Project Name',
         client: 'Client Name',
         role: 'Lead Product Designer',
@@ -264,6 +265,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
     case 'metrics':
       return {
         type: 'metrics',
+        eyebrow: 'Results',
         heading: 'The impact',
         stats: [
           { value: '+38%', label: 'Conversion rate' },
