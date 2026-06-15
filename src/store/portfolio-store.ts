@@ -353,6 +353,8 @@ interface PortfolioState {
   setDrawStrokeWidth: (w: number) => void
   setDrawStrokeColor: (c: string) => void
   addDrawingLayer: (slideId: string) => void
+  addImageLayer: (slideId: string, src: string, naturalW: number, naturalH: number) => void
+  setDrawingLayerRadius: (slideId: string, layerId: string, radius: number) => void
   removeDrawingLayer: (slideId: string, layerId: string) => void
   toggleDrawingLayerVisibility: (slideId: string, layerId: string) => void
   addPathToLayer: (slideId: string, layerId: string, path: DrawingPath) => void
@@ -798,6 +800,55 @@ export const usePortfolioStore = create<PortfolioState>()(
             return { ...s, drawingLayers: layers }
           }),
           selectedDrawingLayerIds: [layerId],
+        }))
+      },
+
+      addImageLayer: (slideId, src, naturalW, naturalH) => {
+        get()._pushHistory()
+        const layerId = nanoid()
+        const slide = get().slides.find((s) => s.id === slideId)
+        const imageCount = (slide?.drawingLayers ?? []).filter((l) => l.image).length
+        // Fit the image inside ~half the slide while keeping aspect ratio
+        const maxW = 1920 * 0.5
+        const maxH = 1080 * 0.62
+        let w = naturalW || 800
+        let h = naturalH || 600
+        const fit = Math.min(maxW / w, maxH / h, 1)
+        w = Math.round(w * fit)
+        h = Math.round(h * fit)
+        const offsetX = Math.round((1920 - w) / 2)
+        const offsetY = Math.round((1080 - h) / 2)
+        set((state) => ({
+          slides: state.slides.map((s) => {
+            if (s.id !== slideId) return s
+            return {
+              ...s,
+              drawingLayers: [
+                ...(s.drawingLayers ?? []),
+                {
+                  id: layerId, paths: [], visible: true,
+                  name: `Image ${imageCount + 1}`,
+                  rotation: 0, scale: 1, offsetX, offsetY,
+                  image: src, imageW: w, imageH: h,
+                },
+              ],
+            }
+          }),
+          selectedDrawingLayerIds: [layerId],
+        }))
+      },
+
+      setDrawingLayerRadius: (slideId, layerId, radius) => {
+        set((state) => ({
+          slides: state.slides.map((s) => {
+            if (s.id !== slideId) return s
+            return {
+              ...s,
+              drawingLayers: (s.drawingLayers ?? []).map((l) =>
+                l.id === layerId ? { ...l, radius } : l
+              ),
+            }
+          }),
         }))
       },
 

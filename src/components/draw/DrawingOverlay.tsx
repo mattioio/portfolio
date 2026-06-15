@@ -274,34 +274,38 @@ function getSVGBoundsEls() {
 }
 
 function getLayerBounds(layer: DrawingLayer): { x: number; y: number; width: number; height: number } | null {
-  if (layer.paths.length === 0) return null
-
-  const pathEl = getSVGBoundsEls()
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
 
-  for (const path of layer.paths) {
-    pathEl.setAttribute('d', path.d)
-    try {
-      const bbox = pathEl.getBBox()
-      minX = Math.min(minX, bbox.x)
-      minY = Math.min(minY, bbox.y)
-      maxX = Math.max(maxX, bbox.x + bbox.width)
-      maxY = Math.max(maxY, bbox.y + bbox.height)
-    } catch {
-      // Fallback to coordinate extraction if getBBox fails
-      const coords = extractPathCoords(path.d)
-      for (const { x, y } of coords) {
-        minX = Math.min(minX, x)
-        minY = Math.min(minY, y)
-        maxX = Math.max(maxX, x)
-        maxY = Math.max(maxY, y)
+  if (layer.image) {
+    // Image layers: bounds are the placed image box (local space)
+    minX = 0; minY = 0
+    maxX = layer.imageW ?? 0; maxY = layer.imageH ?? 0
+  } else {
+    if (layer.paths.length === 0) return null
+    const pathEl = getSVGBoundsEls()
+    for (const path of layer.paths) {
+      pathEl.setAttribute('d', path.d)
+      try {
+        const bbox = pathEl.getBBox()
+        minX = Math.min(minX, bbox.x)
+        minY = Math.min(minY, bbox.y)
+        maxX = Math.max(maxX, bbox.x + bbox.width)
+        maxY = Math.max(maxY, bbox.y + bbox.height)
+      } catch {
+        // Fallback to coordinate extraction if getBBox fails
+        const coords = extractPathCoords(path.d)
+        for (const { x, y } of coords) {
+          minX = Math.min(minX, x)
+          minY = Math.min(minY, y)
+          maxX = Math.max(maxX, x)
+          maxY = Math.max(maxY, y)
+        }
       }
     }
+    if (minX === Infinity) return null
   }
 
-  if (minX === Infinity) return null
-
-  // Apply layer scale transforms to bounds
+  // Apply layer scale transforms to bounds (center is preserved)
   const sx = (layer.scaleX ?? layer.scale ?? 1)
   const sy = (layer.scaleY ?? layer.scale ?? 1)
   if (sx !== 1 || sy !== 1) {
@@ -315,7 +319,7 @@ function getLayerBounds(layer: DrawingLayer): { x: number; y: number; width: num
     maxY = cy + hh * Math.abs(sy)
   }
 
-  const pad = 20
+  const pad = layer.image ? 0 : 20 // images get a tight box; strokes get breathing room
   return {
     x: minX - pad,
     y: minY - pad,
@@ -451,6 +455,16 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
             lx = cx + dx * cos - dy * sin
             ly = cy + dx * sin + dy * cos
           }
+        }
+
+        // Image layer: hit-test against its box
+        if (layer.image) {
+          if (lx >= 0 && lx <= (layer.imageW ?? 0) && ly >= 0 && ly <= (layer.imageH ?? 0)) {
+            if (addToSelection) toggleDrawingLayerSelection(layer.id)
+            else selectDrawingLayer(layer.id)
+            return
+          }
+          continue
         }
 
         for (let pi = layer.paths.length - 1; pi >= 0; pi--) {
@@ -906,25 +920,48 @@ export function DrawingOverlay({ slideId, interactive = false }: Props) {
 
         return (
           <g key={layer.id} transform={transform} opacity={layer.opacity ?? 1}>
-            {layer.paths.map((path, i) => {
-              const isFilled = path.opacity < 0
-              const color = COLOR_MAP[path.stroke] ?? path.stroke
-              return (
-                <path
-                  key={i}
-                  d={path.d}
-                  stroke={color}
-                  strokeWidth={path.strokeWidth}
-                  fill={isFilled ? color : 'none'}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity={Math.abs(path.opacity)}
-                  vectorEffect="non-scaling-stroke"
+            {layer.image ? (
+              <>
+                {layer.radius ? (
+                  <defs>
+                    <clipPath id={`imgclip-${layer.id}`}>
+                      <rect x={0} y={0} width={layer.imageW ?? 0} height={layer.imageH ?? 0} rx={layer.radius} ry={layer.radius} />
+                    </clipPath>
+                  </defs>
+                ) : null}
+                <image
+                  href={layer.image}
+                  x={0}
+                  y={0}
+                  width={layer.imageW ?? 0}
+                  height={layer.imageH ?? 0}
+                  preserveAspectRatio="none"
+                  clipPath={layer.radius ? `url(#imgclip-${layer.id})` : undefined}
                   data-layer={layer.id}
-                  data-path={i}
+                  data-path={0}
                 />
-              )
-            })}
+              </>
+            ) : (
+              layer.paths.map((path, i) => {
+                const isFilled = path.opacity < 0
+                const color = COLOR_MAP[path.stroke] ?? path.stroke
+                return (
+                  <path
+                    key={i}
+                    d={path.d}
+                    stroke={color}
+                    strokeWidth={path.strokeWidth}
+                    fill={isFilled ? color : 'none'}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={Math.abs(path.opacity)}
+                    vectorEffect="non-scaling-stroke"
+                    data-layer={layer.id}
+                    data-path={i}
+                  />
+                )
+              })
+            )}
           </g>
         )
       })}

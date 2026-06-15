@@ -167,6 +167,7 @@ export function LayerPanel() {
   const addLayer = usePortfolioStore((s) => s.addDrawingLayer)
   const updateTransform = usePortfolioStore((s) => s.updateDrawingLayerTransform)
   const setLayerOpacity = usePortfolioStore((s) => s.setDrawingLayerOpacity)
+  const setLayerRadius = usePortfolioStore((s) => s.setDrawingLayerRadius)
 
   const layers = slide?.drawingLayers ?? []
   const groups = slide?.drawingGroups ?? []
@@ -392,7 +393,7 @@ export function LayerPanel() {
             />
           </div>
 
-          <div>
+          <div className={selectedLayer.image ? 'mb-2' : ''}>
             <div className="mb-1 flex items-center justify-between">
               <span className="text-[10px] text-zinc-500">Opacity</span>
               <span className="text-[10px] tabular-nums text-zinc-400">{Math.round((selectedLayer.opacity ?? 1) * 100)}%</span>
@@ -404,6 +405,22 @@ export function LayerPanel() {
               className="w-full accent-zinc-400"
             />
           </div>
+
+          {/* Corner radius — image layers only */}
+          {selectedLayer.image && (
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-[10px] text-zinc-500">Corner radius</span>
+                <span className="text-[10px] tabular-nums text-zinc-400">{Math.round(selectedLayer.radius ?? 0)}px</span>
+              </div>
+              <input
+                type="range" min="0" max="200"
+                value={selectedLayer.radius ?? 0}
+                onChange={(e) => setLayerRadius(selectedSlideId, selectedLayer.id, Number(e.target.value))}
+                className="w-full accent-zinc-400"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

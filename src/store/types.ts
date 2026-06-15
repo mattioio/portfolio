@@ -205,6 +205,12 @@ export interface DrawingLayer {
   offsetY: number        // px translation
   opacity?: number       // 0-1, defaults to 1
   groupId?: string       // if set, this layer belongs to a group
+  // ── Image layers ── when `image` is set, this layer is a placed image
+  // (instead of vector paths). The same transform fields above apply.
+  image?: string         // data URL or /data/images path
+  imageW?: number        // base width in slide px (at scale 1)
+  imageH?: number        // base height in slide px (at scale 1)
+  radius?: number        // corner radius in px (0 = square)
 }
 
 export interface DrawingGroup {

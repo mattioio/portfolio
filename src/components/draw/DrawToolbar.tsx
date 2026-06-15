@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pencil, Eraser, Hand, Shapes } from 'lucide-react'
+import { Pencil, Eraser, Hand, Image as ImageIcon } from 'lucide-react'
 import { usePortfolioStore } from '../../store/portfolio-store'
 
 const SIZES = [
@@ -181,6 +181,23 @@ export function DrawToolbar() {
   const prevToolRef = useRef(tool)
   const showShapePicker = usePortfolioStore((s) => s.drawShapePickerOpen)
   const setShowShapePicker = usePortfolioStore((s) => s.setDrawShapePickerOpen)
+  const addImageLayer = usePortfolioStore((s) => s.addImageLayer)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onPickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-picking the same file
+    if (!file || !selectedSlideId) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const src = reader.result as string
+      const img = new window.Image()
+      img.onload = () => { addImageLayer(selectedSlideId, src, img.naturalWidth, img.naturalHeight); setTool('hand') }
+      img.onerror = () => { addImageLayer(selectedSlideId, src, 800, 600); setTool('hand') }
+      img.src = src
+    }
+    reader.readAsDataURL(file)
+  }
 
   // Space: hold = temporary hand tool, double-tap = lock hand tool
   const lastSpaceDownRef = useRef(0)
@@ -294,6 +311,17 @@ export function DrawToolbar() {
           </Tip>
           {showShapePicker && <ShapePicker onClose={() => setShowShapePicker(false)} />}
         </div>
+
+        {/* Image — place a movable/resizable image layer */}
+        <Tip label="Image" hint="Place an image, then move & resize it">
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="rounded-xl p-2.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+          >
+            <ImageIcon size={18} />
+          </button>
+        </Tip>
+        <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
 
         {/* Divider */}
         <div className="mx-1.5 h-6 w-px bg-zinc-200" />
