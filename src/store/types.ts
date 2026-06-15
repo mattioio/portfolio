@@ -238,13 +238,33 @@ export interface Slide {
   bodyWidth?: number
 }
 
-/** A deck is one presentation/document. Each deck owns its slides;
- *  brand/theme settings are shared globally across all decks. */
+/** Per-deck brand/theme settings (fonts, palette, spacing, texture, footer,
+ *  background library). Each deck carries its own. */
+export interface DeckSettings {
+  colorPaletteId: string
+  headerFont: string
+  bodyFont: string
+  footerName: string
+  footerTitle: string
+  footerShowYear: boolean
+  headerUppercase: boolean
+  headerLetterSpacing: number
+  slidePadding: number
+  slideRounding: number
+  backgroundLibrary: string[]
+  textureImage: string
+  textureBlendMode: string
+  textureOpacity: number
+}
+
+/** A deck is one presentation/document. Each deck owns its slides AND its
+ *  settings; the top-level store fields mirror the active deck's. */
 export interface Deck {
   id: string
   name: string
   slides: Slide[]
   selectedSlideId: string | null
+  settings?: DeckSettings
 }
 
 export interface ImageTransform {

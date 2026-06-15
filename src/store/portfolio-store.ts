@@ -1,32 +1,64 @@
 import { create } from 'zustand'
 import { persist, type StateStorage } from 'zustand/middleware'
 import { nanoid } from 'nanoid'
-import type { Slide, SlideType, SlideContent, BentoContent, ImageTransform, CVContent, DrawingPath, DrawingLayer, DrawingGroup, Deck } from './types'
+import type { Slide, SlideType, SlideContent, BentoContent, ImageTransform, CVContent, DrawingPath, DrawingLayer, DrawingGroup, Deck, DeckSettings } from './types'
 import { idbStorage } from './idb-storage'
+
+// Brand/theme fields that live PER-DECK (mirrored at the top level for the active deck)
+const DECK_SETTING_KEYS = [
+  'colorPaletteId', 'headerFont', 'bodyFont', 'footerName', 'footerTitle', 'footerShowYear',
+  'headerUppercase', 'headerLetterSpacing', 'slidePadding', 'slideRounding', 'backgroundLibrary',
+  'textureImage', 'textureBlendMode', 'textureOpacity',
+] as const
+
+function extractSettings(s: any): DeckSettings {
+  return {
+    colorPaletteId: s.colorPaletteId, headerFont: s.headerFont, bodyFont: s.bodyFont,
+    footerName: s.footerName, footerTitle: s.footerTitle, footerShowYear: s.footerShowYear,
+    headerUppercase: s.headerUppercase, headerLetterSpacing: s.headerLetterSpacing,
+    slidePadding: s.slidePadding, slideRounding: s.slideRounding,
+    backgroundLibrary: Array.isArray(s.backgroundLibrary) ? s.backgroundLibrary : [],
+    textureImage: s.textureImage, textureBlendMode: s.textureBlendMode, textureOpacity: s.textureOpacity,
+  }
+}
+
+/** Build a top-level patch from a deck's settings (only keys that are defined). */
+function applySettings(settings: DeckSettings | undefined): Record<string, unknown> {
+  if (!settings) return {}
+  const out: Record<string, unknown> = {}
+  for (const k of DECK_SETTING_KEYS) {
+    if ((settings as any)[k] !== undefined) out[k] = (settings as any)[k]
+  }
+  return out
+}
 
 // ── Multi-deck helpers ──
 // Top-level `slides`/`selectedSlideId` are the ACTIVE deck's live working copy.
 // `decks` holds every deck; entries are refreshed from the live copy at sync points
 // (switch / save / persist) via syncActiveDeck.
-type DeckSyncable = { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null }
+type DeckSyncable = { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null } & Partial<DeckSettings>
 
 function syncActiveDeck(state: DeckSyncable): Deck[] {
+  const settings = extractSettings(state)
   let found = false
   const decks = state.decks.map((d) => {
     if (d.id === state.activeDeckId) {
       found = true
-      return { ...d, slides: state.slides, selectedSlideId: state.selectedSlideId }
+      return { ...d, slides: state.slides, selectedSlideId: state.selectedSlideId, settings }
     }
     return d
   })
   if (!found) {
-    decks.push({ id: state.activeDeckId || nanoid(), name: 'Portfolio', slides: state.slides, selectedSlideId: state.selectedSlideId })
+    decks.push({ id: state.activeDeckId || nanoid(), name: 'Portfolio', slides: state.slides, selectedSlideId: state.selectedSlideId, settings })
   }
   return decks
 }
 
-/** Normalize any persisted/seed blob (new multi-deck OR legacy single-deck) into deck shape. */
-function normalizeDecks(raw: any): { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null } {
+/** Normalize any persisted/seed blob (new multi-deck OR legacy single-deck) into deck shape.
+ *  Migration: decks without their own `settings` inherit the blob's top-level (old
+ *  shared) brand settings, so existing decks keep their look and can then diverge. */
+function normalizeDecks(raw: any): { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null } & Partial<DeckSettings> {
+  const fallbackSettings = extractSettings(raw ?? {})
   if (raw && Array.isArray(raw.decks) && raw.decks.length > 0) {
     const decks: Deck[] = raw.decks.map((d: any) => {
       const slides: Slide[] = Array.isArray(d.slides) ? d.slides : []
@@ -35,17 +67,18 @@ function normalizeDecks(raw: any): { decks: Deck[]; activeDeckId: string; slides
         name: d.name ?? 'Untitled',
         slides,
         selectedSlideId: d.selectedSlideId ?? slides[0]?.id ?? null,
+        settings: d.settings ?? fallbackSettings,
       }
     })
     const activeDeckId = raw.activeDeckId && decks.some((d) => d.id === raw.activeDeckId) ? raw.activeDeckId : decks[0].id
     const active = decks.find((d) => d.id === activeDeckId) ?? decks[0]
-    return { decks, activeDeckId, slides: active.slides, selectedSlideId: active.selectedSlideId }
+    return { decks, activeDeckId, slides: active.slides, selectedSlideId: active.selectedSlideId, ...applySettings(active.settings) }
   }
   // Legacy single-deck (raw.slides) or empty → wrap in one "Portfolio" deck
   const slides: Slide[] = Array.isArray(raw?.slides) ? raw.slides : []
   const selectedSlideId = raw?.selectedSlideId ?? slides[0]?.id ?? null
   const id = nanoid()
-  return { decks: [{ id, name: 'Portfolio', slides, selectedSlideId }], activeDeckId: id, slides, selectedSlideId }
+  return { decks: [{ id, name: 'Portfolio', slides, selectedSlideId, settings: fallbackSettings }], activeDeckId: id, slides, selectedSlideId, ...applySettings(fallbackSettings) }
 }
 
 // ── Save to repo: Cmd+S writes state to portfolio-data.json via dev server ──
@@ -648,13 +681,15 @@ export const usePortfolioStore = create<PortfolioState>()(
           decks, activeDeckId: id,
           slides: target.slides,
           selectedSlideId: target.selectedSlideId ?? target.slides[0]?.id ?? null,
+          ...applySettings(target.settings),
           _history: [], _future: [],
         }
       }),
       addDeck: (name) => set((state) => {
         const decks = syncActiveDeck(state)
         const id = nanoid()
-        decks.push({ id, name: (name && name.trim()) || `Deck ${decks.length + 1}`, slides: [], selectedSlideId: null })
+        // New deck inherits the current deck's settings as a starting brand
+        decks.push({ id, name: (name && name.trim()) || `Deck ${decks.length + 1}`, slides: [], selectedSlideId: null, settings: extractSettings(state) })
         return { decks, activeDeckId: id, slides: [], selectedSlideId: null, _history: [], _future: [] }
       }),
       renameDeck: (id, name) => set((state) => ({
@@ -671,6 +706,7 @@ export const usePortfolioStore = create<PortfolioState>()(
           decks, activeDeckId: next.id,
           slides: next.slides,
           selectedSlideId: next.selectedSlideId ?? next.slides[0]?.id ?? null,
+          ...applySettings(next.settings),
           _history: [], _future: [],
         }
       }),
@@ -680,8 +716,8 @@ export const usePortfolioStore = create<PortfolioState>()(
         if (!src) return {} as Partial<PortfolioState>
         const newId = nanoid()
         const slides: Slide[] = JSON.parse(JSON.stringify(src.slides)).map((s: Slide) => ({ ...s, id: nanoid() }))
-        const copy: Deck = { id: newId, name: `${src.name} copy`, slides, selectedSlideId: slides[0]?.id ?? null }
-        return { decks: [...synced, copy], activeDeckId: newId, slides: copy.slides, selectedSlideId: copy.selectedSlideId, _history: [], _future: [] }
+        const copy: Deck = { id: newId, name: `${src.name} copy`, slides, selectedSlideId: slides[0]?.id ?? null, settings: src.settings ? { ...src.settings } : extractSettings(state) }
+        return { decks: [...synced, copy], activeDeckId: newId, slides: copy.slides, selectedSlideId: copy.selectedSlideId, ...applySettings(copy.settings), _history: [], _future: [] }
       }),
 
       updateSlideContent: (id, content) => {
