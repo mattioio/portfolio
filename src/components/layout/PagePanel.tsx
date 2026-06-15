@@ -541,7 +541,7 @@ export function PagePanel() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSlideHeadingSizeStep(slide.id, (slide.headingSizeStep ?? 0) - 1)}
-                disabled={(slide.headingSizeStep ?? 0) <= 0}
+                disabled={(slide.headingSizeStep ?? 0) <= -3}
                 className="rounded p-1 text-zinc-400 transition-colors hover:text-white disabled:opacity-25 disabled:hover:text-zinc-400"
                 aria-label="Decrease heading size"
               >
@@ -566,7 +566,7 @@ export function PagePanel() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSlideBodSizeStep(slide.id, (slide.bodySizeStep ?? 0) - 1)}
-                disabled={(slide.bodySizeStep ?? 0) <= 0}
+                disabled={(slide.bodySizeStep ?? 0) <= -3}
                 className="rounded p-1 text-zinc-400 transition-colors hover:text-white disabled:opacity-25 disabled:hover:text-zinc-400"
                 aria-label="Decrease body text size"
               >

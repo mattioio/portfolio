@@ -2,7 +2,7 @@ import type { AboutContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { ImageDropZone } from '../../shared/ImageDropZone'
-import { TYPE, stepType } from '../../../constants/typography'
+import { stepType } from '../../../constants/typography'
 
 interface Props {
   content: AboutContent
@@ -81,7 +81,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         </div>
         {/* Heading — overlapping the boundary, bottom-left */}
         <div className="absolute z-10" style={{ left: '60px', bottom: '80px', maxWidth: '1100px' }}>
-          {headingEl(TYPE['7xl'], { letterSpacing: '-0.03em' })}
+          {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.03em' })}
         </div>
       </div>
     )
@@ -97,7 +97,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         </div>
         {/* Heading — top-left */}
         <div className="absolute left-[60px] top-[80px] z-10" style={{ maxWidth: '900px' }}>
-          {headingEl(TYPE['7xl'], { letterSpacing: '-0.03em' })}
+          {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.03em' })}
         </div>
         {/* Text — left column, vertically centered */}
         <div className="absolute left-[60px] top-0 bottom-0 flex flex-col justify-center" style={{ width: '960px', paddingTop: '240px' }}>
@@ -184,7 +184,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         height: rowEnd - row3 - cellPad * 2,
         zIndex: 2,
       }}>
-        {headingEl(TYPE['7xl'], { letterSpacing: '-0.04em' })}
+        {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.04em' })}
       </div>
     </div>
   )

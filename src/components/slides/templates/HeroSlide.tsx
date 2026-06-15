@@ -2,7 +2,7 @@ import type { HeroContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { ImageDropZone } from '../../shared/ImageDropZone'
-import { TYPE } from '../../../constants/typography'
+import { stepType } from '../../../constants/typography'
 
 interface Props {
   content: HeroContent
@@ -14,7 +14,7 @@ interface Props {
   bodySizeStep?: number
 }
 
-export function HeroSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false }: Props) {
+export function HeroSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   // When there's a background image, overlay it with a scrim so text remains legible
@@ -40,7 +40,7 @@ export function HeroSlide({ content, slideId, editable = false, styleVariant = 0
           {[25, 50, 75].map(p => <div key={p} className="absolute top-0 h-full w-px" style={{ left: `${p}%`, background: textColor }} />)}
         </div>
         <EditableText value={content.title} onChange={(v) => update(slideId, { title: v } as any)} as="h1" editable={editable}
-          className="relative z-10 text-center" style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['8xl'], fontWeight: 900, lineHeight: 0.88, color: textColor }} />
+          className="relative z-10 text-center" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('8xl', headingSizeStep), fontWeight: 900, lineHeight: 0.88, color: textColor }} />
       </div>
     )
   }
@@ -52,7 +52,7 @@ export function HeroSlide({ content, slideId, editable = false, styleVariant = 0
         {bg}
         <div className="relative z-10 flex h-full w-full items-end px-20 pb-20">
           <EditableText value={content.title} onChange={(v) => update(slideId, { title: v } as any)} as="h1" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['8xl'], lineHeight: 0.85, color: textColor, fontWeight: 800 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('8xl', headingSizeStep), lineHeight: 0.85, color: textColor, fontWeight: 800 }} />
         </div>
       </div>
     )
@@ -64,7 +64,7 @@ export function HeroSlide({ content, slideId, editable = false, styleVariant = 0
       <div className="relative flex h-[1080px] w-[1920px] items-center justify-center overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         {bg}
         <EditableText value={content.title} onChange={(v) => update(slideId, { title: v } as any)} as="h1" editable={editable}
-          className="relative z-10 text-center font-black" style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['9xl'], lineHeight: 0.8, color: textColor, opacity: 0.9 }} />
+          className="relative z-10 text-center font-black" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('9xl', headingSizeStep), lineHeight: 0.8, color: textColor, opacity: 0.9 }} />
       </div>
     )
   }
@@ -76,7 +76,7 @@ export function HeroSlide({ content, slideId, editable = false, styleVariant = 0
       <div className="relative z-10 flex flex-1 flex-col px-20 py-20">
         <div className="mb-8 h-px w-full" style={{ background: textColor, opacity: ruleOpacity }} />
         <EditableText value={content.title} onChange={(v) => update(slideId, { title: v } as any)} as="h1" editable={editable}
-          style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['7xl'], lineHeight: 0.9, color: textColor, fontWeight: 800 }} />
+          style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', headingSizeStep), lineHeight: 0.9, color: textColor, fontWeight: 800 }} />
       </div>
     </div>
   )

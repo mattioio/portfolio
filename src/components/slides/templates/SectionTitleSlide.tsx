@@ -2,7 +2,7 @@ import type { SectionTitleContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { ImageDropZone } from '../../shared/ImageDropZone'
-import { TYPE, stepType } from '../../../constants/typography'
+import { stepType } from '../../../constants/typography'
 
 interface Props {
   content: SectionTitleContent
@@ -102,7 +102,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         {bgLayer}
         <div className="relative z-10 flex flex-col items-center">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            className="text-center" style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['7xl'], fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.1, maxWidth: '1200px' }} />
+            className="text-center" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.1, maxWidth: '1200px' }} />
           {blurbEl && <div className="mt-6 text-center" style={{ maxWidth: '1100px' }}>{blurbEl}</div>}
           {ctaEl && <div className="mt-10">{ctaEl}</div>}
         </div>
@@ -135,7 +135,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
       <div className="relative z-10 flex w-full flex-col px-20">
         <div className="flex items-center gap-16">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: TYPE['7xl'], fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
           <svg width="100" height="100" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" style={{ flexShrink: 0 }}>
             <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
           </svg>
