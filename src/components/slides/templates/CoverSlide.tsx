@@ -42,11 +42,12 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
     />
   )
 
-  // Meta line: client · role · year, each individually editable, joined by middot separators
+  // Meta line: client · role · year, each individually editable. A middot only
+  // appears BETWEEN fields that have content, so emptying one never leaves an
+  // orphaned separator. Empty fields stay editable in the editor (so you can
+  // re-add them) but are dropped entirely from the rendered/exported output.
   const metaLine = (color: string, mutedColor: string, opts?: { center?: boolean; sizeStep?: number; mutedOpacity?: number }) => {
-    const sep = (
-      <span aria-hidden="true" style={{ color: 'var(--color-accent)', fontWeight: 700, padding: '0 4px' }}>·</span>
-    )
+    const sepStyle: React.CSSProperties = { color: 'var(--color-accent)', fontWeight: 700, padding: '0 6px' }
     const baseStyle: React.CSSProperties = {
       fontFamily: 'var(--font-body)',
       fontSize: stepType('xl', opts?.sizeStep ?? bodySizeStep),
@@ -55,13 +56,29 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
       opacity: opts?.mutedOpacity,
       letterSpacing: '0.01em',
     }
+    const isEmpty = (v?: string) => !v || v.replace(/<[^>]*>/g, '').replace(/&nbsp;| /g, ' ').trim() === ''
+    const fields = [
+      { key: 'client', value: content.client, style: baseStyle },
+      { key: 'role', value: content.role, style: baseStyle },
+      { key: 'year', value: content.year, style: { ...baseStyle, color } },
+    ]
+    // View/export: drop empty fields. Editor: keep them (tiny clickable slots).
+    const shown = editable ? fields : fields.filter((f) => !isEmpty(f.value))
+    const nodes: React.ReactNode[] = []
+    let emitted = 0
+    for (const f of shown) {
+      const empty = isEmpty(f.value)
+      if (!empty && emitted > 0) {
+        nodes.push(<span key={`${f.key}-sep`} aria-hidden="true" style={sepStyle}>·</span>)
+      }
+      nodes.push(
+        <EditableText key={f.key} value={f.value ?? ''} onChange={(v) => update(slideId, { [f.key]: v } as any)} as="span" editable={editable} style={f.style} />
+      )
+      if (!empty) emitted++
+    }
     return (
       <div className={`flex flex-wrap items-baseline ${opts?.center ? 'justify-center' : ''}`} style={{ gap: 0 }}>
-        <EditableText value={content.client} onChange={(v) => update(slideId, { client: v } as any)} as="span" editable={editable} style={baseStyle} />
-        {sep}
-        <EditableText value={content.role} onChange={(v) => update(slideId, { role: v } as any)} as="span" editable={editable} style={baseStyle} />
-        {sep}
-        <EditableText value={content.year} onChange={(v) => update(slideId, { year: v } as any)} as="span" editable={editable} style={{ ...baseStyle, color }} />
+        {nodes}
       </div>
     )
   }
