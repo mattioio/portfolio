@@ -181,6 +181,7 @@ export interface ColumnsContent {
   type: 'columns'
   heading: string
   columns: ColumnItem[]
+  rows: number          // 1 = single row, 2 = grid of two rows
   backgroundImage: string
 }
 

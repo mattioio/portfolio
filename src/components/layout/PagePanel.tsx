@@ -610,6 +610,24 @@ function ColumnsSettings({ slideId, content }: { slideId: string; content: Colum
   return (
     <div className="flex flex-col gap-4">
       <div>
+        <SectionLabel>Rows</SectionLabel>
+        <div className="flex gap-1">
+          {[1, 2].map((r) => (
+            <button
+              key={r}
+              onClick={() => update(slideId, { rows: r } as any)}
+              className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
+                (content.rows ?? 1) === r
+                  ? 'bg-white text-zinc-900'
+                  : 'border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+              }`}
+            >
+              {r} row{r > 1 ? 's' : ''}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
         <div className="mb-2 flex items-center justify-between">
           <SectionLabel>Columns</SectionLabel>
           <button onClick={add} className="rounded p-1 text-zinc-500 hover:text-zinc-300" title="Add column"><Plus size={12} /></button>
