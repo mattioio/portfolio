@@ -10,6 +10,7 @@ import type {
 } from '../../store/types'
 import { ImageDropZone } from '../shared/ImageDropZone'
 import { Plus, Minus, Trash2, Image, RotateCcw, GripVertical } from 'lucide-react'
+import { defaultBodyWidth, supportsBodyWidth, BODY_WIDTH_MIN, BODY_WIDTH_MAX } from '../../constants/bodyWidth'
 
 /** Scrollable row of background images from the global library (Settings tab) */
 function ExistingBackgrounds({ currentSlideId, onSelect }: { currentSlideId: string; onSelect: (url: string) => void }) {
@@ -459,6 +460,7 @@ export function PagePanel() {
   const toggleSlideDarkMode = usePortfolioStore((s) => s.toggleSlideDarkMode)
   const setSlideHeadingSizeStep = usePortfolioStore((s) => s.setSlideHeadingSizeStep)
   const setSlideBodSizeStep = usePortfolioStore((s) => s.setSlideBodSizeStep)
+  const setSlideBodyWidth = usePortfolioStore((s) => s.setSlideBodyWidth)
 
   if (!slide) {
     return (
@@ -587,6 +589,45 @@ export function PagePanel() {
           </div>
         </div>
       </div>
+
+      {/* Text width (body column) — only for templates with a body column */}
+      {supportsBodyWidth(slide.type) && (() => {
+        const def = defaultBodyWidth(slide.type, slide.styleVariant ?? 0)
+        const isAuto = slide.bodyWidth === undefined
+        const value = slide.bodyWidth ?? def
+        return (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <SectionLabel>Text width</SectionLabel>
+              {!isAuto && (
+                <button
+                  onClick={() => setSlideBodyWidth(slide.id, undefined)}
+                  className="text-[10px] text-zinc-500 transition-colors hover:text-zinc-300"
+                  title="Reset to the template default"
+                >
+                  Auto
+                </button>
+              )}
+            </div>
+            <div className="rounded-lg border border-zinc-700 px-3 py-2.5">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-xs text-zinc-300">Column width</span>
+                <span className="text-[10px] tabular-nums text-zinc-500">{isAuto ? 'Auto' : `${value}px`}</span>
+              </div>
+              <input
+                type="range"
+                min={BODY_WIDTH_MIN}
+                max={BODY_WIDTH_MAX}
+                step={10}
+                value={value}
+                onChange={(e) => setSlideBodyWidth(slide.id, Number(e.target.value))}
+                className="w-full accent-zinc-400"
+              />
+              <p className="mt-1 text-[10px] text-zinc-600">Or drag the edge handle on the slide.</p>
+            </div>
+          </div>
+        )
+      })()}
 
       {slide.type === 'section-title' && (
         <SectionTitleSettings slideId={slide.id} content={slide.content as SectionTitleContent} />

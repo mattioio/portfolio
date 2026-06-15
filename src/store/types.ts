@@ -225,6 +225,8 @@ export interface Slide {
   headingSizeStep?: number
   /** Steps above baseline for body copy sizes (xs–xl). 0 = default. */
   bodySizeStep?: number
+  /** Per-slide body-text column width override (1920-space px). undefined = template default. */
+  bodyWidth?: number
 }
 
 /** A deck is one presentation/document. Each deck owns its slides;

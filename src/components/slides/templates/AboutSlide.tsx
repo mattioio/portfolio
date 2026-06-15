@@ -3,6 +3,7 @@ import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { ImageDropZone } from '../../shared/ImageDropZone'
 import { stepType } from '../../../constants/typography'
+import { BodyWidth } from '../../shared/BodyWidth'
 
 interface Props {
   content: AboutContent
@@ -60,7 +61,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
       <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center" style={{ background: 'var(--color-surface)' }}>
         {imgBox('380px', '380px')}
         <div className="mt-8 text-center">{headingEl(stepType('5xl', headingSizeStep), { textAlign: 'center' })}</div>
-        <div className="mt-6 flex max-w-[900px] flex-col items-center gap-6 text-center">{paragraphEls(stepType('lg', bodySizeStep), { textAlign: 'center' })}</div>
+        <BodyWidth slideId={slideId} editable={editable} align="center" className="mt-6 flex flex-col items-center gap-6 text-center">{paragraphEls(stepType('lg', bodySizeStep), { textAlign: 'center' })}</BodyWidth>
       </div>
     )
   }
@@ -75,9 +76,9 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         </div>
         {/* Text column — right side */}
         <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center px-16" style={{ left: '920px' }}>
-          <div className="flex flex-col gap-6" style={{ maxWidth: '560px' }}>
+          <BodyWidth slideId={slideId} editable={editable} className="flex flex-col gap-6">
             {paragraphEls(stepType('lg', bodySizeStep))}
-          </div>
+          </BodyWidth>
         </div>
         {/* Heading — overlapping the boundary, bottom-left */}
         <div className="absolute z-10" style={{ left: '60px', bottom: '80px', maxWidth: '1100px' }}>
@@ -102,9 +103,9 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         {/* Text — left column, vertically centered. Wide so copy runs long and
             fills the space up to the image (which starts at x≈1060). */}
         <div className="absolute left-[60px] top-0 bottom-0 flex flex-col justify-center" style={{ width: '960px', paddingTop: '240px' }}>
-          <div className="flex flex-col gap-6" style={{ maxWidth: '880px' }}>
+          <BodyWidth slideId={slideId} editable={editable} className="flex flex-col gap-6">
             {paragraphEls(stepType('lg', bodySizeStep))}
-          </div>
+          </BodyWidth>
         </div>
       </div>
     )
@@ -164,17 +165,18 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         {imgFull('h-full w-full', 'transparent')}
       </div>
 
-      {/* Text — cols 3-4, rows 1-2 (stays within two columns, doesn't cross col5 line) */}
-      <div className="absolute flex flex-col justify-center overflow-hidden" style={{
+      {/* Text — starts at col3, free to run right toward the outer border
+          (no vertical grid lines exist above row3 past col3) */}
+      <div className="absolute flex flex-col justify-center" style={{
         left: col3 + cellPad,
         top: m + cellPad,
-        width: col5 - col3 - cellPad * 2,
+        width: colEnd - col3 - cellPad * 2,
         height: row3 - row1 - cellPad * 2,
         zIndex: 2,
       }}>
-        <div className="flex flex-col gap-6">
+        <BodyWidth slideId={slideId} editable={editable} className="flex flex-col gap-6">
           {paragraphEls(stepType('body', bodySizeStep))}
-        </div>
+        </BodyWidth>
       </div>
 
       {/* Heading — cols 1-2, row 3 */}

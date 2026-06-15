@@ -2,6 +2,7 @@ import type { ProblemContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { stepType } from '../../../constants/typography'
+import { BodyWidth } from '../../shared/BodyWidth'
 
 interface Props {
   content: ProblemContent
@@ -77,7 +78,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] flex-col justify-center px-32 pb-24" style={{ background: 'var(--color-surface)' }}>
         {label({ marginBottom: '28px' })}
         {statement(stepType('5xl', headingSizeStep), { maxWidth: '1200px' })}
-        {context(stepType('lg', bodySizeStep), { maxWidth: '720px', marginTop: '40px' })}
+        <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
       </div>
     )
   }
@@ -88,7 +89,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center px-32 pb-24 text-center" style={{ background: 'var(--color-surface)' }}>
         {label({ marginBottom: '28px' })}
         {statement(stepType('5xl', headingSizeStep), { maxWidth: '1100px' })}
-        {context(stepType('lg', bodySizeStep), { maxWidth: '720px', marginTop: '40px' })}
+        <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
       </div>
     )
   }
@@ -101,8 +102,8 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
           {label({ marginBottom: '28px' })}
           {statement(stepType('4xl', headingSizeStep), { maxWidth: '820px' })}
         </div>
-        <div className="flex flex-1 flex-col justify-center" style={{ maxWidth: '680px' }}>
-          {context(stepType('xl', bodySizeStep))}
+        <div className="flex flex-1 flex-col justify-center">
+          <BodyWidth slideId={slideId} editable={editable}>{context(stepType('xl', bodySizeStep))}</BodyWidth>
         </div>
       </div>
     )
@@ -115,9 +116,9 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
         {label({ marginBottom: '32px' })}
         {statement(stepType('6xl', headingSizeStep), { maxWidth: '1500px' })}
       </div>
-      <div style={{ maxWidth: '640px' }}>
+      <BodyWidth slideId={slideId} editable={editable}>
         {context(stepType('base', bodySizeStep))}
-      </div>
+      </BodyWidth>
     </div>
   )
 }
