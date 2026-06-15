@@ -1,4 +1,4 @@
-import { Download, Save, Undo2, Redo2, Loader2 } from 'lucide-react'
+import { Download, Save, Undo2, Redo2, Loader2, Layers, ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useLayoutEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { toJpeg } from 'html-to-image'
@@ -42,6 +42,96 @@ function ModeTabBar({ appMode, setAppMode }: { appMode: 'design' | 'draw'; setAp
         className="absolute bottom-0 h-0.5 rounded-full bg-white transition-all duration-200 ease-out"
         style={{ left: indicator.left, width: indicator.width }}
       />
+    </div>
+  )
+}
+
+function DeckSwitcher() {
+  const decks = usePortfolioStore((s) => s.decks)
+  const activeDeckId = usePortfolioStore((s) => s.activeDeckId)
+  const switchDeck = usePortfolioStore((s) => s.switchDeck)
+  const addDeck = usePortfolioStore((s) => s.addDeck)
+  const renameDeck = usePortfolioStore((s) => s.renameDeck)
+  const removeDeck = usePortfolioStore((s) => s.removeDeck)
+  const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+  const active = decks.find((d) => d.id === activeDeckId) ?? decks[0]
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  const commitRename = (id: string) => {
+    const t = editName.trim()
+    if (t) renameDeck(id, t)
+    setEditingId(null)
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+        title="Switch deck"
+      >
+        <Layers size={14} className="text-zinc-500" />
+        <span className="max-w-[180px] truncate">{active?.name ?? 'Deck'}</span>
+        <ChevronDown size={14} className="text-zinc-500" />
+      </button>
+      {open && (
+        <div className="absolute left-1/2 top-full z-50 mt-1.5 w-64 -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-2xl">
+          {decks.map((d) => (
+            <div
+              key={d.id}
+              className={`group flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm ${
+                d.id === activeDeckId ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-800/60'
+              }`}
+            >
+              {editingId === d.id ? (
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onBlur={() => commitRename(d.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') commitRename(d.id); if (e.key === 'Escape') setEditingId(null) }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 border-b border-blue-500 bg-transparent outline-none"
+                />
+              ) : (
+                <button
+                  onClick={() => { switchDeck(d.id); setOpen(false) }}
+                  onDoubleClick={() => { setEditName(d.name); setEditingId(d.id) }}
+                  className="flex-1 truncate text-left"
+                  title="Click to open · double-click to rename"
+                >
+                  {d.name}
+                </button>
+              )}
+              <span className="text-[10px] tabular-nums text-zinc-600">{d.slides.length}</span>
+              {decks.length > 1 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); if (confirm(`Delete deck "${d.name}"? Its slides will be removed.`)) removeDeck(d.id) }}
+                  className="text-zinc-600 opacity-0 transition-colors hover:text-red-400 group-hover:opacity-100"
+                  title="Delete deck"
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            onClick={() => { const name = prompt('New deck name:', 'Case Study'); if (name !== null) { addDeck(name || undefined); setOpen(false) } }}
+            className="mt-1 flex w-full items-center gap-1.5 border-t border-zinc-800 px-2 py-1.5 text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+          >
+            <Plus size={13} /> New deck
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -234,6 +324,8 @@ export function TopNav() {
   return (
     <header className="no-print flex h-12 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4">
       <ModeTabBar appMode={appMode} setAppMode={setAppMode} />
+
+      <DeckSwitcher />
 
       <div className="flex items-center gap-1">
         <button

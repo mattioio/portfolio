@@ -1,8 +1,52 @@
 import { create } from 'zustand'
 import { persist, type StateStorage } from 'zustand/middleware'
 import { nanoid } from 'nanoid'
-import type { Slide, SlideType, SlideContent, BentoContent, ImageTransform, CVContent, DrawingPath, DrawingLayer, DrawingGroup } from './types'
+import type { Slide, SlideType, SlideContent, BentoContent, ImageTransform, CVContent, DrawingPath, DrawingLayer, DrawingGroup, Deck } from './types'
 import { idbStorage } from './idb-storage'
+
+// ── Multi-deck helpers ──
+// Top-level `slides`/`selectedSlideId` are the ACTIVE deck's live working copy.
+// `decks` holds every deck; entries are refreshed from the live copy at sync points
+// (switch / save / persist) via syncActiveDeck.
+type DeckSyncable = { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null }
+
+function syncActiveDeck(state: DeckSyncable): Deck[] {
+  let found = false
+  const decks = state.decks.map((d) => {
+    if (d.id === state.activeDeckId) {
+      found = true
+      return { ...d, slides: state.slides, selectedSlideId: state.selectedSlideId }
+    }
+    return d
+  })
+  if (!found) {
+    decks.push({ id: state.activeDeckId || nanoid(), name: 'Portfolio', slides: state.slides, selectedSlideId: state.selectedSlideId })
+  }
+  return decks
+}
+
+/** Normalize any persisted/seed blob (new multi-deck OR legacy single-deck) into deck shape. */
+function normalizeDecks(raw: any): { decks: Deck[]; activeDeckId: string; slides: Slide[]; selectedSlideId: string | null } {
+  if (raw && Array.isArray(raw.decks) && raw.decks.length > 0) {
+    const decks: Deck[] = raw.decks.map((d: any) => {
+      const slides: Slide[] = Array.isArray(d.slides) ? d.slides : []
+      return {
+        id: d.id ?? nanoid(),
+        name: d.name ?? 'Untitled',
+        slides,
+        selectedSlideId: d.selectedSlideId ?? slides[0]?.id ?? null,
+      }
+    })
+    const activeDeckId = raw.activeDeckId && decks.some((d) => d.id === raw.activeDeckId) ? raw.activeDeckId : decks[0].id
+    const active = decks.find((d) => d.id === activeDeckId) ?? decks[0]
+    return { decks, activeDeckId, slides: active.slides, selectedSlideId: active.selectedSlideId }
+  }
+  // Legacy single-deck (raw.slides) or empty → wrap in one "Portfolio" deck
+  const slides: Slide[] = Array.isArray(raw?.slides) ? raw.slides : []
+  const selectedSlideId = raw?.selectedSlideId ?? slides[0]?.id ?? null
+  const id = nanoid()
+  return { decks: [{ id, name: 'Portfolio', slides, selectedSlideId }], activeDeckId: id, slides, selectedSlideId }
+}
 
 // ── Save to repo: Cmd+S writes state to portfolio-data.json via dev server ──
 async function saveToRepo(state: Record<string, unknown>): Promise<boolean> {
@@ -166,6 +210,15 @@ interface HistorySnapshot {
 }
 
 interface PortfolioState {
+  // Decks: `slides`/`selectedSlideId` mirror the active deck's working copy
+  decks: Deck[]
+  activeDeckId: string
+  switchDeck: (id: string) => void
+  addDeck: (name?: string) => void
+  renameDeck: (id: string, name: string) => void
+  removeDeck: (id: string) => void
+  duplicateDeck: (id: string) => void
+
   slides: Slide[]
   selectedSlideId: string | null
   colorPaletteId: string
@@ -276,6 +329,8 @@ interface PortfolioState {
 export const usePortfolioStore = create<PortfolioState>()(
   persist(
     (set, get) => ({
+      decks: [{ id: 'default', name: 'Portfolio', slides: [], selectedSlideId: null }],
+      activeDeckId: 'default',
       slides: [],
       selectedSlideId: null,
       colorPaletteId: 'mono',
@@ -513,6 +568,52 @@ export const usePortfolioStore = create<PortfolioState>()(
       },
 
       selectSlide: (id) => set({ selectedSlideId: id }),
+
+      // ── Deck management ──
+      switchDeck: (id) => set((state) => {
+        if (id === state.activeDeckId) return {} as Partial<PortfolioState>
+        const decks = syncActiveDeck(state)
+        const target = decks.find((d) => d.id === id)
+        if (!target) return {} as Partial<PortfolioState>
+        return {
+          decks, activeDeckId: id,
+          slides: target.slides,
+          selectedSlideId: target.selectedSlideId ?? target.slides[0]?.id ?? null,
+          _history: [], _future: [],
+        }
+      }),
+      addDeck: (name) => set((state) => {
+        const decks = syncActiveDeck(state)
+        const id = nanoid()
+        decks.push({ id, name: (name && name.trim()) || `Deck ${decks.length + 1}`, slides: [], selectedSlideId: null })
+        return { decks, activeDeckId: id, slides: [], selectedSlideId: null, _history: [], _future: [] }
+      }),
+      renameDeck: (id, name) => set((state) => ({
+        decks: state.decks.map((d) => (d.id === id ? { ...d, name } : d)),
+      })),
+      removeDeck: (id) => set((state) => {
+        if (state.decks.length <= 1) return {} as Partial<PortfolioState>
+        const synced = syncActiveDeck(state)
+        const idx = synced.findIndex((d) => d.id === id)
+        const decks = synced.filter((d) => d.id !== id)
+        if (id !== state.activeDeckId) return { decks }
+        const next = decks[Math.max(0, idx - 1)]
+        return {
+          decks, activeDeckId: next.id,
+          slides: next.slides,
+          selectedSlideId: next.selectedSlideId ?? next.slides[0]?.id ?? null,
+          _history: [], _future: [],
+        }
+      }),
+      duplicateDeck: (id) => set((state) => {
+        const synced = syncActiveDeck(state)
+        const src = synced.find((d) => d.id === id)
+        if (!src) return {} as Partial<PortfolioState>
+        const newId = nanoid()
+        const slides: Slide[] = JSON.parse(JSON.stringify(src.slides)).map((s: Slide) => ({ ...s, id: nanoid() }))
+        const copy: Deck = { id: newId, name: `${src.name} copy`, slides, selectedSlideId: slides[0]?.id ?? null }
+        return { decks: [...synced, copy], activeDeckId: newId, slides: copy.slides, selectedSlideId: copy.selectedSlideId, _history: [], _future: [] }
+      }),
 
       updateSlideContent: (id, content) => {
         get()._pushHistory()
@@ -1014,8 +1115,8 @@ export const usePortfolioStore = create<PortfolioState>()(
         // Save the same fields that persist to IDB
         const data = {
           state: {
-            slides: state.slides,
-            selectedSlideId: state.selectedSlideId,
+            decks: syncActiveDeck(state),
+            activeDeckId: state.activeDeckId,
             colorPaletteId: state.colorPaletteId,
             headerFont: state.headerFont,
             bodyFont: state.bodyFont,
@@ -1070,9 +1171,14 @@ export const usePortfolioStore = create<PortfolioState>()(
           await idbStorage.removeItem(name)
         },
       },
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as any
+        const norm = normalizeDecks(p)
+        return { ...current, ...p, ...norm }
+      },
       partialize: (state) => ({
-        slides: state.slides,
-        selectedSlideId: state.selectedSlideId,
+        decks: syncActiveDeck(state),
+        activeDeckId: state.activeDeckId,
         colorPaletteId: state.colorPaletteId,
         headerFont: state.headerFont,
         bodyFont: state.bodyFont,
@@ -1107,8 +1213,11 @@ async function _trySeedFromFile() {
   if (existing) return // IDB has data — no seed needed
 
   const seed = await loadSeedData()
-  if (seed && Array.isArray((seed as any).slides) && (seed as any).slides.length > 0) {
-    usePortfolioStore.setState(seed)
+  if (!seed) return
+  const norm = normalizeDecks(seed)
+  const hasContent = norm.decks.some((d) => d.slides.length > 0)
+  if (hasContent) {
+    usePortfolioStore.setState({ ...(seed as any), ...norm })
   }
 }
 

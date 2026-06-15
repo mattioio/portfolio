@@ -149,6 +149,15 @@ export interface Slide {
   bodySizeStep?: number
 }
 
+/** A deck is one presentation/document. Each deck owns its slides;
+ *  brand/theme settings are shared globally across all decks. */
+export interface Deck {
+  id: string
+  name: string
+  slides: Slide[]
+  selectedSlideId: string | null
+}
+
 export interface ImageTransform {
   x: number // percentage offset from center (-50 to 50)
   y: number // percentage offset from center (-50 to 50)
