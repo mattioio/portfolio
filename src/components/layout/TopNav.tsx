@@ -1,4 +1,4 @@
-import { Download, Save, Undo2, Redo2, Loader2, Layers, ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { Download, Save, Undo2, Redo2, Loader2, Layers, ChevronDown, Plus, Trash2, FolderDown } from 'lucide-react'
 import { useEffect, useRef, useLayoutEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { toJpeg } from 'html-to-image'
@@ -133,6 +133,31 @@ function DeckSwitcher() {
         </div>
       )}
     </div>
+  )
+}
+
+function LoadButton() {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
+  const loadFromFile = usePortfolioStore((s) => s.loadFromFile)
+
+  const handleLoad = async () => {
+    if (!confirm('Load the saved decks from the repo? This replaces the slides currently in this browser with the last saved version.')) return
+    setStatus('loading')
+    const ok = await loadFromFile()
+    setStatus(ok ? 'loaded' : 'idle')
+    if (ok) setTimeout(() => setStatus('idle'), 1500)
+  }
+
+  return (
+    <button
+      onClick={handleLoad}
+      disabled={status === 'loading'}
+      className="flex items-center gap-1.5 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-sm text-zinc-400 transition-all hover:border-zinc-500 hover:text-zinc-200 disabled:opacity-40"
+      title="Load the saved decks from the repo (repo → this browser)"
+    >
+      <FolderDown size={14} />
+      {status === 'loading' ? 'Loading...' : status === 'loaded' ? 'Loaded' : 'Load'}
+    </button>
   )
 }
 
@@ -349,6 +374,7 @@ export function TopNav() {
 
         <div className="mx-2 h-5 w-px bg-zinc-800" />
 
+        <LoadButton />
         <SaveButton />
 
         <button

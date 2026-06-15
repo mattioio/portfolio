@@ -375,6 +375,7 @@ interface PortfolioState {
   reorderGroup: (slideId: string, groupId: string, direction: 'up' | 'down') => void
 
   saveToFile: () => Promise<boolean>
+  loadFromFile: () => Promise<boolean>
 
   setColorPalette: (id: string) => void
   setHeaderFont: (font: string) => void
@@ -1197,6 +1198,18 @@ export const usePortfolioStore = create<PortfolioState>()(
           },
         }
         return saveToRepo(data)
+      },
+
+      loadFromFile: async () => {
+        // Pull repo → browser, overwriting the current in-browser state.
+        // Used to sync changes made elsewhere (or on a fresh machine) when
+        // IndexedDB already has data and so wouldn't auto-seed.
+        const seed = await loadSeedData()
+        if (!seed) return false
+        const norm = normalizeDecks(seed)
+        if (!norm.decks.some((d) => d.slides.length > 0)) return false
+        set({ ...(seed as Record<string, unknown>), ...norm, _history: [], _future: [] })
+        return true
       },
 
       setColorPalette: (id) => { get()._pushHistory(); set({ colorPaletteId: id }) },
