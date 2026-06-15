@@ -10,6 +10,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }

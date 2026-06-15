@@ -10,11 +10,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function ColumnsSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function ColumnsSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   void darkMode
   const cols = content.columns ?? []
@@ -79,7 +80,7 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
           {/* Heading */}
           {hasHeading && (
             <div className="absolute flex items-center" style={{ left: m + cellPad, top: m, height: headingH, width: contentW - cellPad * 2 }}>
-              {heading(stepType('5xl', headingSizeStep))}
+              {heading(stepType('5xl', titleSizeStep))}
             </div>
           )}
           {/* Columns */}
@@ -104,7 +105,7 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
         <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
           {hasHeading && (
             <div className="mb-12" style={{ borderBottom: `1px solid ${faintLine}`, paddingBottom: '28px' }}>
-              {heading(stepType('4xl', headingSizeStep))}
+              {heading(stepType('4xl', titleSizeStep))}
             </div>
           )}
           <div className="flex flex-1" style={{ gap: '64px' }}>
@@ -126,7 +127,7 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
-          {hasHeading && <div className="mb-14">{heading(stepType('4xl', headingSizeStep))}</div>}
+          {hasHeading && <div className="mb-14">{heading(stepType('4xl', titleSizeStep))}</div>}
           <div className="flex flex-1" style={{ gap: '56px' }}>
             {cols.map((_, i) => (
               <div key={i} className="flex flex-1 flex-col">
@@ -148,7 +149,7 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
     <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
       <SlideBackdrop image={content.backgroundImage} />
       <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
-        {hasHeading && <div className="mb-12">{heading(stepType('4xl', headingSizeStep))}</div>}
+        {hasHeading && <div className="mb-12">{heading(stepType('4xl', titleSizeStep))}</div>}
         <div className="flex flex-1" style={{ gap: '28px' }}>
           {cols.map((_, i) => (
             <div

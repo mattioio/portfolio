@@ -11,6 +11,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -52,7 +53,7 @@ const QuoteMark = ({ size, color, opacity = 1 }: { size: number; color: string; 
   </svg>
 )
 
-export function QuoteSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function QuoteSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   const hasBg = !!content.backgroundImage
@@ -150,7 +151,7 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
         <div className="relative z-10 flex flex-col items-center px-32 pb-24">
           <QuoteMark size={72} color="var(--color-accent)" opacity={onImage ? 0.95 : 1} />
           <BodyWidth slideId={slideId} editable={editable} align="center" style={{ marginTop: '40px' }}>
-            {quoteField(stepType('3xl', headingSizeStep), textColor, { align: 'center' })}
+            {quoteField(stepType('3xl', titleSizeStep), textColor, { align: 'center' })}
           </BodyWidth>
           <div className="mt-8 flex flex-col items-center gap-2">
             {attributionField(attrColor, 'center')}
@@ -170,7 +171,7 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
       >
         <QuoteMark size={140} color="var(--color-accent)" />
         <BodyWidth slideId={slideId} editable={editable} style={{ marginTop: '40px' }}>
-          {quoteField(stepType('3xl', headingSizeStep), 'var(--color-text)')}
+          {quoteField(stepType('3xl', titleSizeStep), 'var(--color-text)')}
         </BodyWidth>
         <div className="mt-12 flex items-center gap-5">
           <div className="h-[44px] w-[3px]" style={{ background: 'var(--color-accent)' }} />
@@ -198,7 +199,7 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
         <div className="relative z-10 flex h-full w-full flex-col justify-end px-24 pb-28">
           <QuoteMark size={88} color="var(--color-accent)" />
           <BodyWidth slideId={slideId} editable={editable} style={{ marginTop: '32px' }}>
-            {quoteField(stepType('2xl', headingSizeStep), '#ffffff')}
+            {quoteField(stepType('2xl', titleSizeStep), '#ffffff')}
           </BodyWidth>
           <div className="mt-10 flex flex-col gap-2">
             {attributionField('#ffffff')}
@@ -219,7 +220,7 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
         <div className="flex-1">
           <QuoteMark size={96} color="var(--color-accent)" opacity={0.9} />
           <BodyWidth slideId={slideId} editable={editable} style={{ marginTop: '32px' }}>
-            {quoteField(stepType('3xl', headingSizeStep), 'var(--color-text)')}
+            {quoteField(stepType('3xl', titleSizeStep), 'var(--color-text)')}
           </BodyWidth>
         </div>
         <div

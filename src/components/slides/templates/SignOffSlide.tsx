@@ -11,11 +11,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function SignOffSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function SignOffSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   const headingEl = (size: string, align: string, extra?: React.CSSProperties) => (
@@ -98,7 +99,7 @@ export function SignOffSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center" style={{ background: 'var(--color-surface)' }}>
         {bgLayer}
         <div className="relative z-10 flex flex-col items-center">
-          <div className="mb-6">{headingEl(stepType('5xl', headingSizeStep), 'center')}</div>
+          <div className="mb-6">{headingEl(stepType('5xl', titleSizeStep), 'center')}</div>
           <div className="mb-14">{subEl(stepType('xl', bodySizeStep), 'center')}</div>
           <div className="mb-14">{emailEl(stepType('xl', bodySizeStep))}</div>
           {linkPills()}
@@ -113,7 +114,7 @@ export function SignOffSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] flex-col justify-center" style={{ background: 'var(--color-surface)' }}>
         {bgLayer}
         <div className="relative z-10 px-20">
-          <div className="mb-6">{headingEl(stepType('5xl', headingSizeStep), 'left')}</div>
+          <div className="mb-6">{headingEl(stepType('5xl', titleSizeStep), 'left')}</div>
           <div className="mb-10">{subEl(stepType('xl', bodySizeStep), 'left')}</div>
           <div className="mb-12">{emailEl(stepType('lg', bodySizeStep))}</div>
           {linkPills()}
@@ -128,7 +129,7 @@ export function SignOffSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] items-center" style={{ background: 'var(--color-surface)' }}>
         {bgLayer}
         <div className="relative z-10 flex w-full items-start gap-20 px-20">
-          <div className="flex-1">{headingEl(stepType('5xl', headingSizeStep), 'left')}</div>
+          <div className="flex-1">{headingEl(stepType('5xl', titleSizeStep), 'left')}</div>
           <div className="flex w-[500px] flex-shrink-0 flex-col gap-8 pt-4">
             {subEl(stepType('lg', bodySizeStep), 'left')}
             {emailEl(stepType('lg', bodySizeStep))}
@@ -145,7 +146,7 @@ export function SignOffSlide({ content, slideId, editable = false, styleVariant 
     <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center" style={{ background: 'var(--color-surface)' }}>
       {bgLayer}
       <div className="relative z-10 flex flex-col items-center">
-        <div className="mb-6">{headingEl(stepType('6xl', headingSizeStep), 'center')}</div>
+        <div className="mb-6">{headingEl(stepType('6xl', titleSizeStep), 'center')}</div>
         <div className="mb-14">{subEl(stepType('xl', bodySizeStep), 'center')}</div>
         <div className="mb-14">{emailEl(stepType('xl', bodySizeStep))}</div>
         {linkPills()}

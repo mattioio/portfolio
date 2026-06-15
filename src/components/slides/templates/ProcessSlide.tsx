@@ -10,11 +10,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function ProcessSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function ProcessSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   const steps = content.steps ?? []
 
@@ -90,7 +91,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
         >
           Process
         </p>
-        {headingEl(stepType('5xl', headingSizeStep), '1100px')}
+        {headingEl(stepType('5xl', titleSizeStep), '1100px')}
 
         <div className="flex flex-1 items-center">
           <div className="relative w-full">
@@ -133,7 +134,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-28 pt-24 pb-28">
-        {headingEl(stepType('5xl', headingSizeStep), '1200px')}
+        {headingEl(stepType('5xl', titleSizeStep), '1200px')}
 
         <div className="mt-10 flex flex-1 flex-col justify-center" style={{ maxWidth: '1280px' }}>
           {steps.map((_, i) => (
@@ -186,7 +187,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
         >
           Process
         </p>
-        {headingEl(stepType('5xl', headingSizeStep), '1100px')}
+        {headingEl(stepType('5xl', titleSizeStep), '1100px')}
 
         <div className="mt-12 grid flex-1 content-center" style={{ gridTemplateColumns: '1fr 1fr', columnGap: '120px', rowGap: '56px' }}>
           {steps.map((_, i) => (
@@ -227,7 +228,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
         >
           Process
         </p>
-        {headingEl(stepType('6xl', headingSizeStep), '560px')}
+        {headingEl(stepType('6xl', titleSizeStep), '560px')}
       </div>
 
       <div

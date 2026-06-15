@@ -11,6 +11,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -67,6 +68,7 @@ export function BeforeAfterSlide({
   editable = false,
   styleVariant = 0,
   darkMode = false,
+  titleSizeStep = 0,
   headingSizeStep = 0,
   bodySizeStep = 0,
 }: Props) {
@@ -188,7 +190,7 @@ export function BeforeAfterSlide({
         style={{ background: 'var(--color-surface)', padding: '72px 80px 88px' }}
       >
         <div className="mb-10 flex flex-col items-center">
-          {headingEl(stepType('4xl', headingSizeStep), 'center')}
+          {headingEl(stepType('4xl', titleSizeStep), 'center')}
         </div>
         <div className="flex flex-1 gap-12">
           <div className="flex flex-1 flex-col">

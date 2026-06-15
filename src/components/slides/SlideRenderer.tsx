@@ -214,6 +214,7 @@ export function SlideRenderer({ slide, editable = false }: SlideRendererProps) {
   const isDark = slide.darkMode ?? false
   const props = {
     slideId: slide.id, editable, styleVariant: slide.styleVariant ?? 0, darkMode: isDark,
+    titleSizeStep: slide.titleSizeStep ?? 0,
     headingSizeStep: slide.headingSizeStep ?? 0, bodySizeStep: slide.bodySizeStep ?? 0,
   }
   const containerRef = useRef<HTMLDivElement>(null)

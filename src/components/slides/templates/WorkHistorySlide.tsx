@@ -10,6 +10,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -25,7 +26,7 @@ function Html({ html, style, className }: { html: string; style?: React.CSSPrope
   return <span className={className} style={style} dangerouslySetInnerHTML={{ __html: html }} />
 }
 
-export function WorkHistorySlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function WorkHistorySlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   // Derive entries live from CV slides — always in sync
@@ -54,7 +55,7 @@ export function WorkHistorySlide({ content, slideId, editable = false, styleVari
         {/* Heading */}
         <div className="px-20 pt-20">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
         </div>
 
         {/* Timeline */}
@@ -112,7 +113,7 @@ export function WorkHistorySlide({ content, slideId, editable = false, styleVari
         {/* Heading — positioned next to the line */}
         <div className="absolute" style={{ left: `${lineX + 40}px`, top: '60px', right: '80px' }}>
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
         </div>
 
         {/* Entries — below the heading, aligned to the line */}
@@ -150,7 +151,7 @@ export function WorkHistorySlide({ content, slideId, editable = false, styleVari
         {/* Heading — top left */}
         <div className="absolute left-20 top-16 z-10">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
         </div>
 
         {/* Central line */}
@@ -254,7 +255,7 @@ export function WorkHistorySlide({ content, slideId, editable = false, styleVari
         zIndex: 2,
       }}>
         <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-          style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
+          style={{ fontFamily: 'var(--font-header)', fontSize: stepType('5xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
       </div>
 
       {/* Timeline — line with terminal dot at the heading */}

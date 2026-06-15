@@ -365,6 +365,7 @@ interface PortfolioState {
   resetSlideContent: (id: string) => void
   setSlideStyleVariant: (id: string, variant: number) => void
   toggleSlideDarkMode: (id: string) => void
+  setSlideTitleSizeStep: (id: string, step: number) => void
   setSlideHeadingSizeStep: (id: string, step: number) => void
   setSlideBodSizeStep: (id: string, step: number) => void
   setSlideBodyWidth: (id: string, width: number | undefined) => void
@@ -762,6 +763,15 @@ export const usePortfolioStore = create<PortfolioState>()(
         set((state) => ({
           slides: state.slides.map((s) =>
             s.id === id ? { ...s, darkMode: !s.darkMode } : s
+          ),
+        }))
+      },
+
+      setSlideTitleSizeStep: (id, step) => {
+        get()._pushHistory()
+        set((state) => ({
+          slides: state.slides.map((s) =>
+            s.id === id ? { ...s, titleSizeStep: step } : s
           ),
         }))
       },

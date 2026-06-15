@@ -11,6 +11,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -24,7 +25,7 @@ const personPlaceholder = (
   </div>
 )
 
-export function AboutSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function AboutSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   const headingEl = (fontSize: string, extra?: React.CSSProperties) => (
@@ -60,7 +61,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
     return (
       <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center" style={{ background: 'var(--color-surface)' }}>
         {imgBox('380px', '380px')}
-        <div className="mt-8 text-center">{headingEl(stepType('5xl', headingSizeStep), { textAlign: 'center' })}</div>
+        <div className="mt-8 text-center">{headingEl(stepType('5xl', titleSizeStep), { textAlign: 'center' })}</div>
         <BodyWidth slideId={slideId} editable={editable} align="center" className="mt-6 flex flex-col items-center gap-6 text-center">{paragraphEls(stepType('lg', bodySizeStep), { textAlign: 'center' })}</BodyWidth>
       </div>
     )
@@ -82,7 +83,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         </div>
         {/* Heading — overlapping the boundary, bottom-left */}
         <div className="absolute z-10" style={{ left: '60px', bottom: '80px', maxWidth: '1100px' }}>
-          {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.03em' })}
+          {headingEl(stepType('7xl', titleSizeStep), { letterSpacing: '-0.03em' })}
         </div>
       </div>
     )
@@ -98,7 +99,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         </div>
         {/* Heading — top-left */}
         <div className="absolute left-[60px] top-[80px] z-10" style={{ maxWidth: '900px' }}>
-          {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.03em' })}
+          {headingEl(stepType('7xl', titleSizeStep), { letterSpacing: '-0.03em' })}
         </div>
         {/* Text — left column, vertically centered. Wide so copy runs long and
             fills the space up to the image (which starts at x≈1060). */}
@@ -187,7 +188,7 @@ export function AboutSlide({ content, slideId, editable = false, styleVariant = 
         height: rowEnd - row3 - cellPad * 2,
         zIndex: 2,
       }}>
-        {headingEl(stepType('7xl', headingSizeStep), { letterSpacing: '-0.04em' })}
+        {headingEl(stepType('7xl', titleSizeStep), { letterSpacing: '-0.04em' })}
       </div>
     </div>
   )

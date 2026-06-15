@@ -10,11 +10,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function MetricsSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function MetricsSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   const stats = content.stats ?? []
 
@@ -102,7 +103,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-40">
           <div className="mb-4">{eyebrow}</div>
-          {heading(stepType('5xl', headingSizeStep), '1100px')}
+          {heading(stepType('5xl', titleSizeStep), '1100px')}
           <div className="mt-auto flex items-end justify-between gap-16">
             {stats.map((_, i) => (
               <div key={i} className="flex flex-1 flex-col gap-5">
@@ -123,7 +124,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-32">
           <div className="mb-4">{eyebrow}</div>
-          {heading(stepType('4xl', headingSizeStep), '1200px')}
+          {heading(stepType('4xl', titleSizeStep), '1200px')}
           <div className="mt-16 grid flex-1 grid-cols-2 gap-x-24 gap-y-14">
             {stats.map((_, i) => (
               <div
@@ -152,7 +153,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         <div className="relative z-10 flex h-full w-full items-stretch gap-24 px-32 pt-32 pb-32">
           <div className="flex w-[680px] flex-shrink-0 flex-col justify-center">
             <div className="mb-5">{eyebrow}</div>
-            {heading(stepType('4xl', headingSizeStep), '620px')}
+            {heading(stepType('4xl', titleSizeStep), '620px')}
           </div>
           <div className="flex flex-1 flex-col justify-center">
             {stats.map((_, i) => (
@@ -179,7 +180,7 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
       <SlideBackdrop image={content.backgroundImage} />
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-24 pb-20">
         <div className="mb-5 text-center">{eyebrow}</div>
-        {heading(stepType('5xl', headingSizeStep), '1300px', 'center')}
+        {heading(stepType('5xl', titleSizeStep), '1300px', 'center')}
         <div className="mt-20 flex w-full items-start justify-center gap-0">
           {stats.map((_, i) => (
             <div

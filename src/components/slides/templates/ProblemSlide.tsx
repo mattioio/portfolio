@@ -11,11 +11,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function ProblemSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function ProblemSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   void darkMode
 
@@ -80,7 +81,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col justify-center px-32 pb-24">
           {label({ marginBottom: '28px' })}
-          {statement(stepType('5xl', headingSizeStep), { maxWidth: '1200px' })}
+          {statement(stepType('5xl', titleSizeStep), { maxWidth: '1200px' })}
           <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
         </div>
       </div>
@@ -94,7 +95,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-32 pb-24 text-center">
           {label({ marginBottom: '28px' })}
-          {statement(stepType('5xl', headingSizeStep), { maxWidth: '1100px' })}
+          {statement(stepType('5xl', titleSizeStep), { maxWidth: '1100px' })}
           <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
         </div>
       </div>
@@ -109,7 +110,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
         <div className="relative z-10 flex h-full w-full items-center gap-24 px-32 pb-24">
           <div className="flex flex-1 flex-col">
             {label({ marginBottom: '28px' })}
-            {statement(stepType('4xl', headingSizeStep), { maxWidth: '820px' })}
+            {statement(stepType('4xl', titleSizeStep), { maxWidth: '820px' })}
           </div>
           <div className="flex flex-1 flex-col justify-center">
             <BodyWidth slideId={slideId} editable={editable}>{context(stepType('xl', bodySizeStep))}</BodyWidth>
@@ -126,7 +127,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative z-10 flex h-full w-full flex-col justify-between px-32 pt-32 pb-28">
         <div className="flex flex-col">
           {label({ marginBottom: '32px' })}
-          {statement(stepType('6xl', headingSizeStep), { maxWidth: '1500px' })}
+          {statement(stepType('6xl', titleSizeStep), { maxWidth: '1500px' })}
         </div>
         <BodyWidth slideId={slideId} editable={editable}>
           {context(stepType('base', bodySizeStep))}

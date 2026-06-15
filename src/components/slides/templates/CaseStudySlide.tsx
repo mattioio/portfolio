@@ -11,6 +11,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -23,7 +24,7 @@ const placeholderSvg = (
   </div>
 )
 
-export function CaseStudySlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function CaseStudySlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   const slides = usePortfolioStore((s) => s.slides)
   const imageSlots = [content.images[0] ?? '', content.images[1] ?? '']
@@ -85,7 +86,7 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
     return (
       <div className="relative flex h-[1080px] w-[1920px]" style={{ background: bgColor }}>
         <div className="flex w-[680px] flex-shrink-0 flex-col justify-center px-20 py-20">
-          {label}{heading(stepType('4xl', headingSizeStep))}
+          {label}{heading(stepType('4xl', titleSizeStep))}
           <div className="mb-8 h-[2px] w-14" style={{ background: 'var(--color-accent)' }} />
           {description}{link}
         </div>
@@ -104,7 +105,7 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
           {imgEl(imageSlots[0], 0, '100%', '100%')}
         </div>
         <div className="flex w-[680px] flex-shrink-0 flex-col justify-center px-20 py-20">
-          {label}{heading(stepType('4xl', headingSizeStep))}
+          {label}{heading(stepType('4xl', titleSizeStep))}
           <div className="mb-8 h-[2px] w-14" style={{ background: 'var(--color-accent)' }} />
           {description}{link}
         </div>
@@ -118,7 +119,7 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
       <div className="relative flex h-[1080px] w-[1920px] flex-col" style={{ background: bgColor }}>
         <div className="flex items-end gap-16 px-20 pt-16 pb-10">
           <div className="flex-1">
-            {label}{heading(stepType('3xl', headingSizeStep))}
+            {label}{heading(stepType('3xl', titleSizeStep))}
           </div>
           <div className="flex-1">
             {description}{link}
@@ -151,7 +152,7 @@ export function CaseStudySlide({ content, slideId, editable = false, styleVarian
         }}>
           {label}
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            className="mb-6" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', headingSizeStep), fontWeight: 800, lineHeight: 1.1, color: 'var(--color-text)' }} />
+            className="mb-6" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', titleSizeStep), fontWeight: 800, lineHeight: 1.1, color: 'var(--color-text)' }} />
           <EditableText value={content.description} onChange={(v) => update(slideId, { description: v } as any)} as="p" editable={editable} multiline
             className="mb-6" style={{ fontFamily: 'var(--font-body)', fontSize: stepType('body', bodySizeStep), lineHeight: 1.6, color: 'var(--color-text)', opacity: 0.7 }} />
           {hasLink ? (

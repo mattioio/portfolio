@@ -10,11 +10,12 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
 
-export function SectionTitleSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function SectionTitleSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   const hasBg = !!content.backgroundImage
@@ -83,7 +84,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         <div className="relative z-10 flex h-full w-full flex-col justify-end px-20 pb-28">
           <div className="flex items-center gap-8">
             <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-              style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.08, maxWidth: '900px' }} />
+              style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.08, maxWidth: '900px' }} />
             <svg width="48" height="48" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" style={{ flexShrink: 0 }}>
               <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
             </svg>
@@ -102,7 +103,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         {bgLayer}
         <div className="relative z-10 flex flex-col items-center">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            className="text-center" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.1, maxWidth: '1200px' }} />
+            className="text-center" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.1, maxWidth: '1200px' }} />
           {blurbEl && <div className="mt-6 text-center" style={{ maxWidth: '1100px' }}>{blurbEl}</div>}
           {ctaEl && <div className="mt-10">{ctaEl}</div>}
         </div>
@@ -117,7 +118,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
         {bgLayer}
         <div className="relative z-10 flex h-full w-full flex-col items-end justify-start px-20 pt-28">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', headingSizeStep), fontWeight: 400, fontStyle: 'italic', color: 'var(--color-text)', lineHeight: 1.15, maxWidth: '800px', textAlign: 'right' }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', titleSizeStep), fontWeight: 400, fontStyle: 'italic', color: 'var(--color-text)', lineHeight: 1.15, maxWidth: '800px', textAlign: 'right' }} />
           <svg width="48" height="48" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" className="mt-8" style={{ flexShrink: 0 }}>
             <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
           </svg>
@@ -135,7 +136,7 @@ export function SectionTitleSlide({ content, slideId, editable = false, styleVar
       <div className="relative z-10 flex w-full flex-col px-20">
         <div className="flex items-center gap-16">
           <EditableText value={content.heading} onChange={(v) => update(slideId, { heading: v } as any)} as="h2" editable={editable}
-            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
+            style={{ fontFamily: 'var(--font-header)', fontSize: stepType('7xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.0 }} />
           <svg width="100" height="100" viewBox="0 0 306.465 310.545" fill="var(--color-accent)" style={{ flexShrink: 0 }}>
             <polygon points="149.041,214.822 215.869,147.99 0,147.99 0,100.45 213.774,100.45 146.931,33.6146 180.55,0 306.465,124.628 182.656,248.436" />
           </svg>

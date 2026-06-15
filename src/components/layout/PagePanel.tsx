@@ -676,6 +676,7 @@ export function PagePanel() {
   )
   const setSlideStyleVariant = usePortfolioStore((s) => s.setSlideStyleVariant)
   const toggleSlideDarkMode = usePortfolioStore((s) => s.toggleSlideDarkMode)
+  const setSlideTitleSizeStep = usePortfolioStore((s) => s.setSlideTitleSizeStep)
   const setSlideHeadingSizeStep = usePortfolioStore((s) => s.setSlideHeadingSizeStep)
   const setSlideBodSizeStep = usePortfolioStore((s) => s.setSlideBodSizeStep)
   const setSlideBodyWidth = usePortfolioStore((s) => s.setSlideBodyWidth)
@@ -755,6 +756,31 @@ export function PagePanel() {
       <div>
         <SectionLabel>Text size</SectionLabel>
         <div className="flex flex-col gap-2">
+          {/* Slide title stepper */}
+          <div className="flex items-center justify-between rounded-lg border border-zinc-700 px-3 py-2">
+            <span className="text-xs text-zinc-300">Slide title</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSlideTitleSizeStep(slide.id, (slide.titleSizeStep ?? 0) - 1)}
+                disabled={(slide.titleSizeStep ?? 0) <= -3}
+                className="rounded p-1 text-zinc-400 transition-colors hover:text-white disabled:opacity-25 disabled:hover:text-zinc-400"
+                aria-label="Decrease slide title size"
+              >
+                <Minus size={12} />
+              </button>
+              <span className="w-5 text-center text-xs tabular-nums text-zinc-400">
+                {slide.titleSizeStep ?? 0}
+              </span>
+              <button
+                onClick={() => setSlideTitleSizeStep(slide.id, (slide.titleSizeStep ?? 0) + 1)}
+                disabled={(slide.titleSizeStep ?? 0) >= 3}
+                className="rounded p-1 text-zinc-400 transition-colors hover:text-white disabled:opacity-25 disabled:hover:text-zinc-400"
+                aria-label="Increase slide title size"
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+          </div>
           {/* Headings stepper */}
           <div className="flex items-center justify-between rounded-lg border border-zinc-700 px-3 py-2">
             <span className="text-xs text-zinc-300">Headings</span>

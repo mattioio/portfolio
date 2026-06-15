@@ -11,6 +11,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -28,7 +29,7 @@ const imgPlaceholder = (recWidth: number, recHeight: number) => (
   </div>
 )
 
-export function CVSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function CVSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
   const isFlipped = styleVariant === 1 || styleVariant === 3
 
@@ -41,7 +42,7 @@ export function CVSlide({ content, slideId, editable = false, styleVariant = 0, 
     <img src={content.logo} alt={content.company} className="mb-5 h-14 w-auto object-contain object-left" />
   ) : (
     <EditableText value={content.company} onChange={(v) => update(slideId, { company: v } as any)} as="h2" editable={editable}
-      className="mb-5" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', headingSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
+      className="mb-5" style={{ fontFamily: 'var(--font-header)', fontSize: stepType('4xl', titleSizeStep), fontWeight: 900, color: 'var(--color-text)', lineHeight: 1.05 }} />
   )
 
   const badge = (

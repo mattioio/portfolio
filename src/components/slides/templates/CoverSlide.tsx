@@ -10,6 +10,7 @@ interface Props {
   editable?: boolean
   styleVariant?: number
   darkMode?: boolean
+  titleSizeStep?: number
   headingSizeStep?: number
   bodySizeStep?: number
 }
@@ -22,7 +23,7 @@ const placeholderBlock = (
   </div>
 )
 
-export function CoverSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
+export function CoverSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, titleSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
 
   const hasImage = !!content.backgroundImage
@@ -103,7 +104,7 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
             className="mb-7"
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: stepType('7xl', headingSizeStep),
+              fontSize: stepType('7xl', titleSizeStep),
               fontWeight: 900,
               lineHeight: 1.02,
               color: hasImage ? '#ffffff' : 'var(--color-text)',
@@ -145,7 +146,7 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
             className="mb-9"
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: stepType('6xl', headingSizeStep),
+              fontSize: stepType('6xl', titleSizeStep),
               fontWeight: 900,
               lineHeight: 1.04,
               color: 'var(--color-text)',
@@ -174,7 +175,7 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
             className="mb-12 text-center"
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: stepType('7xl', headingSizeStep),
+              fontSize: stepType('7xl', titleSizeStep),
               fontWeight: 900,
               lineHeight: 1.02,
               color: 'var(--color-text)',
@@ -202,7 +203,7 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
             editable={editable}
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: stepType('5xl', headingSizeStep),
+              fontSize: stepType('5xl', titleSizeStep),
               fontWeight: 900,
               lineHeight: 1.04,
               color: 'var(--color-text)',

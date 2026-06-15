@@ -244,7 +244,9 @@ export interface Slide {
   darkMode: boolean
   drawingLayers: DrawingLayer[]
   drawingGroups: DrawingGroup[]
-  /** Steps above baseline for heading sizes (2xl–6xl). 0 = default. */
+  /** Steps for the main slide title size (decoupled from in-content headings). 0 = default. */
+  titleSizeStep?: number
+  /** Steps above baseline for in-content heading sizes (column/step titles, etc.). 0 = default. */
   headingSizeStep?: number
   /** Steps above baseline for body copy sizes (xs–xl). 0 = default. */
   bodySizeStep?: number
