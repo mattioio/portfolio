@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react'
 import type { BeforeAfterContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
@@ -14,29 +15,51 @@ interface Props {
   bodySizeStep?: number
 }
 
-const placeholder = (
-  <div
-    className="flex h-full w-full flex-col items-center justify-center gap-3"
-    style={{ background: 'var(--color-surface-alt)' }}
-  >
-    <svg width="64" height="48" viewBox="0 0 64 48" fill="none" style={{ opacity: 0.14 }}>
-      <rect width="64" height="40" rx="3" fill="var(--color-text)" />
-      <circle cx="20" cy="16" r="5" fill="var(--color-surface)" />
-      <path d="M0 30 L24 18 L40 26 L64 12 V40 H0Z" fill="var(--color-surface)" opacity="0.5" />
-    </svg>
-    <span
-      style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: TYPE.sm,
-        color: 'var(--color-text-muted)',
-        opacity: 0.55,
-        letterSpacing: '0.04em',
-      }}
+/**
+ * Placeholder that measures its own slot and shows the matching recommended
+ * size (@2x). The slide is laid out at 1920px and only transform-scaled for
+ * display, so offsetWidth/Height give the true slot size in slide space — a
+ * correctly-sized image then fills the slot exactly (no object-cover crop).
+ */
+function ImagePlaceholder() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState('')
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => {
+      if (el.offsetWidth > 0) setDims(`${Math.round(el.offsetWidth * 2)} × ${Math.round(el.offsetHeight * 2)}px`)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div
+      ref={ref}
+      className="flex h-full w-full flex-col items-center justify-center gap-3"
+      style={{ background: 'var(--color-surface-alt)' }}
     >
-      2560 &times; 2160px
-    </span>
-  </div>
-)
+      <svg width="64" height="48" viewBox="0 0 64 48" fill="none" style={{ opacity: 0.14 }}>
+        <rect width="64" height="40" rx="3" fill="var(--color-text)" />
+        <circle cx="20" cy="16" r="5" fill="var(--color-surface)" />
+        <path d="M0 30 L24 18 L40 26 L64 12 V40 H0Z" fill="var(--color-surface)" opacity="0.5" />
+      </svg>
+      <span
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: TYPE.sm,
+          color: 'var(--color-text-muted)',
+          opacity: 0.55,
+          letterSpacing: '0.04em',
+        }}
+      >
+        {dims || 'Drop image'}
+      </span>
+    </div>
+  )
+}
 
 export function BeforeAfterSlide({
   content,
@@ -58,7 +81,7 @@ export function BeforeAfterSlide({
       className="h-full w-full overflow-hidden"
       style={{ borderRadius: radius ?? 'var(--border-radius)', ...extraStyle }}
       imgClassName="h-full w-full object-cover"
-      placeholder={placeholder}
+      placeholder={<ImagePlaceholder />}
       transformKey={`${slideId}:beforeImage`}
     />
   )
@@ -72,7 +95,7 @@ export function BeforeAfterSlide({
       className="h-full w-full overflow-hidden"
       style={{ borderRadius: radius ?? 'var(--border-radius)', ...extraStyle }}
       imgClassName="h-full w-full object-cover"
-      placeholder={placeholder}
+      placeholder={<ImagePlaceholder />}
       transformKey={`${slideId}:afterImage`}
     />
   )
