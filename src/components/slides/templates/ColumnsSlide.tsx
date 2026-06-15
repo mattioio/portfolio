@@ -94,17 +94,23 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
     )
   }
 
-  // ── B (1): minimal — heading, clean columns, no lines ──
+  const faintLine = 'color-mix(in srgb, var(--color-text) 16%, transparent)'
+
+  // ── B (1): Newspaper — heading with underline, bold top rule capping each column ──
   if (styleVariant === 1) {
     return (
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
-          {hasHeading && <div className="mb-14">{heading(stepType('4xl', headingSizeStep))}</div>}
-          <div className="flex flex-1" style={{ gap: '72px' }}>
+          {hasHeading && (
+            <div className="mb-12" style={{ borderBottom: `1px solid ${faintLine}`, paddingBottom: '28px' }}>
+              {heading(stepType('4xl', headingSizeStep))}
+            </div>
+          )}
+          <div className="flex flex-1" style={{ gap: '64px' }}>
             {cols.map((_, i) => (
-              <div key={i} className="flex flex-1 flex-col">
-                {colTitle(i, stepType('2xl', headingSizeStep), { marginBottom: '16px' })}
+              <div key={i} className="flex flex-1 flex-col" style={{ borderTop: '3px solid var(--color-text)', paddingTop: '24px' }}>
+                {colTitle(i, stepType('xl', headingSizeStep), { marginBottom: '14px' })}
                 {colBody(i, stepType('base', bodySizeStep))}
               </div>
             ))}
@@ -114,17 +120,17 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
     )
   }
 
-  // ── C (2): numbered — big accent index above each column ──
+  // ── C (2): Oversized accent numerals leading each column ──
   if (styleVariant === 2) {
     return (
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
           {hasHeading && <div className="mb-14">{heading(stepType('4xl', headingSizeStep))}</div>}
-          <div className="flex flex-1" style={{ gap: '64px' }}>
+          <div className="flex flex-1" style={{ gap: '56px' }}>
             {cols.map((_, i) => (
               <div key={i} className="flex flex-1 flex-col">
-                <span style={{ fontFamily: 'var(--font-header)', fontSize: stepType('3xl', headingSizeStep), fontWeight: 800, color: 'var(--color-accent)', lineHeight: 1, marginBottom: '20px' }}>
+                <span style={{ fontFamily: 'var(--font-header)', fontSize: stepType('6xl', headingSizeStep), fontWeight: 800, color: 'var(--color-accent)', lineHeight: 0.85, letterSpacing: '-0.03em', marginBottom: '24px' }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 {colTitle(i, stepType('xl', headingSizeStep), { marginBottom: '12px' })}
@@ -137,18 +143,18 @@ export function ColumnsSlide({ content, slideId, editable = false, styleVariant 
     )
   }
 
-  // ── D (3): cards — each column on a surface-alt card ──
+  // ── D (3): Refined outlined cards ──
   return (
     <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
       <SlideBackdrop image={content.backgroundImage} />
       <div className="relative z-10 flex h-full w-full flex-col" style={{ padding: '80px 88px 96px' }}>
         {hasHeading && <div className="mb-12">{heading(stepType('4xl', headingSizeStep))}</div>}
-        <div className="flex flex-1" style={{ gap: '32px' }}>
+        <div className="flex flex-1" style={{ gap: '28px' }}>
           {cols.map((_, i) => (
             <div
               key={i}
               className="flex flex-1 flex-col"
-              style={{ background: 'var(--color-surface-alt)', borderRadius: 'var(--border-radius)', padding: '40px' }}
+              style={{ border: `1px solid ${faintLine}`, borderRadius: 'var(--border-radius)', padding: '48px 44px' }}
             >
               {colTitle(i, stepType('2xl', headingSizeStep), { marginBottom: '16px' })}
               {colBody(i, stepType('base', bodySizeStep))}
