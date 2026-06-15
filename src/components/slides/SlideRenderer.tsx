@@ -17,6 +17,7 @@ import { ShowcaseSlide } from './templates/ShowcaseSlide'
 import { BeforeAfterSlide } from './templates/BeforeAfterSlide'
 import { MetricsSlide } from './templates/MetricsSlide'
 import { QuoteSlide } from './templates/QuoteSlide'
+import { ColumnsSlide } from './templates/ColumnsSlide'
 
 interface SlideRendererProps {
   slide: Slide
@@ -271,6 +272,8 @@ export function SlideRenderer({ slide, editable = false }: SlideRendererProps) {
       slideContent = <MetricsSlide content={slide.content as any} {...props} />; break
     case 'quote':
       slideContent = <QuoteSlide content={slide.content as any} {...props} />; break
+    case 'columns':
+      slideContent = <ColumnsSlide content={slide.content as any} {...props} />; break
   }
 
   const inner = (

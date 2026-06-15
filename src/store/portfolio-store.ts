@@ -279,6 +279,14 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
         role: 'Head of Product, Company',
         backgroundImage: '',
       }
+    case 'columns': {
+      const count = Math.max(2, Math.min(6, layoutVariant ?? 3))
+      const columns = Array.from({ length: count }, (_, i) => ({
+        title: `Column ${i + 1}`,
+        body: 'A short description for this column — a sentence or two about the point you are making.',
+      }))
+      return { type: 'columns', heading: 'Section heading', columns, backgroundImage: '' }
+    }
   }
 }
 

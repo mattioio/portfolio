@@ -12,6 +12,7 @@ import type {
   ProcessContent,
   MetricsContent,
   QuoteContent,
+  ColumnsContent,
 } from '../../store/types'
 import { ImageDropZone } from '../shared/ImageDropZone'
 import { Plus, Minus, Trash2, Image, RotateCcw, GripVertical } from 'lucide-react'
@@ -598,6 +599,41 @@ function MetricsSettings({ slideId, content }: { slideId: string; content: Metri
   )
 }
 
+function ColumnsSettings({ slideId, content }: { slideId: string; content: ColumnsContent }) {
+  const update = usePortfolioStore((s) => s.updateSlideContent)
+  const columns = content.columns ?? []
+  const setCol = (i: number, key: 'title' | 'body', val: string) => {
+    update(slideId, { columns: columns.map((c, j) => (j === i ? { ...c, [key]: val } : c)) } as any)
+  }
+  const add = () => update(slideId, { columns: [...columns, { title: `Column ${columns.length + 1}`, body: 'A short description for this column.' }] } as any)
+  const remove = (i: number) => update(slideId, { columns: columns.filter((_, j) => j !== i) } as any)
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <SectionLabel>Columns</SectionLabel>
+          <button onClick={add} className="rounded p-1 text-zinc-500 hover:text-zinc-300" title="Add column"><Plus size={12} /></button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {columns.map((col, i) => (
+            <div key={i} className="rounded-lg border border-zinc-700 p-2">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <span className="text-[10px] tabular-nums text-zinc-600">{i + 1}</span>
+                <input value={col.title} onChange={(e) => setCol(i, 'title', e.target.value)} placeholder="Title" className="flex-1 bg-transparent text-xs text-zinc-200 outline-none placeholder:text-zinc-600" />
+                {columns.length > 1 && (
+                  <button onClick={() => remove(i)} className="rounded p-0.5 text-zinc-600 hover:text-red-400" title="Remove column"><Trash2 size={10} /></button>
+                )}
+              </div>
+              <input value={col.body} onChange={(e) => setCol(i, 'body', e.target.value)} placeholder="Body" className="w-full bg-transparent pl-[18px] text-[10px] text-zinc-400 outline-none placeholder:text-zinc-600" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <BackgroundImageField slideId={slideId} value={content.backgroundImage} />
+    </div>
+  )
+}
+
 function ResetButton({ slideId }: { slideId: string }) {
   const resetSlideContent = usePortfolioStore((s) => s.resetSlideContent)
   const [confirming, setConfirming] = useState(false)
@@ -843,6 +879,9 @@ export function PagePanel() {
       )}
       {slide.type === 'quote' && (
         <QuoteSettings slideId={slide.id} content={slide.content as QuoteContent} />
+      )}
+      {slide.type === 'columns' && (
+        <ColumnsSettings slideId={slide.id} content={slide.content as ColumnsContent} />
       )}
 
       {/* Reset content */}

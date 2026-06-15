@@ -16,6 +16,8 @@ import {
   ListOrdered,
   Image as ImageIcon,
   Columns2,
+  Columns3,
+  Columns4,
   BarChart3,
   Quote,
 } from 'lucide-react'
@@ -54,6 +56,8 @@ const templates: TemplateOption[] = [
   { type: 'before-after', label: 'Before / After', icon: Columns2, shortcut: '' },
   { type: 'metrics', label: 'Metrics', icon: BarChart3, shortcut: '' },
   { type: 'quote', label: 'Quote', icon: Quote, shortcut: '' },
+  { type: 'columns', label: 'Columns 3', icon: Columns3, layoutVariant: 3, shortcut: '' },
+  { type: 'columns', label: 'Columns 4', icon: Columns4, layoutVariant: 4, shortcut: '' },
 ]
 
 export function AddSlideSheet({ open, onClose }: AddSlideSheetProps) {

@@ -15,6 +15,7 @@ export type SlideType =
   | 'before-after'
   | 'metrics'
   | 'quote'
+  | 'columns'
 
 export interface HeroContent {
   type: 'hero'
@@ -171,6 +172,18 @@ export interface QuoteContent {
   backgroundImage: string
 }
 
+export interface ColumnItem {
+  title: string
+  body: string
+}
+
+export interface ColumnsContent {
+  type: 'columns'
+  heading: string
+  columns: ColumnItem[]
+  backgroundImage: string
+}
+
 export type SlideContent =
   | HeroContent
   | AboutContent
@@ -187,6 +200,7 @@ export type SlideContent =
   | BeforeAfterContent
   | MetricsContent
   | QuoteContent
+  | ColumnsContent
 
 export interface DrawingPath {
   d: string              // SVG path data
