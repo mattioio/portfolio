@@ -27,6 +27,21 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
 
   const num = (i: number) => String(i + 1).padStart(2, '0')
 
+  // Editable eyebrow label. Always editable in the editor (so it can be changed
+  // or cleared and retyped); hidden in the exported deck when empty.
+  const eyebrowValue = content.eyebrow ?? 'PROCESS'
+  const eyebrowShown = editable || eyebrowValue.replace(/<[^>]*>/g, '').replace(/&nbsp;| /g, ' ').trim() !== ''
+  const eyebrow = (className: string) => eyebrowShown ? (
+    <EditableText
+      value={eyebrowValue}
+      onChange={(v) => update(slideId, { eyebrow: v } as any)}
+      as="p"
+      editable={editable}
+      className={className}
+      style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
+    />
+  ) : null
+
   const headingEl = (size: string, maxWidth?: string) => (
     <EditableText
       value={content.heading}
@@ -85,12 +100,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-24 pt-24 pb-28">
-        <p
-          className="mb-4"
-          style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
-        >
-          Process
-        </p>
+        {eyebrow('mb-4')}
         {headingEl(stepType('5xl', titleSizeStep), '1100px')}
 
         <div className="flex flex-1 items-center">
@@ -181,12 +191,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
         <SlideBackdrop image={content.backgroundImage} />
         <div className="relative z-10 flex h-full w-full flex-col px-28 pt-24 pb-28">
-        <p
-          className="mb-4"
-          style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
-        >
-          Process
-        </p>
+        {eyebrow('mb-4')}
         {headingEl(stepType('5xl', titleSizeStep), '1100px')}
 
         <div className="mt-12 grid flex-1 content-center" style={{ gridTemplateColumns: '1fr 1fr', columnGap: '120px', rowGap: '56px' }}>
@@ -222,12 +227,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
       <SlideBackdrop image={content.backgroundImage} />
       <div className="relative z-10 flex h-full w-full">
       <div className="flex w-[640px] flex-shrink-0 flex-col justify-center px-24 pb-28">
-        <p
-          className="mb-5"
-          style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
-        >
-          Process
-        </p>
+        {eyebrow('mb-5')}
         {headingEl(stepType('6xl', titleSizeStep), '560px')}
       </div>
 

@@ -236,6 +236,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
     case 'process':
       return {
         type: 'process',
+        eyebrow: 'PROCESS',
         heading: 'Approach',
         steps: [
           { title: 'Discover', description: 'Research, interviews, and an audit of the current experience.' },

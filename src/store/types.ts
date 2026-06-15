@@ -132,6 +132,7 @@ export interface ProcessStep {
 
 export interface ProcessContent {
   type: 'process'
+  eyebrow: string
   heading: string
   steps: ProcessStep[]
   backgroundImage: string
