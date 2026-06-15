@@ -62,20 +62,17 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
       { key: 'role', value: content.role, style: baseStyle },
       { key: 'year', value: content.year, style: { ...baseStyle, color } },
     ]
-    // View/export: drop empty fields. Editor: keep them (tiny clickable slots).
-    const shown = editable ? fields : fields.filter((f) => !isEmpty(f.value))
+    // Only show fields that have content, joined by separators — no gaps or
+    // orphan dots when a field is empty. Emptied fields are re-added from the
+    // Cover details panel (Page tab), not an on-canvas slot.
+    const shown = fields.filter((f) => !isEmpty(f.value))
     const nodes: React.ReactNode[] = []
-    let emitted = 0
-    for (const f of shown) {
-      const empty = isEmpty(f.value)
-      if (!empty && emitted > 0) {
-        nodes.push(<span key={`${f.key}-sep`} aria-hidden="true" style={sepStyle}>·</span>)
-      }
+    shown.forEach((f, i) => {
+      if (i > 0) nodes.push(<span key={`${f.key}-sep`} aria-hidden="true" style={sepStyle}>·</span>)
       nodes.push(
         <EditableText key={f.key} value={f.value ?? ''} onChange={(v) => update(slideId, { [f.key]: v } as any)} as="span" editable={editable} style={f.style} />
       )
-      if (!empty) emitted++
-    }
+    })
     return (
       <div className={`flex flex-wrap items-baseline ${opts?.center ? 'justify-center' : ''}`} style={{ gap: 0 }}>
         {nodes}

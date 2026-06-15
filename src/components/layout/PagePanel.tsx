@@ -7,6 +7,7 @@ import type {
   CaseStudyContent,
   SignOffContent,
   SectionTitleContent,
+  CoverContent,
 } from '../../store/types'
 import { ImageDropZone } from '../shared/ImageDropZone'
 import { Plus, Minus, Trash2, Image, RotateCcw, GripVertical } from 'lucide-react'
@@ -294,6 +295,68 @@ function CaseStudySettings({
           placeholder="https://..."
           className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-zinc-500"
         />
+      </div>
+    </div>
+  )
+}
+
+function CoverSettings({
+  slideId,
+  content,
+}: {
+  slideId: string
+  content: CoverContent
+}) {
+  const update = usePortfolioStore((s) => s.updateSlideContent)
+  const field = (label: string, key: 'client' | 'role' | 'year', placeholder: string) => (
+    <div>
+      <label className="mb-1 block text-[10px] uppercase tracking-wider text-zinc-500">{label}</label>
+      <input
+        type="text"
+        value={content[key] ?? ''}
+        onChange={(e) => update(slideId, { [key]: e.target.value } as any)}
+        placeholder={placeholder}
+        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+      />
+    </div>
+  )
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <SectionLabel>Cover details</SectionLabel>
+        <p className="mb-2 text-[10px] text-zinc-600">Leave a field blank to hide it (the middot adjusts automatically).</p>
+        <div className="flex flex-col gap-2.5">
+          {field('Client', 'client', 'Client name')}
+          {field('Role', 'role', 'Your role')}
+          {field('Year', 'year', '2025')}
+        </div>
+      </div>
+
+      <div>
+        <SectionLabel>Background image</SectionLabel>
+        <ImageDropZone
+          image={content.backgroundImage ?? ''}
+          onImageDrop={(url) => update(slideId, { backgroundImage: url } as any)}
+          onImageRemove={() => update(slideId, { backgroundImage: '' } as any)}
+          editable={true}
+          className="flex h-32 w-full items-center justify-center overflow-hidden rounded-lg border border-zinc-700"
+          imgClassName="h-full w-full object-cover"
+          placeholder={
+            <div className="flex flex-col items-center gap-2 text-zinc-600">
+              <Image size={20} />
+              <span className="text-[10px]">Drop image here</span>
+            </div>
+          }
+        />
+        {content.backgroundImage && (
+          <button
+            onClick={() => update(slideId, { backgroundImage: '' } as any)}
+            className="mt-1.5 text-[10px] text-red-400 hover:text-red-300"
+          >
+            Remove image
+          </button>
+        )}
+        <ExistingBackgrounds currentSlideId={slideId} onSelect={(url) => update(slideId, { backgroundImage: url } as any)} />
       </div>
     </div>
   )
@@ -646,6 +709,9 @@ export function PagePanel() {
       )}
       {slide.type === 'sign-off' && (
         <SignOffSettings slideId={slide.id} content={slide.content as SignOffContent} />
+      )}
+      {slide.type === 'cover' && (
+        <CoverSettings slideId={slide.id} content={slide.content as CoverContent} />
       )}
 
       {/* Reset content */}
