@@ -104,7 +104,6 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
           {stats.map((_, i) => (
             <div key={i} className="flex flex-1 flex-col gap-5">
               {statValue(i, stepType('6xl', headingSizeStep), 'left')}
-              <div className="h-[3px] w-12" style={{ background: 'var(--color-accent)' }} />
               {statLabel(i, 'left', '320px')}
             </div>
           ))}
@@ -145,7 +144,6 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
         <div className="flex w-[680px] flex-shrink-0 flex-col justify-center">
           <div className="mb-5">{eyebrow}</div>
           {heading(stepType('4xl', headingSizeStep), '620px')}
-          <div className="mt-8 h-[3px] w-16" style={{ background: 'var(--color-accent)' }} />
         </div>
         <div className="flex flex-1 flex-col justify-center">
           {stats.map((_, i) => (

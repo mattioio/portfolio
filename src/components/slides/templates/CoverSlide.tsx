@@ -81,7 +81,6 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
         )}
 
         <div className="relative z-10 flex h-full w-full flex-col justify-end px-24 pb-28">
-          <div className="mb-7 h-[3px] w-16" style={{ background: 'var(--color-accent)' }} />
           <EditableText
             value={content.projectName}
             onChange={(v) => update(slideId, { projectName: v } as any)}
@@ -139,7 +138,6 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
               maxWidth: '760px',
             }}
           />
-          <div className="mb-9 h-[2px] w-14" style={{ background: 'var(--color-accent)' }} />
           {metaLine('var(--color-text)', 'var(--color-text-muted)')}
         </div>
         <div className="relative flex-1 overflow-hidden">
@@ -154,7 +152,6 @@ export function CoverSlide({ content, slideId, editable = false, styleVariant = 
     return (
       <div className="relative flex h-[1080px] w-[1920px] items-center justify-center" style={{ background: 'var(--color-surface)' }}>
         <div className="flex flex-col items-center px-24 pb-16">
-          <div className="mb-12 h-[3px] w-20" style={{ background: 'var(--color-accent)' }} />
           <EditableText
             value={content.projectName}
             onChange={(v) => update(slideId, { projectName: v } as any)}

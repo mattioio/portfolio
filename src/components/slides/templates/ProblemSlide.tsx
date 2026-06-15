@@ -15,6 +15,7 @@ interface Props {
 
 export function ProblemSlide({ content, slideId, editable = false, styleVariant = 0, darkMode = false, headingSizeStep = 0, bodySizeStep = 0 }: Props) {
   const update = usePortfolioStore((s) => s.updateSlideContent)
+  void darkMode
 
   const label = (extraStyle?: React.CSSProperties) => (
     <EditableText
@@ -70,18 +71,13 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
     />
   )
 
-  const rule = (extraStyle?: React.CSSProperties) => (
-    <div style={{ height: '3px', width: '64px', background: 'var(--color-accent)', ...extraStyle }} />
-  )
-
   // A: Left-aligned, vertically centered
   if (styleVariant === 0) {
     return (
       <div className="relative flex h-[1080px] w-[1920px] flex-col justify-center px-32 pb-24" style={{ background: 'var(--color-surface)' }}>
         {label({ marginBottom: '28px' })}
         {statement(stepType('5xl', headingSizeStep), { maxWidth: '1200px' })}
-        {rule({ margin: '44px 0' })}
-        {context(stepType('lg', bodySizeStep), { maxWidth: '720px' })}
+        {context(stepType('lg', bodySizeStep), { maxWidth: '720px', marginTop: '40px' })}
       </div>
     )
   }
@@ -92,8 +88,7 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
       <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center px-32 pb-24 text-center" style={{ background: 'var(--color-surface)' }}>
         {label({ marginBottom: '28px' })}
         {statement(stepType('5xl', headingSizeStep), { maxWidth: '1100px' })}
-        {rule({ margin: '44px 0' })}
-        {context(stepType('lg', bodySizeStep), { maxWidth: '720px' })}
+        {context(stepType('lg', bodySizeStep), { maxWidth: '720px', marginTop: '40px' })}
       </div>
     )
   }
@@ -105,7 +100,6 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
         <div className="flex flex-1 flex-col">
           {label({ marginBottom: '28px' })}
           {statement(stepType('4xl', headingSizeStep), { maxWidth: '820px' })}
-          {rule({ marginTop: '44px' })}
         </div>
         <div className="flex flex-1 flex-col justify-center" style={{ maxWidth: '680px' }}>
           {context(stepType('xl', bodySizeStep))}
@@ -119,7 +113,6 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
     <div className="relative flex h-[1080px] w-[1920px] flex-col justify-between px-32 pt-32 pb-28" style={{ background: 'var(--color-surface)' }}>
       <div className="flex flex-col">
         {label({ marginBottom: '32px' })}
-        {rule({ marginBottom: '40px', height: '5px', width: '96px' })}
         {statement(stepType('6xl', headingSizeStep), { maxWidth: '1500px' })}
       </div>
       <div style={{ maxWidth: '640px' }}>

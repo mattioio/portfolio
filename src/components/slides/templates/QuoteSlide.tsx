@@ -151,7 +151,6 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
           <div className="mt-10">
             {quoteField(stepType('3xl', headingSizeStep), textColor, { align: 'center', maxWidth: '1300px' })}
           </div>
-          <div className="mt-12 h-[2px] w-16" style={{ background: 'var(--color-accent)' }} />
           <div className="mt-8 flex flex-col items-center gap-2">
             {attributionField(attrColor, 'center')}
             {roleField(roleColor, 'center')}
@@ -230,7 +229,6 @@ export function QuoteSlide({ content, slideId, editable = false, styleVariant = 
             boxShadow: darkMode ? 'none' : '0 8px 40px rgba(0,0,0,0.08)',
           }}
         >
-          <div className="h-[3px] w-12" style={{ background: 'var(--color-accent)' }} />
           {attributionField('var(--color-text)')}
           {roleField('var(--color-text)')}
         </div>

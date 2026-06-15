@@ -107,7 +107,6 @@ export function ShowcaseSlide({ content, slideId, editable = false, styleVariant
           {imageEl('var(--border-radius)', 'shadow-2xl')}
         </div>
         <div className="mt-10 flex w-full max-w-[1100px] flex-col items-center">
-          <div className="mb-6 h-[2px] w-12" style={{ background: 'var(--color-accent)' }} />
           <EditableText
             value={content.caption}
             onChange={(v) => update(slideId, { caption: v } as any)}
@@ -137,7 +136,6 @@ export function ShowcaseSlide({ content, slideId, editable = false, styleVariant
           {imageEl('var(--border-radius)', 'shadow-xl')}
         </div>
         <div className="flex flex-1 flex-col justify-center px-20 pb-20">
-          <div className="mb-8 h-[3px] w-16" style={{ background: 'var(--color-accent)' }} />
           <EditableText
             value={content.caption}
             onChange={(v) => update(slideId, { caption: v } as any)}

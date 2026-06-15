@@ -128,7 +128,6 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
     return (
       <div className="relative flex h-[1080px] w-[1920px] flex-col px-28 pt-24 pb-28" style={{ background: 'var(--color-surface)' }}>
         {headingEl(stepType('5xl', headingSizeStep), '1200px')}
-        <div className="mt-12 h-[2px] w-16 flex-shrink-0" style={{ background: 'var(--color-accent)' }} />
 
         <div className="mt-10 flex flex-1 flex-col justify-center" style={{ maxWidth: '1280px' }}>
           {steps.map((_, i) => (
@@ -217,7 +216,6 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
           Process
         </p>
         {headingEl(stepType('6xl', headingSizeStep), '560px')}
-        <div className="mt-8 h-[2px] w-16" style={{ background: 'var(--color-accent)' }} />
       </div>
 
       <div

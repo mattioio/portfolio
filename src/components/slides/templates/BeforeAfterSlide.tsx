@@ -166,7 +166,6 @@ export function BeforeAfterSlide({
       >
         <div className="mb-10 flex flex-col items-center">
           {headingEl(stepType('4xl', headingSizeStep), 'center')}
-          <div className="mt-6 h-[3px] w-16" style={{ background: 'var(--color-accent)' }} />
         </div>
         <div className="flex flex-1 gap-12">
           <div className="flex flex-1 flex-col">
