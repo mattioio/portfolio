@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar'
 import { Canvas } from './components/layout/Canvas'
 import { LayerPanel } from './components/draw/LayerPanel'
 import { DrawToolbar } from './components/draw/DrawToolbar'
+import { RichTextToolbar } from './components/shared/RichTextToolbar'
 import { usePortfolioStore } from './store/portfolio-store'
 import { applyPalette } from './themes'
 import { idbStorage } from './store/idb-storage'
@@ -65,6 +66,9 @@ function App() {
           <DrawToolbar />
         </div>
       </div>
+
+      {/* Floating rich-text format toolbar (appears on text selection) */}
+      {isDesign && <RichTextToolbar />}
     </div>
   )
 }

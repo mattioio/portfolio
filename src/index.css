@@ -162,6 +162,23 @@ h1, h2 {
   background: var(--color-accent);
 }
 
+/* Rich-text body lists (EditableText) — re-enable markers Tailwind's reset strips */
+.rich-text ul,
+.rich-text ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.rich-text ul { list-style: disc; }
+.rich-text ol { list-style: decimal; }
+.rich-text li { padding-left: 0.25em; }
+.rich-text li::marker { color: var(--color-accent); }
+.rich-text ol li::marker { font-weight: 700; }
+.rich-text li > ul,
+.rich-text li > ol { margin: 0.25em 0; }
+
 /* Settings sliders */
 .slider-input {
   -webkit-appearance: none;

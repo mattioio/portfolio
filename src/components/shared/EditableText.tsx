@@ -45,9 +45,11 @@ export function EditableText({
     }
   }, [value])
 
+  const richClass = `rich-text${multiline ? ' rich-text-multi' : ''}`
+
   if (!editable) {
     return createElement(as, {
-      className,
+      className: `${className} ${richClass}`,
       style,
       dangerouslySetInnerHTML: { __html: value },
     })
@@ -65,7 +67,7 @@ export function EditableText({
 
   return createElement(as, {
     ref: setRef,
-    className: `${className} outline-none cursor-text`,
+    className: `${className} outline-none cursor-text ${richClass}`,
     style: { ...style, minWidth: '20px' },
     contentEditable: true,
     suppressContentEditableWarning: true,
@@ -75,6 +77,10 @@ export function EditableText({
       isFocusedRef.current = false
       commitValue()
     },
+    // Commit on input too, so formatting from the toolbar/shortcuts (and live
+    // typing) persists immediately. Safe: the focused guard keeps React from
+    // resetting the DOM/cursor while editing.
+    onInput: commitValue,
     onKeyDown: (e: React.KeyboardEvent) => {
       // Auto-convert "- " into a bullet list: intercept Space after a lone "-" at line start
       if (multiline && e.key === ' ' && ref.current) {
@@ -86,9 +92,13 @@ export function EditableText({
             const offset = sel.anchorOffset
             // The text before cursor is exactly "-" (possibly with leading whitespace from a new line)
             const before = text.slice(0, offset)
-            if (before.trim() === '-') {
+            // "- " → bullet list, "1. " → numbered list
+            const listCmd = before.trim() === '-' ? 'insertUnorderedList'
+              : before.trim() === '1.' ? 'insertOrderedList'
+              : null
+            if (listCmd) {
               e.preventDefault()
-              // Remove the "-" text
+              // Remove the marker text we just typed
               node.textContent = text.slice(offset)
               // Place cursor at start
               const range = document.createRange()
@@ -96,8 +106,7 @@ export function EditableText({
               range.collapse(true)
               sel.removeAllRanges()
               sel.addRange(range)
-              // Convert to bullet list
-              document.execCommand('insertUnorderedList')
+              document.execCommand(listCmd)
               commitValue()
               return
             }
@@ -147,6 +156,14 @@ export function EditableText({
       if (mod && e.shiftKey && e.key === '8') {
         e.preventDefault()
         document.execCommand('insertUnorderedList')
+        commitValue()
+        return
+      }
+
+      // Cmd+Shift+7 = numbered list
+      if (mod && e.shiftKey && e.key === '7') {
+        e.preventDefault()
+        document.execCommand('insertOrderedList')
         commitValue()
         return
       }
