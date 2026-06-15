@@ -181,6 +181,68 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
         ],
         backgroundImage: '',
       }
+
+    // ── Case-study presentation templates ──
+    case 'cover':
+      return {
+        type: 'cover',
+        projectName: 'Project Name',
+        client: 'Client Name',
+        role: 'Lead Product Designer',
+        year: `${new Date().getFullYear()}`,
+        backgroundImage: '',
+      }
+    case 'problem':
+      return {
+        type: 'problem',
+        label: 'THE CHALLENGE',
+        statement: 'A clear, single-sentence framing of the core problem.',
+        context: 'A short paragraph giving the background and the stakes — who was affected, why it mattered, and what was at risk if it went unsolved.',
+      }
+    case 'process':
+      return {
+        type: 'process',
+        heading: 'Approach',
+        steps: [
+          { title: 'Discover', description: 'Research, interviews, and an audit of the current experience.' },
+          { title: 'Define', description: 'Synthesise findings into clear problems and opportunities.' },
+          { title: 'Design', description: 'Explore concepts, prototype, and test with real users.' },
+          { title: 'Deliver', description: 'Ship, measure, and iterate alongside the team.' },
+        ],
+      }
+    case 'showcase':
+      return {
+        type: 'showcase',
+        image: '',
+        caption: 'A short caption describing what is shown.',
+      }
+    case 'before-after':
+      return {
+        type: 'before-after',
+        heading: 'Before & after',
+        beforeImage: '',
+        afterImage: '',
+        beforeLabel: 'Before',
+        afterLabel: 'After',
+      }
+    case 'metrics':
+      return {
+        type: 'metrics',
+        heading: 'The impact',
+        stats: [
+          { value: '+38%', label: 'Conversion rate' },
+          { value: '2.4×', label: 'Faster checkout' },
+          { value: '−45%', label: 'Support tickets' },
+        ],
+      }
+    case 'quote':
+      return {
+        type: 'quote',
+        quote: 'A short, punchy testimonial that captures the value of the work.',
+        attribution: 'Jane Smith',
+        role: 'Head of Product, Company',
+        backgroundImage: '',
+      }
   }
 }
 

@@ -10,6 +10,13 @@ import { CaseStudySlide } from './templates/CaseStudySlide'
 import { BentoSlide } from './templates/BentoSlide'
 import { WorkHistorySlide } from './templates/WorkHistorySlide'
 import { SignOffSlide } from './templates/SignOffSlide'
+import { CoverSlide } from './templates/CoverSlide'
+import { ProblemSlide } from './templates/ProblemSlide'
+import { ProcessSlide } from './templates/ProcessSlide'
+import { ShowcaseSlide } from './templates/ShowcaseSlide'
+import { BeforeAfterSlide } from './templates/BeforeAfterSlide'
+import { MetricsSlide } from './templates/MetricsSlide'
+import { QuoteSlide } from './templates/QuoteSlide'
 
 interface SlideRendererProps {
   slide: Slide
@@ -250,6 +257,20 @@ export function SlideRenderer({ slide, editable = false }: SlideRendererProps) {
       slideContent = <BentoSlide content={slide.content as any} {...props} />; break
     case 'sign-off':
       slideContent = <SignOffSlide content={slide.content as any} {...props} />; break
+    case 'cover':
+      slideContent = <CoverSlide content={slide.content as any} {...props} />; break
+    case 'problem':
+      slideContent = <ProblemSlide content={slide.content as any} {...props} />; break
+    case 'process':
+      slideContent = <ProcessSlide content={slide.content as any} {...props} />; break
+    case 'showcase':
+      slideContent = <ShowcaseSlide content={slide.content as any} {...props} />; break
+    case 'before-after':
+      slideContent = <BeforeAfterSlide content={slide.content as any} {...props} />; break
+    case 'metrics':
+      slideContent = <MetricsSlide content={slide.content as any} {...props} />; break
+    case 'quote':
+      slideContent = <QuoteSlide content={slide.content as any} {...props} />; break
   }
 
   const inner = (

@@ -1676,11 +1676,142 @@
       {
         "id": "EuJKFE6noAuNFEmVlah2p",
         "name": "Case Study",
-        "slides": [],
-        "selectedSlideId": null
+        "slides": [
+          {
+            "id": "mZ8_-2N-G5tlxg26XLWbh",
+            "type": "cover",
+            "content": {
+              "type": "cover",
+              "projectName": "Project Name",
+              "client": "Client Name",
+              "role": "Lead Product Designer",
+              "year": "2026",
+              "backgroundImage": ""
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "JZAXnkyqn6ZY7QsBYlN6V",
+            "type": "problem",
+            "content": {
+              "type": "problem",
+              "label": "THE CHALLENGE",
+              "statement": "A clear, single-sentence framing of the core problem.",
+              "context": "A short paragraph giving the background and the stakes — who was affected, why it mattered, and what was at risk if it went unsolved."
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "5-m9MtrVILTxy4_paMkc1",
+            "type": "process",
+            "content": {
+              "type": "process",
+              "heading": "Approach",
+              "steps": [
+                {
+                  "title": "Discover",
+                  "description": "Research, interviews, and an audit of the current experience."
+                },
+                {
+                  "title": "Define",
+                  "description": "Synthesise findings into clear problems and opportunities."
+                },
+                {
+                  "title": "Design",
+                  "description": "Explore concepts, prototype, and test with real users."
+                },
+                {
+                  "title": "Deliver",
+                  "description": "Ship, measure, and iterate alongside the team."
+                }
+              ]
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "0FgClsM5y1d8090H2Cnb7",
+            "type": "showcase",
+            "content": {
+              "type": "showcase",
+              "image": "",
+              "caption": "A short caption describing what is shown."
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "rKdSwxMIN3h8xnqQQmfK1",
+            "type": "before-after",
+            "content": {
+              "type": "before-after",
+              "heading": "Before & after",
+              "beforeImage": "",
+              "afterImage": "",
+              "beforeLabel": "Before",
+              "afterLabel": "After"
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "VlB1rMYDOKX5OMkA58bAL",
+            "type": "metrics",
+            "content": {
+              "type": "metrics",
+              "heading": "The impact",
+              "stats": [
+                {
+                  "value": "+38%",
+                  "label": "Conversion rate"
+                },
+                {
+                  "value": "2.4×",
+                  "label": "Faster checkout"
+                },
+                {
+                  "value": "−45%",
+                  "label": "Support tickets"
+                }
+              ]
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          },
+          {
+            "id": "9xhF8zMaeYXiFqLPVbWfV",
+            "type": "quote",
+            "content": {
+              "type": "quote",
+              "quote": "A short, punchy testimonial that captures the value of the work.",
+              "attribution": "Jane Smith",
+              "role": "Head of Product, Company",
+              "backgroundImage": ""
+            },
+            "styleVariant": 0,
+            "darkMode": false,
+            "drawingLayers": [],
+            "drawingGroups": []
+          }
+        ],
+        "selectedSlideId": "mZ8_-2N-G5tlxg26XLWbh"
       }
     ],
-    "activeDeckId": "ebFDygC6tX8XdIpwctfKh",
+    "activeDeckId": "EuJKFE6noAuNFEmVlah2p",
     "colorPaletteId": "green",
     "headerFont": "'Inter Variable', sans-serif",
     "bodyFont": "'Roboto Variable', sans-serif",

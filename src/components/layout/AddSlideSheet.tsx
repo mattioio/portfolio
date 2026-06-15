@@ -11,6 +11,13 @@ import {
   LayoutGrid,
   Heart,
   X,
+  Presentation,
+  HelpCircle,
+  ListOrdered,
+  Image as ImageIcon,
+  Columns2,
+  BarChart3,
+  Quote,
 } from 'lucide-react'
 
 interface AddSlideSheetProps {
@@ -39,6 +46,14 @@ const templates: TemplateOption[] = [
   { type: 'bento', label: 'Bento 4', icon: LayoutGrid, layoutVariant: 4, shortcut: '0' },
   { type: 'bento', label: 'Bento 5', icon: LayoutGrid, layoutVariant: 5, shortcut: '-' },
   { type: 'sign-off', label: 'Sign Off', icon: Heart, shortcut: '=' },
+  // ── Case-study presentation templates ──
+  { type: 'cover', label: 'Cover', icon: Presentation, shortcut: '' },
+  { type: 'problem', label: 'Problem', icon: HelpCircle, shortcut: '' },
+  { type: 'process', label: 'Process', icon: ListOrdered, shortcut: '' },
+  { type: 'showcase', label: 'Showcase', icon: ImageIcon, shortcut: '' },
+  { type: 'before-after', label: 'Before / After', icon: Columns2, shortcut: '' },
+  { type: 'metrics', label: 'Metrics', icon: BarChart3, shortcut: '' },
+  { type: 'quote', label: 'Quote', icon: Quote, shortcut: '' },
 ]
 
 export function AddSlideSheet({ open, onClose }: AddSlideSheetProps) {
@@ -108,7 +123,7 @@ export function AddSlideSheet({ open, onClose }: AddSlideSheetProps) {
             >
               <t.icon size={13} />
               <span className="flex-1">{t.label}</span>
-              <kbd className="text-[10px] text-zinc-600 group-hover:text-zinc-500">{t.shortcut}</kbd>
+              {t.shortcut && <kbd className="text-[10px] text-zinc-600 group-hover:text-zinc-500">{t.shortcut}</kbd>}
             </button>
           ))}
         </div>

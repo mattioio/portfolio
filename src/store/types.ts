@@ -7,6 +7,14 @@ export type SlideType =
   | 'case-study'
   | 'bento'
   | 'sign-off'
+  // ── Case-study presentation templates ──
+  | 'cover'
+  | 'problem'
+  | 'process'
+  | 'showcase'
+  | 'before-after'
+  | 'metrics'
+  | 'quote'
 
 export interface HeroContent {
   type: 'hero'
@@ -97,6 +105,69 @@ export interface SignOffContent {
   backgroundImage: string
 }
 
+// ── Case-study presentation templates ──
+
+export interface CoverContent {
+  type: 'cover'
+  projectName: string
+  client: string
+  role: string
+  year: string
+  backgroundImage: string
+}
+
+export interface ProblemContent {
+  type: 'problem'
+  label: string       // small uppercase eyebrow, e.g. "THE CHALLENGE"
+  statement: string   // large headline framing of the problem
+  context: string     // supporting paragraph
+}
+
+export interface ProcessStep {
+  title: string
+  description: string
+}
+
+export interface ProcessContent {
+  type: 'process'
+  heading: string
+  steps: ProcessStep[]
+}
+
+export interface ShowcaseContent {
+  type: 'showcase'
+  image: string
+  caption: string
+}
+
+export interface BeforeAfterContent {
+  type: 'before-after'
+  heading: string
+  beforeImage: string
+  afterImage: string
+  beforeLabel: string
+  afterLabel: string
+}
+
+export interface MetricStat {
+  value: string   // e.g. "+38%"
+  label: string   // e.g. "Conversion rate"
+}
+
+export interface MetricsContent {
+  type: 'metrics'
+  heading: string
+  stats: MetricStat[]
+}
+
+export interface QuoteContent {
+  type: 'quote'
+  quote: string
+  attribution: string
+  role: string
+  backgroundImage: string
+}
+
 export type SlideContent =
   | HeroContent
   | AboutContent
@@ -106,6 +177,13 @@ export type SlideContent =
   | CaseStudyContent
   | BentoContent
   | SignOffContent
+  | CoverContent
+  | ProblemContent
+  | ProcessContent
+  | ShowcaseContent
+  | BeforeAfterContent
+  | MetricsContent
+  | QuoteContent
 
 export interface DrawingPath {
   d: string              // SVG path data
