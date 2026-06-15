@@ -1,5 +1,21 @@
 import { useRef, useEffect, useCallback, createElement, type CSSProperties } from 'react'
 
+// ── Hanging punctuation ──
+// Pull a leading quote into the margin so the first letter aligns optically with
+// the text below. CSS `hanging-punctuation` is Safari-only, so we use a negative
+// text-indent sized to the glyph (works in Chrome/Firefox + the PDF export too).
+const HANG_INDENT: Record<string, string> = {
+  '"': '-0.46em', '“': '-0.46em', '”': '-0.46em', '«': '-0.46em', '„': '-0.46em',
+  "'": '-0.24em', '‘': '-0.24em', '’': '-0.24em',
+}
+function hangingIndent(value: string, as: string, style?: CSSProperties): string | undefined {
+  if (as === 'span' || as === 'a') return undefined // text-indent only affects block boxes
+  const align = style?.textAlign
+  if (align === 'center' || align === 'right') return undefined // hanging only makes sense left-aligned
+  const first = value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trimStart().charAt(0)
+  return first ? HANG_INDENT[first] : undefined
+}
+
 interface EditableTextProps {
   value: string
   onChange: (value: string) => void
@@ -46,11 +62,13 @@ export function EditableText({
   }, [value])
 
   const richClass = `rich-text${multiline ? ' rich-text-multi' : ''}`
+  const hang = hangingIndent(value, as, style)
+  const hangStyle: CSSProperties | undefined = hang ? { textIndent: hang } : undefined
 
   if (!editable) {
     return createElement(as, {
       className: `${className} ${richClass}`,
-      style,
+      style: hangStyle ? { ...style, ...hangStyle } : style,
       dangerouslySetInnerHTML: { __html: value },
     })
   }
@@ -68,7 +86,7 @@ export function EditableText({
   return createElement(as, {
     ref: setRef,
     className: `${className} outline-none cursor-text ${richClass}`,
-    style: { ...style, minWidth: '20px' },
+    style: { ...style, ...hangStyle, minWidth: '20px' },
     contentEditable: true,
     suppressContentEditableWarning: true,
     spellCheck: false,
