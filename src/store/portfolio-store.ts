@@ -198,6 +198,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
         label: 'THE CHALLENGE',
         statement: 'A clear, single-sentence framing of the core problem.',
         context: 'A short paragraph giving the background and the stakes — who was affected, why it mattered, and what was at risk if it went unsolved.',
+        backgroundImage: '',
       }
     case 'process':
       return {
@@ -209,6 +210,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
           { title: 'Design', description: 'Explore concepts, prototype, and test with real users.' },
           { title: 'Deliver', description: 'Ship, measure, and iterate alongside the team.' },
         ],
+        backgroundImage: '',
       }
     case 'showcase':
       return {
@@ -234,6 +236,7 @@ function getDefaultContent(type: SlideType, layoutVariant?: number): SlideConten
           { value: '2.4×', label: 'Faster checkout' },
           { value: '−45%', label: 'Support tickets' },
         ],
+        backgroundImage: '',
       }
     case 'quote':
       return {

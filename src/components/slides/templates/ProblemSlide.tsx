@@ -3,6 +3,7 @@ import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { stepType } from '../../../constants/typography'
 import { BodyWidth } from '../../shared/BodyWidth'
+import { SlideBackdrop } from './SlideBackdrop'
 
 interface Props {
   content: ProblemContent
@@ -75,10 +76,13 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
   // A: Left-aligned, vertically centered
   if (styleVariant === 0) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col justify-center px-32 pb-24" style={{ background: 'var(--color-surface)' }}>
-        {label({ marginBottom: '28px' })}
-        {statement(stepType('5xl', headingSizeStep), { maxWidth: '1200px' })}
-        <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col justify-center px-32 pb-24">
+          {label({ marginBottom: '28px' })}
+          {statement(stepType('5xl', headingSizeStep), { maxWidth: '1200px' })}
+          <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
+        </div>
       </div>
     )
   }
@@ -86,10 +90,13 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
   // B: Centered version of A
   if (styleVariant === 1) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center px-32 pb-24 text-center" style={{ background: 'var(--color-surface)' }}>
-        {label({ marginBottom: '28px' })}
-        {statement(stepType('5xl', headingSizeStep), { maxWidth: '1100px' })}
-        <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-32 pb-24 text-center">
+          {label({ marginBottom: '28px' })}
+          {statement(stepType('5xl', headingSizeStep), { maxWidth: '1100px' })}
+          <BodyWidth slideId={slideId} editable={editable}>{context(stepType('lg', bodySizeStep), { marginTop: '40px' })}</BodyWidth>
+        </div>
       </div>
     )
   }
@@ -97,13 +104,16 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
   // C: Two-column — statement left, context right
   if (styleVariant === 2) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] items-center gap-24 px-32 pb-24" style={{ background: 'var(--color-surface)' }}>
-        <div className="flex flex-1 flex-col">
-          {label({ marginBottom: '28px' })}
-          {statement(stepType('4xl', headingSizeStep), { maxWidth: '820px' })}
-        </div>
-        <div className="flex flex-1 flex-col justify-center">
-          <BodyWidth slideId={slideId} editable={editable}>{context(stepType('xl', bodySizeStep))}</BodyWidth>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full items-center gap-24 px-32 pb-24">
+          <div className="flex flex-1 flex-col">
+            {label({ marginBottom: '28px' })}
+            {statement(stepType('4xl', headingSizeStep), { maxWidth: '820px' })}
+          </div>
+          <div className="flex flex-1 flex-col justify-center">
+            <BodyWidth slideId={slideId} editable={editable}>{context(stepType('xl', bodySizeStep))}</BodyWidth>
+          </div>
         </div>
       </div>
     )
@@ -111,14 +121,17 @@ export function ProblemSlide({ content, slideId, editable = false, styleVariant 
 
   // D: Statement-led emphasis — oversized statement, context at lower-left
   return (
-    <div className="relative flex h-[1080px] w-[1920px] flex-col justify-between px-32 pt-32 pb-28" style={{ background: 'var(--color-surface)' }}>
-      <div className="flex flex-col">
-        {label({ marginBottom: '32px' })}
-        {statement(stepType('6xl', headingSizeStep), { maxWidth: '1500px' })}
+    <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+      <SlideBackdrop image={content.backgroundImage} />
+      <div className="relative z-10 flex h-full w-full flex-col justify-between px-32 pt-32 pb-28">
+        <div className="flex flex-col">
+          {label({ marginBottom: '32px' })}
+          {statement(stepType('6xl', headingSizeStep), { maxWidth: '1500px' })}
+        </div>
+        <BodyWidth slideId={slideId} editable={editable}>
+          {context(stepType('base', bodySizeStep))}
+        </BodyWidth>
       </div>
-      <BodyWidth slideId={slideId} editable={editable}>
-        {context(stepType('base', bodySizeStep))}
-      </BodyWidth>
     </div>
   )
 }

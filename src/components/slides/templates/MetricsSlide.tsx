@@ -2,6 +2,7 @@ import type { MetricsContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { stepType } from '../../../constants/typography'
+import { SlideBackdrop } from './SlideBackdrop'
 
 interface Props {
   content: MetricsContent
@@ -97,16 +98,19 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
   // A: heading top-left; stats in an evenly-spaced horizontal row
   if (styleVariant === 0) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col px-32 pt-32 pb-40" style={{ background: 'var(--color-surface)' }}>
-        <div className="mb-4">{eyebrow}</div>
-        {heading(stepType('5xl', headingSizeStep), '1100px')}
-        <div className="mt-auto flex items-end justify-between gap-16">
-          {stats.map((_, i) => (
-            <div key={i} className="flex flex-1 flex-col gap-5">
-              {statValue(i, stepType('6xl', headingSizeStep), 'left')}
-              {statLabel(i, 'left', '320px')}
-            </div>
-          ))}
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-40">
+          <div className="mb-4">{eyebrow}</div>
+          {heading(stepType('5xl', headingSizeStep), '1100px')}
+          <div className="mt-auto flex items-end justify-between gap-16">
+            {stats.map((_, i) => (
+              <div key={i} className="flex flex-1 flex-col gap-5">
+                {statValue(i, stepType('6xl', headingSizeStep), 'left')}
+                {statLabel(i, 'left', '320px')}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -115,23 +119,26 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
   // B: heading top; stats in a 2-column grid
   if (styleVariant === 1) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col px-32 pt-32 pb-32" style={{ background: 'var(--color-surface)' }}>
-        <div className="mb-4">{eyebrow}</div>
-        {heading(stepType('4xl', headingSizeStep), '1200px')}
-        <div className="mt-16 grid flex-1 grid-cols-2 gap-x-24 gap-y-14">
-          {stats.map((_, i) => (
-            <div
-              key={i}
-              className="flex flex-col justify-center gap-4 px-12 py-10"
-              style={{
-                background: 'var(--color-surface-alt)',
-                borderRadius: 'var(--border-radius)',
-              }}
-            >
-              {statValue(i, stepType('5xl', headingSizeStep), 'left')}
-              {statLabel(i, 'left', '440px')}
-            </div>
-          ))}
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col px-32 pt-32 pb-32">
+          <div className="mb-4">{eyebrow}</div>
+          {heading(stepType('4xl', headingSizeStep), '1200px')}
+          <div className="mt-16 grid flex-1 grid-cols-2 gap-x-24 gap-y-14">
+            {stats.map((_, i) => (
+              <div
+                key={i}
+                className="flex flex-col justify-center gap-4 px-12 py-10"
+                style={{
+                  background: 'var(--color-surface-alt)',
+                  borderRadius: 'var(--border-radius)',
+                }}
+              >
+                {statValue(i, stepType('5xl', headingSizeStep), 'left')}
+                {statLabel(i, 'left', '440px')}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -140,24 +147,27 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
   // C: heading on the left; stats stacked in a right column with hairline dividers
   if (styleVariant === 2) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] items-stretch gap-24 px-32 pt-32 pb-32" style={{ background: 'var(--color-surface)' }}>
-        <div className="flex w-[680px] flex-shrink-0 flex-col justify-center">
-          <div className="mb-5">{eyebrow}</div>
-          {heading(stepType('4xl', headingSizeStep), '620px')}
-        </div>
-        <div className="flex flex-1 flex-col justify-center">
-          {stats.map((_, i) => (
-            <div
-              key={i}
-              className="flex items-baseline justify-between gap-12 py-10"
-              style={{
-                borderTop: i === 0 ? 'none' : '1px solid var(--color-text-muted)',
-              }}
-            >
-              <div className="flex-1">{statLabel(i, 'left', '480px')}</div>
-              {statValue(i, stepType('5xl', headingSizeStep), 'right')}
-            </div>
-          ))}
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full items-stretch gap-24 px-32 pt-32 pb-32">
+          <div className="flex w-[680px] flex-shrink-0 flex-col justify-center">
+            <div className="mb-5">{eyebrow}</div>
+            {heading(stepType('4xl', headingSizeStep), '620px')}
+          </div>
+          <div className="flex flex-1 flex-col justify-center">
+            {stats.map((_, i) => (
+              <div
+                key={i}
+                className="flex items-baseline justify-between gap-12 py-10"
+                style={{
+                  borderTop: i === 0 ? 'none' : '1px solid var(--color-text-muted)',
+                }}
+              >
+                <div className="flex-1">{statLabel(i, 'left', '480px')}</div>
+                {statValue(i, stepType('5xl', headingSizeStep), 'right')}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -165,22 +175,25 @@ export function MetricsSlide({ content, slideId, editable = false, styleVariant 
 
   // D: centered single row of large stats with the heading centered above
   return (
-    <div className="relative flex h-[1080px] w-[1920px] flex-col items-center justify-center px-24 pb-20" style={{ background: 'var(--color-surface)' }}>
-      <div className="mb-5 text-center">{eyebrow}</div>
-      {heading(stepType('5xl', headingSizeStep), '1300px', 'center')}
-      <div className="mt-20 flex w-full items-start justify-center gap-0">
-        {stats.map((_, i) => (
-          <div
-            key={i}
-            className="flex flex-1 flex-col items-center gap-5 px-12"
-            style={{
-              borderLeft: i === 0 ? 'none' : '1px solid var(--color-text-muted)',
-            }}
-          >
-            {statValue(i, stepType('6xl', headingSizeStep), 'center')}
-            {statLabel(i, 'center', '300px')}
-          </div>
-        ))}
+    <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+      <SlideBackdrop image={content.backgroundImage} />
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-24 pb-20">
+        <div className="mb-5 text-center">{eyebrow}</div>
+        {heading(stepType('5xl', headingSizeStep), '1300px', 'center')}
+        <div className="mt-20 flex w-full items-start justify-center gap-0">
+          {stats.map((_, i) => (
+            <div
+              key={i}
+              className="flex flex-1 flex-col items-center gap-5 px-12"
+              style={{
+                borderLeft: i === 0 ? 'none' : '1px solid var(--color-text-muted)',
+              }}
+            >
+              {statValue(i, stepType('6xl', headingSizeStep), 'center')}
+              {statLabel(i, 'center', '300px')}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

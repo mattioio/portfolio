@@ -8,6 +8,10 @@ import type {
   SignOffContent,
   SectionTitleContent,
   CoverContent,
+  ProblemContent,
+  ProcessContent,
+  MetricsContent,
+  QuoteContent,
 } from '../../store/types'
 import { ImageDropZone } from '../shared/ImageDropZone'
 import { Plus, Minus, Trash2, Image, RotateCcw, GripVertical } from 'lucide-react'
@@ -479,6 +483,121 @@ function SignOffSettings({
 
 // Work History settings removed — timeline entries are derived from CV slides
 
+/** Reusable background-image control (upload + remove + library quick-pick) */
+function BackgroundImageField({ slideId, value }: { slideId: string; value: string }) {
+  const update = usePortfolioStore((s) => s.updateSlideContent)
+  return (
+    <div>
+      <SectionLabel>Background image</SectionLabel>
+      <ImageDropZone
+        image={value ?? ''}
+        onImageDrop={(url) => update(slideId, { backgroundImage: url } as any)}
+        onImageRemove={() => update(slideId, { backgroundImage: '' } as any)}
+        editable={true}
+        className="flex h-32 w-full items-center justify-center overflow-hidden rounded-lg border border-zinc-700"
+        imgClassName="h-full w-full object-cover"
+        placeholder={
+          <div className="flex flex-col items-center gap-2 text-zinc-600">
+            <Image size={20} />
+            <span className="text-[10px]">Drop image here</span>
+          </div>
+        }
+      />
+      {value && (
+        <button
+          onClick={() => update(slideId, { backgroundImage: '' } as any)}
+          className="mt-1.5 text-[10px] text-red-400 hover:text-red-300"
+        >
+          Remove image
+        </button>
+      )}
+      <ExistingBackgrounds currentSlideId={slideId} onSelect={(url) => update(slideId, { backgroundImage: url } as any)} />
+    </div>
+  )
+}
+
+function ProblemSettings({ slideId, content }: { slideId: string; content: ProblemContent }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <BackgroundImageField slideId={slideId} value={content.backgroundImage} />
+    </div>
+  )
+}
+
+function QuoteSettings({ slideId, content }: { slideId: string; content: QuoteContent }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-[10px] text-zinc-600">Background shows on layouts A and C.</p>
+      <BackgroundImageField slideId={slideId} value={content.backgroundImage} />
+    </div>
+  )
+}
+
+function ProcessSettings({ slideId, content }: { slideId: string; content: ProcessContent }) {
+  const update = usePortfolioStore((s) => s.updateSlideContent)
+  const steps = content.steps ?? []
+  const setStep = (i: number, key: 'title' | 'description', val: string) => {
+    const next = steps.map((s, j) => (j === i ? { ...s, [key]: val } : s))
+    update(slideId, { steps: next } as any)
+  }
+  const add = () => update(slideId, { steps: [...steps, { title: 'New step', description: 'Describe this step.' }] } as any)
+  const remove = (i: number) => update(slideId, { steps: steps.filter((_, j) => j !== i) } as any)
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <SectionLabel>Steps</SectionLabel>
+          <button onClick={add} className="rounded p-1 text-zinc-500 hover:text-zinc-300" title="Add step"><Plus size={12} /></button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {steps.map((st, i) => (
+            <div key={i} className="rounded-lg border border-zinc-700 p-2">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <span className="text-[10px] tabular-nums text-zinc-600">{i + 1}</span>
+                <input value={st.title} onChange={(e) => setStep(i, 'title', e.target.value)} placeholder="Title" className="flex-1 bg-transparent text-xs text-zinc-200 outline-none placeholder:text-zinc-600" />
+                <button onClick={() => remove(i)} className="rounded p-0.5 text-zinc-600 hover:text-red-400" title="Remove step"><Trash2 size={10} /></button>
+              </div>
+              <input value={st.description} onChange={(e) => setStep(i, 'description', e.target.value)} placeholder="Description" className="w-full bg-transparent pl-[18px] text-[10px] text-zinc-400 outline-none placeholder:text-zinc-600" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <BackgroundImageField slideId={slideId} value={content.backgroundImage} />
+    </div>
+  )
+}
+
+function MetricsSettings({ slideId, content }: { slideId: string; content: MetricsContent }) {
+  const update = usePortfolioStore((s) => s.updateSlideContent)
+  const stats = content.stats ?? []
+  const setStat = (i: number, key: 'value' | 'label', val: string) => {
+    const next = stats.map((s, j) => (j === i ? { ...s, [key]: val } : s))
+    update(slideId, { stats: next } as any)
+  }
+  const add = () => update(slideId, { stats: [...stats, { value: '00%', label: 'New metric' }] } as any)
+  const remove = (i: number) => update(slideId, { stats: stats.filter((_, j) => j !== i) } as any)
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <SectionLabel>Stats</SectionLabel>
+          <button onClick={add} className="rounded p-1 text-zinc-500 hover:text-zinc-300" title="Add stat"><Plus size={12} /></button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {stats.map((st, i) => (
+            <div key={i} className="flex items-center gap-1.5 rounded-lg border border-zinc-700 p-2">
+              <input value={st.value} onChange={(e) => setStat(i, 'value', e.target.value)} placeholder="+38%" className="w-16 bg-transparent text-xs font-semibold text-zinc-200 outline-none placeholder:text-zinc-600" />
+              <input value={st.label} onChange={(e) => setStat(i, 'label', e.target.value)} placeholder="Label" className="flex-1 bg-transparent text-[11px] text-zinc-400 outline-none placeholder:text-zinc-600" />
+              <button onClick={() => remove(i)} className="rounded p-0.5 text-zinc-600 hover:text-red-400" title="Remove stat"><Trash2 size={10} /></button>
+            </div>
+          ))}
+        </div>
+      </div>
+      <BackgroundImageField slideId={slideId} value={content.backgroundImage} />
+    </div>
+  )
+}
+
 function ResetButton({ slideId }: { slideId: string }) {
   const resetSlideContent = usePortfolioStore((s) => s.resetSlideContent)
   const [confirming, setConfirming] = useState(false)
@@ -712,6 +831,18 @@ export function PagePanel() {
       )}
       {slide.type === 'cover' && (
         <CoverSettings slideId={slide.id} content={slide.content as CoverContent} />
+      )}
+      {slide.type === 'problem' && (
+        <ProblemSettings slideId={slide.id} content={slide.content as ProblemContent} />
+      )}
+      {slide.type === 'process' && (
+        <ProcessSettings slideId={slide.id} content={slide.content as ProcessContent} />
+      )}
+      {slide.type === 'metrics' && (
+        <MetricsSettings slideId={slide.id} content={slide.content as MetricsContent} />
+      )}
+      {slide.type === 'quote' && (
+        <QuoteSettings slideId={slide.id} content={slide.content as QuoteContent} />
       )}
 
       {/* Reset content */}

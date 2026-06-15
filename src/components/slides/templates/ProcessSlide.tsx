@@ -2,6 +2,7 @@ import type { ProcessContent } from '../../../store/types'
 import { usePortfolioStore } from '../../../store/portfolio-store'
 import { EditableText } from '../../shared/EditableText'
 import { stepType } from '../../../constants/typography'
+import { SlideBackdrop } from './SlideBackdrop'
 
 interface Props {
   content: ProcessContent
@@ -80,7 +81,9 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
   // ── A (0): heading top-left; steps as an evenly-spaced horizontal row ──
   if (styleVariant === 0) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col px-24 pt-24 pb-28" style={{ background: 'var(--color-surface)' }}>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col px-24 pt-24 pb-28">
         <p
           className="mb-4"
           style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
@@ -119,6 +122,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
             </div>
           </div>
         </div>
+        </div>
       </div>
     )
   }
@@ -126,7 +130,9 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
   // ── B (1): heading top; steps as a vertical numbered list w/ accent badges ──
   if (styleVariant === 1) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col px-28 pt-24 pb-28" style={{ background: 'var(--color-surface)' }}>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col px-28 pt-24 pb-28">
         {headingEl(stepType('5xl', headingSizeStep), '1200px')}
 
         <div className="mt-10 flex flex-1 flex-col justify-center" style={{ maxWidth: '1280px' }}>
@@ -163,6 +169,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
             </div>
           ))}
         </div>
+        </div>
       </div>
     )
   }
@@ -170,7 +177,9 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
   // ── C (2): heading top-left; steps in a 2-column grid (2x2 for four) ──
   if (styleVariant === 2) {
     return (
-      <div className="relative flex h-[1080px] w-[1920px] flex-col px-28 pt-24 pb-28" style={{ background: 'var(--color-surface)' }}>
+      <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+        <SlideBackdrop image={content.backgroundImage} />
+        <div className="relative z-10 flex h-full w-full flex-col px-28 pt-24 pb-28">
         <p
           className="mb-4"
           style={{ fontFamily: 'var(--font-body)', fontSize: stepType('xs', bodySizeStep), fontWeight: 700, letterSpacing: '0.18em', color: 'var(--color-accent)', textTransform: 'uppercase' }}
@@ -201,13 +210,16 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
             </div>
           ))}
         </div>
+        </div>
       </div>
     )
   }
 
   // ── D (3): large heading in left third; steps stacked in right two-thirds ──
   return (
-    <div className="relative flex h-[1080px] w-[1920px]" style={{ background: 'var(--color-surface)' }}>
+    <div className="relative h-[1080px] w-[1920px] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+      <SlideBackdrop image={content.backgroundImage} />
+      <div className="relative z-10 flex h-full w-full">
       <div className="flex w-[640px] flex-shrink-0 flex-col justify-center px-24 pb-28">
         <p
           className="mb-5"
@@ -251,6 +263,7 @@ export function ProcessSlide({ content, slideId, editable = false, styleVariant 
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   )

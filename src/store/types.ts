@@ -121,6 +121,7 @@ export interface ProblemContent {
   label: string       // small uppercase eyebrow, e.g. "THE CHALLENGE"
   statement: string   // large headline framing of the problem
   context: string     // supporting paragraph
+  backgroundImage: string
 }
 
 export interface ProcessStep {
@@ -132,6 +133,7 @@ export interface ProcessContent {
   type: 'process'
   heading: string
   steps: ProcessStep[]
+  backgroundImage: string
 }
 
 export interface ShowcaseContent {
@@ -158,6 +160,7 @@ export interface MetricsContent {
   type: 'metrics'
   heading: string
   stats: MetricStat[]
+  backgroundImage: string
 }
 
 export interface QuoteContent {
